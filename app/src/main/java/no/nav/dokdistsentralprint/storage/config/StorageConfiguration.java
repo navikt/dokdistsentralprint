@@ -18,10 +18,10 @@ import org.springframework.context.annotation.Profile;
 @Profile("nais")
 public class StorageConfiguration {
 
-	@Value("${dokdistmellomlager_s3_creds_username}")
+	@Value("${dokdistsentralprint_s3_creds_username}")
 	private String accessKey;
 
-	@Value("${dokdistmellomlager_s3_creds_password}")
+	@Value("${dokdistsentralprint_s3_creds_username}")
 	private String secretKey;
 
 	@Value("${storage_s3_url}")
