@@ -7,5 +7,5 @@ public interface AdministrerForsendelse {
 
 	HentForsendelseResponseTo hentForsendelse(final String forsendelseId);
 
-	void oppdaterForsendelseStatus(String forsendelseId, String forsendelseStatus, String bestillingsId);
+	void oppdaterForsendelseStatus(final String forsendelseId, final String forsendelseStatus);
 }

@@ -21,7 +21,7 @@ import javax.xml.bind.JAXBException;
  * @author Sigurd Midttun, Visma Consulting.
  */
 @Component
-public class Qdist008Route extends SpringRouteBuilder {
+public class Qdist009Route extends SpringRouteBuilder {
 
 	public static final String SERVICE_ID = "qdist009";
 	static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";
@@ -34,7 +34,7 @@ public class Qdist008Route extends SpringRouteBuilder {
 	private final Queue qdist009FunksjonellFeil;
 
 	@Inject
-	public Qdist008Route(Qdist009Service qdist009Service,
+	public Qdist009Route(Qdist009Service qdist009Service,
 						 DistribuerForsendelseTilSentralPrintValidatorAndMapper distribuerForsendelseTilSentralPrintValidatorAndMapper,
 						 DokdistStatusUpdater dokdistStatusUpdater,
 						 Queue qdist009,

@@ -7,6 +7,7 @@ import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHO
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.exception.DokdistsentralprintFunctionalException;
 import no.nav.dokdistsentralprint.exception.DokdistsentralprintTechnicalException;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -48,7 +49,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	@Retryable(include = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public HentForsendelseResponseTo hentForsendelse(final String forsendelseId) {
 		try {
-			HttpEntity entity = new HttpEntity<>(createHeaders("")); //todo fix
+			HttpEntity entity = new HttpEntity<>(createHeaders());
 			return restTemplate.exchange(this.administrerforsendelseV1Url + "/" + forsendelseId, HttpMethod.GET, entity, HentForsendelseResponseTo.class)
 					.getBody();
 		} catch (HttpClientErrorException e) {
@@ -61,9 +62,9 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	}
 
 	@Retryable(include = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	public void oppdaterForsendelseStatus(String forsendelseId, String forsendelseStatus, String bestillingsId) {
+	public void oppdaterForsendelseStatus(String forsendelseId, String forsendelseStatus) {
 		try {
-			HttpEntity entity = new HttpEntity<>(createHeaders(bestillingsId));
+			HttpEntity entity = new HttpEntity<>(createHeaders());
 			String uri = UriComponentsBuilder.fromHttpUrl(administrerforsendelseV1Url)
 					.queryParam("forsendelseId", forsendelseId)
 					.queryParam("forsendelseStatus", forsendelseStatus)
@@ -78,10 +79,10 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 		}
 	}
 
-	private HttpHeaders createHeaders(String bestillingsId) {
+	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set(CALL_ID, bestillingsId);
+		headers.set(CALL_ID, MDC.get(CALL_ID));
 		return headers;
 	}
 

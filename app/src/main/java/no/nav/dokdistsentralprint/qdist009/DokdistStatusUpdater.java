@@ -1,7 +1,7 @@
 package no.nav.dokdistsentralprint.qdist009;
 
-import static no.nav.dokdistsentralprint.qdist009.Qdist008Route.PROPERTY_BESTILLINGS_ID;
-import static no.nav.dokdistsentralprint.qdist009.Qdist008Route.PROPERTY_FORSENDELSE_ID;
+import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_BESTILLINGS_ID;
+import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_FORSENDELSE_ID;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import org.apache.camel.Exchange;
