@@ -25,7 +25,7 @@ fasitResources:
     propertyMap:
       username: serviceuser_username
       password: serviceuser_password
-  - alias: dokdistmellomlager_s3_creds
+  - alias: dokdistsentralprint_s3_creds
     resourceType: credential
   - alias: dokdistmellomlager_s3_storage_crypto
     resourceType: credential
