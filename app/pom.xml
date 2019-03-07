@@ -52,16 +52,6 @@
 			<version>${camel.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-spring-boot-starter-jaxws</artifactId>
-			<version>${cxf.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-ws-security</artifactId>
-			<version>${cxf.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-jaxb</artifactId>
 			<version>${camel.version}</version>
@@ -102,23 +92,6 @@
 			<version>${wmq.version}</version>
 		</dependency>
 		<!--Tjenestegrensesnitt-->
-		<dependency>
-			<groupId>no.nav.meldinger.virksomhet</groupId>
-			<artifactId>melding-virksomhet-dokdistsentralprint</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.tjenester.brevogarkiv</groupId>
-			<artifactId>arkiverdokumentproduksjon-tjenestespesifikasjon</artifactId>
-			<version>3.4.1</version>
-			<classifier>jaxws</classifier>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.tjenester.fim</groupId>
-			<artifactId>nav-fim-aktoer-v2-tjenestespesifikasjon</artifactId>
-			<version>${aktoer.version}</version>
-			<classifier>jaxws</classifier>
-		</dependency>
 		<dependency>
 			<groupId>no.nav.dokkat</groupId>
 			<artifactId>dokkat-api</artifactId>

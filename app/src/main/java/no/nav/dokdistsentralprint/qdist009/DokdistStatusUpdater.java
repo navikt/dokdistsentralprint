@@ -24,8 +24,7 @@ public class DokdistStatusUpdater {
 	@Handler
 	public void doUpdate(Exchange exchange) {
 		final String forsendelseId = exchange.getProperty(PROPERTY_FORSENDELSE_ID, String.class);
-		final String bestillingsId = exchange.getProperty(PROPERTY_BESTILLINGS_ID, String.class);
-		administrerForsendelse.oppdaterForsendelseStatus(forsendelseId, FORSENDELSE_OVERSENDT, bestillingsId);
+		administrerForsendelse.oppdaterForsendelseStatus(forsendelseId, FORSENDELSE_OVERSENDT);
 	}
 
 }
