@@ -1,17 +1,13 @@
 package no.nav.dokdistsentralprint.storage;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
  */
-@Data
+@Value
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class DokdistDokument {
 
 	private byte[] pdf;

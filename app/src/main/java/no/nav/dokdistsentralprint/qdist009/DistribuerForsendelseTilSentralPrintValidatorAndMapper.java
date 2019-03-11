@@ -2,7 +2,7 @@ package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
 
-import no.nav.dokdistsentralprint.exception.ValidationException;
+import no.nav.dokdistsentralprint.exception.functional.ValidationException;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 

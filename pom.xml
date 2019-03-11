@@ -10,6 +10,7 @@
 	<version>1.0-SNAPSHOT</version>
 	<modules>
 		<module>app</module>
+		<module>schemas</module>
 	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -36,6 +37,11 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>no.nav.dokdistsentralprint</groupId>
+				<artifactId>schemas</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>javax.inject</groupId>
 				<artifactId>javax.inject</artifactId>

@@ -3,7 +3,7 @@ package no.nav.dokdistsentralprint.qdist009;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static org.apache.camel.LoggingLevel.ERROR;
 
-import no.nav.dokdistsentralprint.exception.DokdistsentralprintFunctionalException;
+import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -54,7 +54,7 @@ public class Qdist009Route extends SpringRouteBuilder {
 				.logExhaustedMessageBody(true)
 				.loggingLevel(ERROR));
 
-		onException(DokdistsentralprintFunctionalException.class, JAXBException.class)
+		onException(AbstractDokdistsentralprintFunctionalException.class, JAXBException.class)
 				.handled(true)
 				.useOriginalMessage()
 				.log(LoggingLevel.WARN, log, "${exception}; " + getIdsForLogging())

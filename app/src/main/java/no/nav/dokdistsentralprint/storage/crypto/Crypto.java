@@ -1,6 +1,6 @@
 package no.nav.dokdistsentralprint.storage.crypto;
 
-import no.nav.dokdistsentralprint.exception.CryptoException;
+import no.nav.dokdistsentralprint.exception.functional.CryptoException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.Cipher;

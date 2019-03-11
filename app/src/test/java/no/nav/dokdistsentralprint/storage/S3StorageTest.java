@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
-import no.nav.dokdistsentralprint.exception.DokdistsentralprintTechnicalException;
+import no.nav.dokdistsentralprint.exception.technical.KunneIkkeLeseFraS3BucketTechnicalException;
 import no.nav.dokdistsentralprint.storage.crypto.Crypto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,7 +71,7 @@ public class S3StorageTest {
 
 	@Test
 	public void shouldRetryGetWhenFailed() {
-		when(s3.getObject(any(String.class), any(String.class))).thenThrow(new DokdistsentralprintTechnicalException("asd"));
+		when(s3.getObject(any(String.class), any(String.class))).thenThrow(new KunneIkkeLeseFraS3BucketTechnicalException("asd"));
 
 		try {
 			storage.get(key);
