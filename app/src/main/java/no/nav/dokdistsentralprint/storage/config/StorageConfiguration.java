@@ -21,7 +21,7 @@ public class StorageConfiguration {
 	@Value("${dokdistsentralprint_s3_creds_username}")
 	private String accessKey;
 
-	@Value("${dokdistsentralprint_s3_creds_username}")
+	@Value("${dokdistsentralprint_s3_creds_password}")
 	private String secretKey;
 
 	@Value("${storage_s3_url}")
