@@ -6,7 +6,7 @@
 	<springProfile name="local">
 		<include resource="logback-local.xml"/>
 	</springProfile>
-	<springProfile name="nais">
-		<include resource="logback-nais.xml"/>
-	</springProfile>
+	<!--<springProfile name="nais">-->
+		<!--<include resource="logback-nais.xml"/>-->
+	<!--</springProfile>-->
 </configuration>

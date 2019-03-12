@@ -45,6 +45,11 @@ fasitResources:
     resourceType: queue
   - alias: dokdistsentralprint_qdist009_dist_s_print
     resourceType: queue
+  - alias: srvregoppslag
+    resourceType: credential
+    propertyMap:
+      username: REGOPPSLAG_SERVICEUSER_USERNAME
+      password: REGOPPSLAG_SERVICEUSER_PASSWORD
 
 
 
