@@ -51,19 +51,17 @@ public class RegoppslagRestConsumer implements Regoppslag {
 
 	@Override
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) throws RegoppslagHentAdresseFunctionalException, RegoppslagHentAdresseSecurityException {
+		HttpEntity entity = createRequestWithHeader(request, retrieveSamlTokenAndCreateHeader());
 		try {
-			HttpEntity entity = createRequestWithHeader(request, retrieveSamlTokenAndCreateHeader());
 			return restTemplate.postForObject(this.hentMottakerOgAdresseUrl, entity, HentMottakerOgAdresseResponseTo.class).getAdresse();
 
 		} catch (HttpClientErrorException e) {
 			if (e.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-				throw new RegoppslagHentAdresseSecurityException("Kall mot TREG002 feilet. Ingen tilgang.", String.format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e.getMessage()), "TREG002");
+				throw new RegoppslagHentAdresseSecurityException(String.format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e.getMessage()));
 			}
-			String errorMsg = String.format("Kall mot TREG002 feilet. HttpStatusKode=%s, Feilmelding=%s", e.getStatusCode(), e.getMessage());
-			throw new RegoppslagHentAdresseFunctionalException(errorMsg, "Kall mot TREG002 feilet med statusKode=" + e.getStatusCode(), errorMsg, "TREG002");
+			throw new RegoppslagHentAdresseFunctionalException(String.format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, Feilmelding=%s", e.getStatusCode(), e.getMessage()));
 		} catch (HttpServerErrorException e) {
-			throw new RegoppslagHentAdresseTechnicalException(String.format("Kall mot TREG002 feilet. HttpStatusKode=%s, Feilmelding=%s", e
-					.getStatusCode(), e.getMessage()));
+			throw new RegoppslagHentAdresseTechnicalException(String.format("Kall mot TREG002 feilet teknisk. HttpStatusKode=%s, Feilmelding=%s", e.getStatusCode(), e.getMessage()));
 		}
 	}
 

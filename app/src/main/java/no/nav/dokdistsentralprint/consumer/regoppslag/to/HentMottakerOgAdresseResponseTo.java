@@ -3,15 +3,16 @@ package no.nav.dokdistsentralprint.consumer.regoppslag.to;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
 
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
+@Value
 public class HentMottakerOgAdresseResponseTo {
-	String identifikator;
-	String navn;
-	AdresseTo adresse;
+	private final String identifikator;
+	private final String navn;
+	private final AdresseTo adresse;
+
 }
