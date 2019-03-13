@@ -2,11 +2,9 @@ package no.nav.dokdistsentralprint.consumer.regoppslag.to;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Value;
 
 
-@Data
 @Builder
 @AllArgsConstructor
 @Value

@@ -50,7 +50,7 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	}
 
 	@Override
-	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) throws RegoppslagHentAdresseFunctionalException, RegoppslagHentAdresseSecurityException {
+	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
 		HttpEntity entity = createRequestWithHeader(request, retrieveSamlTokenAndCreateHeader());
 		try {
 			return restTemplate.postForObject(this.hentMottakerOgAdresseUrl, entity, HentMottakerOgAdresseResponseTo.class).getAdresse();
