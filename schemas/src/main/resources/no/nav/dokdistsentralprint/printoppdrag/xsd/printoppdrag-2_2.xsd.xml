@@ -1,60 +1,60 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Bestilling xsi:noNamespaceSchemaLocation="printoppdrag-2_2.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <!-- bestillingsId = dokdist.DistribusjonsInfo.distribusjonsId -->
-  <BestillingsInfo bestillingsId="unikBestillingsId" kundeId="NAV_IKT" modus="T">
-    <KundeOpprettet>2018-11-26</KundeOpprettet>
+	<!-- bestillingsId = dokdist.DistribusjonsInfo.distribusjonsId -->
+	<BestillingsInfo bestillingsId="unikBestillingsId" kundeId="NAV_IKT" modus="T">
+		<KundeOpprettet>2018-11-26</KundeOpprettet>
 
-    <!-- DokumentInfo attributter: destinasjon = "INNLAND", "EUROPA" eller "VERDEN". sorteringsfelt = "USORTERT" -->
-    <DokumentInfo destinasjon="INNLAND" sorteringsfelt="USORTERT"/>
+		<!-- DokumentInfo attributter: destinasjon = "INNLAND", "EUROPA" eller "VERDEN". sorteringsfelt = "USORTERT" -->
+		<DokumentInfo destinasjon="INNLAND" sorteringsfelt="USORTERT"/>
 
-    <!-- Kanal attributter:
-		behandling = "[PRIO]_[KONVTYPE]_[PLEX]",
-			[PRIO] = A eller B,
-			[KONVTYPE] = X (pakkes i konvolutt med vindu) eller W (pakkes i konvolutt uten vindu),
-			[PLEX] = S (simplex) eller D (duplex).
-		type = "PRINT" -->
-    <Kanal behandling="A_X_D" type="PRINT"/>
+		<!-- Kanal attributter:
+			behandling = "[PRIO]_[KONVTYPE]_[PLEX]",
+				[PRIO] = A eller B,
+				[KONVTYPE] = X (pakkes i konvolutt med vindu) eller W (pakkes i konvolutt uten vindu),
+				[PLEX] = S (simplex) eller D (duplex).
+			type = "PRINT" -->
+		<Kanal behandling="A_X_D" type="PRINT"/>
 
-  </BestillingsInfo>
+	</BestillingsInfo>
 
-  <!-- mailpieceId = dokdist.DokumentInfo.dokumentId -->
-  <Mailpiece mailpieceId="unikMailpieceId">
+	<!-- mailpieceId = dokdist.DokumentInfo.dokumentId -->
+	<Mailpiece mailpieceId="unikMailpieceId">
 
-    <Ressurs>
+		<Ressurs>
 
-      <!-- adresse = dokdist.Postadresse.adresselinje1-3 + dokdist.Postadresse.postnummer + dokdist.Postadresse.poststed -->
-      <Adresse><![CDATA[Kari Nordmann\rVeien 1\r0712 Moss]]></Adresse>
+			<!-- adresse = dokdist.Postadresse.adresselinje1-3 + dokdist.Postadresse.postnummer + dokdist.Postadresse.poststed -->
+			<Adresse><![CDATA[Kari Nordmann\rVeien 1\r0712 Moss]]></Adresse>
 
-    </Ressurs>
-    <Postnummer>0712</Postnummer>
+		</Ressurs>
+		<Landkode>NO</Landkode>
+		<Postnummer>0712</Postnummer>
 
-    <!-- dokumentId = dokdist.DokumentInfo.dokumentId -->
-    <Dokument dokumentId="unikHovedDokumentId" dokumentType="NAV_PDFPRINT">
+		<!-- dokumentId = dokdist.DokumentInfo.dokumentId -->
+		<Dokument dokumentId="unikHovedDokumentId" dokumentType="NAV_PDFPRINT">
 
-      <!-- skatteyternummer = dokdist.DokumentInfo.mottakerId -->
-      <Skattyternummer>mottakerId</Skattyternummer>
+			<!-- skatteyternummer = dokdist.DokumentInfo.mottakerId -->
+			<Skattyternummer>mottakerId</Skattyternummer>
 
-      <!-- adresse = dokdist.Postadresse.adresselinje1-3 + dokdist.Postadresse.postnummer + dokdist.Postadresse.poststed -->
-      <Adresse><![CDATA[Kari Nordmann\rVeien 1\r0712 Moss]]></Adresse>
+			<!-- adresse = dokdist.Postadresse.adresselinje1-3 + dokdist.Postadresse.postnummer + dokdist.Postadresse.poststed -->
+			<Adresse><![CDATA[Kari Nordmann\rVeien 1\r0712 Moss]]></Adresse>
 
-      <!-- navn = dokdist.DokumentInfo.mottakerNavn -->
-      <Navn><![CDATA[Kari Nordmann]]></Navn>
+			<!-- navn = dokdist.DokumentInfo.mottakerNavn -->
+			<Navn><![CDATA[Kari Nordmann]]></Navn>
 
-      <!-- landkode = dokdist.Postadresse.landkode -->
-      <!-- <Landkode>NO</Landkode> -->
+			<!-- landkode = dokdist.Postadresse.landkode -->
+			<Landkode>NO</Landkode>
 
-      <!-- postnummer = dokdist.Postadresse.postnummer -->
-      <Postnummer>0712</Postnummer>
+			<!-- postnummer = dokdist.Postadresse.postnummer -->
+			<Postnummer>0712</Postnummer>
+		</Dokument>
 
-    </Dokument>
+		<Dokument dokumentId="unikVedleggId" dokumentType="NAV_PDFPRINT">
+			<Skattyternummer>mottakerId</Skattyternummer>
+			<Adresse><![CDATA[Kari Nordmann\rVeien 1\r0712 Moss]]></Adresse>
+			<Navn><![CDATA[Kari Nordmann]]></Navn>
+			<Landkode>NO</Landkode>
+			<Postnummer>0712</Postnummer>
+		</Dokument>
 
-    <Dokument dokumentId="unikVedleggId" dokumentType="NAV_PDFPRINT">
-      <Skattyternummer>mottakerId</Skattyternummer>
-      <Adresse><![CDATA[Kari Nordmann\rVeien 1\r0712 Moss]]></Adresse>
-      <Navn><![CDATA[Kari Nordmann]]></Navn>
-      <!-- <Landkode>NO</Landkode> -->
-      <Postnummer>0712</Postnummer>
-    </Dokument>
-
-  </Mailpiece>
+	</Mailpiece>
 </Bestilling>

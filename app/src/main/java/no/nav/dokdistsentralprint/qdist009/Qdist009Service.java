@@ -10,8 +10,11 @@ import no.nav.dokdistsentralprint.consumer.regoppslag.RegoppslagRestConsumer;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
+import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
+import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.exception.functional.DokumentIkkeFunnetIS3Exception;
 import no.nav.dokdistsentralprint.exception.functional.InvalidForsendelseStatusException;
+import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
 import no.nav.dokdistsentralprint.storage.Storage;
@@ -50,12 +53,14 @@ public class Qdist009Service {
 
 		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(distribuerForsendelseTilSentralPrintTo.forsendelseId);
 		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
-		dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));
+		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromS3(hentForsendelseResponseTo);
 
 		AdresseTo adresseTo = getAddresseIfNotProvided(hentForsendelseResponseTo);
 
 		//todo: bygg bestillingsXml
+		Bestilling bestilling = bestillingUtil.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo);
+
 		//todo: pakk forsendelse til zip-fil
 
 		return new File("");
@@ -95,7 +100,7 @@ public class Qdist009Service {
 					String jsonPayload = storage.get(dokumentTo.getDokumentObjektReferanse())
 							.orElseThrow(() -> new DokumentIkkeFunnetIS3Exception(format("Kunne ikke finne dokument i S3 med key=dokumentObjektReferanse=%s", dokumentTo
 									.getDokumentObjektReferanse())));
-					return JsonSerializer.deserialize(jsonPayload, DokdistDokument.class);
+					return JsonSerializer.deserialize(jsonPayload, DokdistDokument.class); //todo catch deserialization exception
 				})
 				.collect(Collectors.toList());
 	}

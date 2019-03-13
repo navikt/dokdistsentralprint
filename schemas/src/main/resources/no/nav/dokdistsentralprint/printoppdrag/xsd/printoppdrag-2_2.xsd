@@ -73,6 +73,11 @@
 					<xs:documentation>navn = dokdist.DokumentInfo.mottakerNavn</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element type="xs:string" name="Landkode">
+				<xs:annotation>
+					<xs:documentation>Landkode = postadresse.landkode</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element type="xs:string" name="Postnummer">
 				<xs:annotation>
 					<xs:documentation>landkode = dokdist.Postadresse.landkode &lt;Landkode>NO&lt;/Landkode> postnummer =
@@ -87,6 +92,7 @@
 	<xs:complexType name="Mailpiece">
 		<xs:sequence>
 			<xs:element type="Ressurs" name="Ressurs"/>
+			<xs:element type="xs:string" name="Landkode"/>
 			<xs:element type="xs:string" name="Postnummer"/>
 			<xs:element type="Dokument" name="Dokument" maxOccurs="unbounded" minOccurs="0">
 				<xs:annotation>
