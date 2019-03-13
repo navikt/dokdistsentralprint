@@ -1,11 +1,14 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
-import static no.nav.dokdistsentralprint.constants.DomainConstants.FORSENDELSE_STATUS_KLAR_FOR_DISTRIBUSJON;
+import static no.nav.dokdistsentralprint.constants.DomainConstants.FORSENDELSE_STATUS_KLAR_FOR_DIST;
 import static no.nav.dokdistsentralprint.constants.DomainConstants.HOVEDDOKUMENT;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
+import no.nav.dokdistsentralprint.consumer.regoppslag.RegoppslagRestConsumer;
+import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
+import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.exception.functional.DokumentIkkeFunnetIS3Exception;
 import no.nav.dokdistsentralprint.exception.functional.InvalidForsendelseStatusException;
@@ -29,13 +32,16 @@ public class Qdist009Service {
 
 	private final DokumentkatalogAdmin dokumentkatalogAdmin;
 	private final AdministrerForsendelse administrerForsendelse;
+	private final RegoppslagRestConsumer regoppslagRestConsumer;
 	private final Storage storage;
 
 	@Inject
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
-						   AdministrerForsendelse administrerForsendelse, Storage storage) {
+						   AdministrerForsendelse administrerForsendelse, Storage storage,
+						   RegoppslagRestConsumer regoppslagRestConsumer) {
 		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
 		this.administrerForsendelse = administrerForsendelse;
+		this.regoppslagRestConsumer = regoppslagRestConsumer;
 		this.storage = storage;
 	}
 
@@ -47,13 +53,22 @@ public class Qdist009Service {
 		dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromS3(hentForsendelseResponseTo);
 
-		//todo: kall regoppslag for adresse
-
+		AdresseTo adresseTo = getAddresseIfNotProvided(hentForsendelseResponseTo);
 
 		//todo: bygg bestillingsXml
 		//todo: pakk forsendelse til zip-fil
 
 		return new File("");
+	}
+
+	private AdresseTo getAddresseIfNotProvided(HentForsendelseResponseTo hentForsendelseResponseTo) {
+		if (hentForsendelseResponseTo.getPostadresse() == null) {
+			return regoppslagRestConsumer.treg002HentAdresse(
+					new HentAdresseRequestTo(hentForsendelseResponseTo.getMottaker().getMottakerId(),
+							hentForsendelseResponseTo.getMottaker().getMottakerType()));
+		} else {
+			return null;
+		}
 	}
 
 	private void validateForsendelseStatus(String forsendelseStatus) {

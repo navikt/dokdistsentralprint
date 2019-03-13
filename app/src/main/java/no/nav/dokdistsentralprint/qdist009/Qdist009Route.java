@@ -65,7 +65,7 @@ public class Qdist009Route extends SpringRouteBuilder {
 				.routeId(SERVICE_ID)
 				.setExchangePattern(ExchangePattern.InOnly)
 				.doTry()
-				.setProperty(PROPERTY_BESTILLINGS_ID, simple("header.callId", String.class))//todo verify
+				.setProperty(PROPERTY_BESTILLINGS_ID, simple("${in.header.callId}", String.class))//todo verify
 				.setProperty(PROPERTY_FORSENDELSE_ID, xpath("//forsendelseId/text()", String.class))
 				.log(LoggingLevel.INFO, log, "qdist009 har mottatt forsendelse med " + getIdsForLogging())
 				.process(exchange -> MDC.put(CALL_ID, (String) exchange.getProperty(PROPERTY_BESTILLINGS_ID)))

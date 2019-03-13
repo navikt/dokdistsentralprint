@@ -12,4 +12,7 @@ public abstract class AbstractDokdistsentralprintFunctionalException extends Run
 	public AbstractDokdistsentralprintFunctionalException(String message, Throwable cause) {
 		super(message, cause);
 	}
+
+	public AbstractDokdistsentralprintFunctionalException(String message, String shortMessage) {
+	}
 }
