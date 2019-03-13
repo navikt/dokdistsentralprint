@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="Bestilling" type="Bestilling"/>
+	<xs:complexType name="DokumentInfo">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="destinasjon"/>
+				<xs:attribute type="xs:string" name="sorteringsfelt"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="Kanal">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="behandling"/>
+				<xs:attribute type="xs:string" name="type"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BestillingsInfo">
+		<xs:sequence>
+			<xs:element type="xs:string" name="KundeOpprettet"/>
+			<xs:element type="DokumentInfo" name="DokumentInfo">
+				<xs:annotation>
+					<xs:documentation>DokumentInfo attributter: destinasjon = "INNLAND", "EUROPA" eller "VERDEN". sorteringsfelt
+						= "USORTERT"
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element type="Kanal" name="Kanal">
+				<xs:annotation>
+					<xs:documentation>Kanal attributter:
+						behandling = "[PRIO]_[KONVTYPE]_[PLEX]",
+						[PRIO] = A eller B,
+						[KONVTYPE] = X (pakkes i konvolutt med vindu) eller W (pakkes i konvolutt uten vindu),
+						[PLEX] = S (simplex) eller D (duplex).
+						type = "PRINT"
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute type="xs:string" name="bestillingsId"/>
+		<xs:attribute type="xs:string" name="kundeId"/>
+		<xs:attribute type="xs:string" name="modus"/>
+	</xs:complexType>
+	<xs:complexType name="Ressurs">
+		<xs:sequence>
+			<xs:element type="xs:string" name="Adresse">
+				<xs:annotation>
+					<xs:documentation>adresse = dokdist.Postadresse.adresselinje1-3 + dokdist.Postadresse.postnummer +
+						dokdist.Postadresse.poststed
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Dokument">
+		<xs:sequence>
+			<xs:element type="xs:string" name="Skattyternummer">
+				<xs:annotation>
+					<xs:documentation>skatteyternummer = dokdist.DokumentInfo.mottakerId</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element type="xs:string" name="Adresse">
+				<xs:annotation>
+					<xs:documentation>adresse = dokdist.Postadresse.adresselinje1-3 + dokdist.Postadresse.postnummer +
+						dokdist.Postadresse.poststed
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element type="xs:string" name="Navn">
+				<xs:annotation>
+					<xs:documentation>navn = dokdist.DokumentInfo.mottakerNavn</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element type="xs:string" name="Postnummer">
+				<xs:annotation>
+					<xs:documentation>landkode = dokdist.Postadresse.landkode &lt;Landkode>NO&lt;/Landkode> postnummer =
+						dokdist.Postadresse.postnummer &lt;Landkode>NO&lt;/Landkode>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute type="xs:string" name="dokumentId" use="optional"/>
+		<xs:attribute type="xs:string" name="dokumentType" use="optional"/>
+	</xs:complexType>
+	<xs:complexType name="Mailpiece">
+		<xs:sequence>
+			<xs:element type="Ressurs" name="Ressurs"/>
+			<xs:element type="xs:string" name="Postnummer"/>
+			<xs:element type="Dokument" name="Dokument" maxOccurs="unbounded" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>dokumentId = dokdist.DokumentInfo.dokumentId</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute type="xs:string" name="mailpieceId"/>
+	</xs:complexType>
+	<xs:complexType name="Bestilling">
+		<xs:sequence>
+			<xs:element type="BestillingsInfo" name="BestillingsInfo">
+				<xs:annotation>
+					<xs:documentation>bestillingsId = dokdist.DistribusjonsInfo.distribusjonsId</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element type="Mailpiece" name="Mailpiece">
+				<xs:annotation>
+					<xs:documentation>mailpieceId = dokdist.DokumentInfo.dokumentId</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

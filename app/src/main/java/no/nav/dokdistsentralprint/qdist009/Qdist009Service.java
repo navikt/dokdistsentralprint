@@ -1,7 +1,6 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
-import static no.nav.dokdistsentralprint.constants.DomainConstants.FORSENDELSE_STATUS_KLAR_FOR_DISTRIBUSJON;
 import static no.nav.dokdistsentralprint.constants.DomainConstants.HOVEDDOKUMENT;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
@@ -73,20 +72,24 @@ public class Qdist009Service {
 	}
 
 	private void validateForsendelseStatus(String forsendelseStatus) {
-//		if (!FORSENDELSE_STATUS_KLAR_FOR_DISTRIBUSJON.equals(forsendelseStatus)) {
-//			throw new InvalidForsendelseStatusException(format("ForsendelseStatus må være %s. Fant forsendelseStatus=%s", FORSENDELSE_STATUS_KLAR_FOR_DISTRIBUSJON, forsendelseStatus));
+//		if (!FORSENDELSE_STATUS_KLAR_FOR_DIST.equals(forsendelseStatus)) {
+//			throw new InvalidForsendelseStatusException(format("ForsendelseStatus må være %s. Fant forsendelseStatus=%s", FORSENDELSE_STATUS_KLAR_FOR_DIST, forsendelseStatus));
 //		}
 	}
 
 	private String getDokumenttypeIdHoveddokument(HentForsendelseResponseTo hentForsendelseResponseTo) {
 		return hentForsendelseResponseTo.getDokumenter().stream()
-				.filter(DokumentTo -> HOVEDDOKUMENT.equals(DokumentTo.getTilknyttetSom()))
+				.filter(dokumentTo -> HOVEDDOKUMENT.equals(dokumentTo.getTilknyttetSom()))
 				.map(HentForsendelseResponseTo.DokumentTo::getDokumenttypeId)
 				.collect(Collectors.toList())
 				.get(0);
 	}
 
 	private List<DokdistDokument> getDocumentsFromS3(HentForsendelseResponseTo hentForsendelseResponseTo) {
+		/**
+		 * Her er rekkefølgen viktig. HentForsendelseResponseTo.getDokumenter består av en ordnet liste av dokumenter i rekkefølgen HOVEDDOK, VEDLEGG1, VEDLEGG2, ...
+		 * Denne rekkefølgen må bevares slik at bestillingen blir korrekt. Siden vi bruker List.java blir denne rekkefølgen ivaretatt
+		 **/
 		return hentForsendelseResponseTo.getDokumenter().stream()
 				.map(dokumentTo -> {
 					String jsonPayload = storage.get(dokumentTo.getDokumentObjektReferanse())

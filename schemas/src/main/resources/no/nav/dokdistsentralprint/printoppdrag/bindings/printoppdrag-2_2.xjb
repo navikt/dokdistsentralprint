@@ -6,9 +6,10 @@
 			   jaxb:extensionBindingPrefixes="xjc annox">
 	<!-- Annotate the following classes with XmlRootElement -->
 	<jaxb:bindings schemaLocation="../xsd/printoppdrag-2_2.xsd" node="/xs:schema">
-		<jaxb:bindings node="xs:complexType[@name='BestillingType']">
+		<jaxb:bindings node="xs:complexType[@name='Bestilling']">
 			<annox:annotate>
-				<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="bestilling"
+
+				<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Bestilling"
 								xsi:noNamespaceSchemaLocation="printoppdrag-2_2.xsd"
 								xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
 			</annox:annotate>
