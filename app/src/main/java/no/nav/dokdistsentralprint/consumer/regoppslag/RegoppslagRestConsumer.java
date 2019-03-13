@@ -2,12 +2,13 @@ package no.nav.dokdistsentralprint.consumer.regoppslag;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
+import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentMottakerOgAdresseResponseTo;
 import no.nav.dokdistsentralprint.consumer.sts.STSTokenRetriever;
-import no.nav.dokdistsentralprint.exception.functional.RegoppslagFunctionalException;
-import no.nav.dokdistsentralprint.exception.technical.RegoppslagSecurityException;
-import no.nav.dokdistsentralprint.exception.technical.RegoppslagTechnicalException;
+import no.nav.dokdistsentralprint.exception.functional.RegoppslagHentAdresseFunctionalException;
+import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseSecurityException;
+import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.StsRetriveTokenException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -49,23 +50,22 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	}
 
 	@Override
-	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) throws RegoppslagFunctionalException, RegoppslagSecurityException {
+	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) throws RegoppslagHentAdresseFunctionalException, RegoppslagHentAdresseSecurityException {
 		try {
 			HttpEntity entity = createRequestWithHeader(request, retrieveSamlTokenAndCreateHeader());
 			return restTemplate.postForObject(this.hentMottakerOgAdresseUrl, entity, HentMottakerOgAdresseResponseTo.class).getAdresse();
 
 		} catch (HttpClientErrorException e) {
 			if (e.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-				throw new RegoppslagSecurityException("Kall mot TREG002 feilet. Ingen tilgang.", String.format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e.getMessage()), "TREG002");
+				throw new RegoppslagHentAdresseSecurityException("Kall mot TREG002 feilet. Ingen tilgang.", String.format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e.getMessage()), "TREG002");
 			}
 			String errorMsg = String.format("Kall mot TREG002 feilet. HttpStatusKode=%s, Feilmelding=%s", e.getStatusCode(), e.getMessage());
-			throw new RegoppslagFunctionalException(errorMsg, "Kall mot TREG002 feilet med statusKode=" + e.getStatusCode(), errorMsg, "TREG002");
+			throw new RegoppslagHentAdresseFunctionalException(errorMsg, "Kall mot TREG002 feilet med statusKode=" + e.getStatusCode(), errorMsg, "TREG002");
 		} catch (HttpServerErrorException e) {
-			throw new RegoppslagTechnicalException(String.format("Kall mot TREG002 feilet. HttpStatusKode=%s, Feilmelding=%s", e
+			throw new RegoppslagHentAdresseTechnicalException(String.format("Kall mot TREG002 feilet. HttpStatusKode=%s, Feilmelding=%s", e
 					.getStatusCode(), e.getMessage()));
 		}
 	}
-
 
 	private HttpHeaders retrieveSamlTokenAndCreateHeader() {
 		try {

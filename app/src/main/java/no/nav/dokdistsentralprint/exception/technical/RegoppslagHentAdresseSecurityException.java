@@ -4,12 +4,12 @@ package no.nav.dokdistsentralprint.exception.technical;
 /**
  * @author Ugur Alpay Cenar, Visma Consulting.
  */
-public class RegoppslagSecurityException extends AbstractDokdistsentralprintTechnicalException {
+public class RegoppslagHentAdresseSecurityException extends AbstractDokdistsentralprintTechnicalException {
 	
 	private final String serviceName;
 	private final String detailedMessage;
 	
-	public RegoppslagSecurityException(String message, String detailedMessage, String serviceName) {
+	public RegoppslagHentAdresseSecurityException(String message, String detailedMessage, String serviceName) {
 		super(message);
 		this.serviceName = serviceName;
 		this.detailedMessage = detailedMessage;

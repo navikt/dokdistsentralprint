@@ -1,12 +1,13 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
+import static no.nav.dokdistsentralprint.constants.DomainConstants.FORSENDELSE_STATUS_KLAR_FOR_DIST;
 import static no.nav.dokdistsentralprint.constants.DomainConstants.HOVEDDOKUMENT;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
-import no.nav.dokdistsentralprint.consumer.regoppslag.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.RegoppslagRestConsumer;
+import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.exception.functional.DokumentIkkeFunnetIS3Exception;
@@ -52,7 +53,6 @@ public class Qdist009Service {
 		dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromS3(hentForsendelseResponseTo);
 
-		//todo: kall regoppslag for adresse
 		AdresseTo adresseTo = getAddresseIfNotProvided(hentForsendelseResponseTo);
 
 		//todo: bygg bestillingsXml
@@ -65,16 +65,16 @@ public class Qdist009Service {
 		if (hentForsendelseResponseTo.getPostadresse() == null) {
 			return regoppslagRestConsumer.treg002HentAdresse(
 					new HentAdresseRequestTo(hentForsendelseResponseTo.getMottaker().getMottakerId(),
-					hentForsendelseResponseTo.getMottaker().getMottakerType()));
+							hentForsendelseResponseTo.getMottaker().getMottakerType()));
 		} else {
 			return null;
 		}
 	}
 
 	private void validateForsendelseStatus(String forsendelseStatus) {
-//		if (!FORSENDELSE_STATUS_KLAR_FOR_DIST.equals(forsendelseStatus)) {
-//			throw new InvalidForsendelseStatusException(format("ForsendelseStatus må være %s. Fant forsendelseStatus=%s", FORSENDELSE_STATUS_KLAR_FOR_DIST, forsendelseStatus));
-//		}
+		if (!FORSENDELSE_STATUS_KLAR_FOR_DIST.equals(forsendelseStatus)) {
+			throw new InvalidForsendelseStatusException(format("ForsendelseStatus må være %s. Fant forsendelseStatus=%s", FORSENDELSE_STATUS_KLAR_FOR_DIST, forsendelseStatus));
+		}
 	}
 
 	private String getDokumenttypeIdHoveddokument(HentForsendelseResponseTo hentForsendelseResponseTo) {

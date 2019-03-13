@@ -4,19 +4,19 @@ package no.nav.dokdistsentralprint.exception.functional;
 /**
  * @author Ugur Alpay Cenar, Visma Consulting.
  */
-public class RegoppslagFunctionalException extends AbstractDokdistsentralprintFunctionalException {
+public class RegoppslagHentAdresseFunctionalException extends AbstractDokdistsentralprintFunctionalException {
 	
 	
 	private final String serviceName;
 	private final String detailedMessage;
 	
-	public RegoppslagFunctionalException(String message, String detailedMessage, String serviceName) {
+	public RegoppslagHentAdresseFunctionalException(String message, String detailedMessage, String serviceName) {
 		super(message);
 		this.serviceName = serviceName;
 		this.detailedMessage = detailedMessage;
 	}
 
-	public RegoppslagFunctionalException(String message, String shortMessage, String detailedMessage, String serviceName) {
+	public RegoppslagHentAdresseFunctionalException(String message, String shortMessage, String detailedMessage, String serviceName) {
 		super(message, shortMessage);
 		this.serviceName = serviceName;
 		this.detailedMessage = detailedMessage;

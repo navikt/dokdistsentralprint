@@ -3,13 +3,13 @@ package no.nav.dokdistsentralprint.exception.technical;
 /**
  * @author Jarl Øystein Samseth, Visma Consulting
  */
-public class RegoppslagTechnicalException extends AbstractDokdistsentralprintTechnicalException {
+public class RegoppslagHentAdresseTechnicalException extends AbstractDokdistsentralprintTechnicalException {
 
-	public RegoppslagTechnicalException(String message) {
+	public RegoppslagHentAdresseTechnicalException(String message) {
 		super(message);
 	}
 
-	public RegoppslagTechnicalException(String message, Throwable cause) {
+	public RegoppslagHentAdresseTechnicalException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

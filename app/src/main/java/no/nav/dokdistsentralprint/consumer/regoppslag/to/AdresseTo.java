@@ -1,4 +1,4 @@
-package no.nav.dokdistsentralprint.consumer.regoppslag;
+package no.nav.dokdistsentralprint.consumer.regoppslag.to;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
