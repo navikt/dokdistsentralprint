@@ -1,15 +1,15 @@
-package no.nav.dokdistsentralprint.consumer.regoppslag.to;
+package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.Builder;
 import lombok.Value;
 
 /**
- * @author Ugur Alpay Cenar, Visma Consulting.
+ * @author Sigurd Midttun, Visma Consulting.
  */
 
 @Value
 @Builder
-public class AdresseTo {
+public class Adresse {
 
 	private final String adresselinje1;
 	private final String adresselinje2;

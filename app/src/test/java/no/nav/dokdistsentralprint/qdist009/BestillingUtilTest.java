@@ -34,12 +34,22 @@ class BestillingUtilTest {
 	@Test
 	public void shouldMarshal() throws Throwable {
 		BestillingUtil bestillingUtil = new BestillingUtil();
-		Bestilling bestilling = bestillingUtil.createBestilling(createHentForsendelseResponseTo(), createDokumenttypeInfoTo());
+		Bestilling bestilling = bestillingUtil.createBestilling(createHentForsendelseResponseTo(), createDokumenttypeInfoTo(), createAdresse());
 //		String outputXml = bestillingUtil.marshalBestillingToXmlString(bestilling);
 		File file = bestillingUtil.marshalBestillingToXmlFile(bestilling);
 		bestillingUtil.zipFile(file);
 	}
 
+	private Adresse createAdresse() {
+		return Adresse.builder()
+				.adresselinje1(ADRESSELINJE_1)
+				.adresselinje2(ADRESSELINJE_2)
+				.adresselinje3(ADRESSELINJE_3)
+				.postnummer(POSTNUMMER)
+				.poststed(POSTSTED)
+				.landkode(LAND)
+				.build();
+	}
 
 	private HentForsendelseResponseTo createHentForsendelseResponseTo() {
 		return HentForsendelseResponseTo.builder()
@@ -48,14 +58,6 @@ class BestillingUtilTest {
 				.mottaker(HentForsendelseResponseTo.MottakerTo.builder()
 						.mottakerId(MOTTAKER_ID)
 						.mottakerNavn(MOTTAKER_NAVN)
-						.build())
-				.postadresse(HentForsendelseResponseTo.PostadresseTo.builder()
-						.adresselinje1(ADRESSELINJE_1)
-						.adresselinje2(ADRESSELINJE_2)
-						.adresselinje3(ADRESSELINJE_3)
-						.postnummer(POSTNUMMER)
-						.poststed(POSTSTED)
-						.landkode(LAND)
 						.build())
 				.dokumenter(Arrays.asList(HentForsendelseResponseTo.DokumentTo.builder()
 						.dokumentObjektReferanse(OBJEKT_REFERANSE_HOVEDDOK)

@@ -42,7 +42,7 @@ public class BestillingUtil {
 	public static final String PRINT = "PRINT";
 	public static final String LANDKODE_NO = "NO";
 
-	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo) {
+	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse) {
 		return new Bestilling()
 				.withBestillingsInfo(new BestillingsInfo()
 						.withModus(hentForsendelseResponseTo.getModus())
@@ -58,17 +58,18 @@ public class BestillingUtil {
 				.withMailpiece(new Mailpiece()
 						.withMailpieceId(hentForsendelseResponseTo.getBestillingsId())
 						.withRessurs(new Ressurs()
-								.withAdresse(addCDataToString(getAdresse(hentForsendelseResponseTo))))
-						.withLandkode(getLandkode(hentForsendelseResponseTo.getPostadresse()))
-						.withPostnummer(getPostnummer(hentForsendelseResponseTo.getPostadresse()))
+								.withAdresse(addCDataToString(getAdresse(adresse, hentForsendelseResponseTo.getMottaker()
+										.getMottakerNavn()))))
+						.withLandkode(getLandkode(adresse))
+						.withPostnummer(getPostnummer(adresse))
 						.withDokument(hentForsendelseResponseTo.getDokumenter().stream()
 								.map(dokumentTo -> new Dokument()
 										.withDokumentType(dokumenttypeInfoTo.getSentralPrintDokumentType())
 										.withDokumentId(dokumentTo.getDokumentObjektReferanse())
 										.withSkattyternummer(hentForsendelseResponseTo.getMottaker().getMottakerId())
 										.withNavn(addCDataToString(hentForsendelseResponseTo.getMottaker().getMottakerNavn()))
-										.withLandkode(getLandkode(hentForsendelseResponseTo.getPostadresse()))
-										.withPostnummer(getPostnummer(hentForsendelseResponseTo.getPostadresse()))) //Todo Verifiser korrekt oppførsel
+										.withLandkode(getLandkode(adresse))
+										.withPostnummer(getPostnummer(adresse))) //Todo Verifiser korrekt oppførsel
 								.collect(Collectors.toList())));
 	}
 
@@ -93,6 +94,7 @@ public class BestillingUtil {
 		}
 
 	}
+
 
 	private void addToZipFile(Path file, ZipOutputStream zipStream) throws Exception {
 		String inputFileName = file.toFile().getPath();
@@ -151,33 +153,32 @@ public class BestillingUtil {
 		return sw.toString();
 	}
 
-	public String getLandkode(HentForsendelseResponseTo.PostadresseTo postadresseTo) {
-		if (LANDKODE_NO.equals(postadresseTo.getLandkode())) {
+	public String getLandkode(Adresse adresse) {
+		if (LANDKODE_NO.equals(adresse.getLandkode())) {
 			return null;
 		} else {
-			return postadresseTo.getLandkode();
+			return adresse.getLandkode();
 		}
 	}
 
-	private String getPostnummer(HentForsendelseResponseTo.PostadresseTo postadresseTo) {
-		if (LANDKODE_NO.equals(postadresseTo.getLandkode())) {
-			return postadresseTo.getLandkode();
+	private String getPostnummer(Adresse adresse) {
+		if (LANDKODE_NO.equals(adresse.getLandkode())) {
+			return adresse.getPostnummer();
 		} else {
 			return null;
 		}
 	}
 
-	private String getAdresse(HentForsendelseResponseTo hentForsendelseResponseTo) {
-		HentForsendelseResponseTo.PostadresseTo postadresseTo = hentForsendelseResponseTo.getPostadresse();
-		if (postadresseTo == null) {
+	private String getAdresse(Adresse adresse, String mottakerNavn) {
+		if (adresse == null) { //todo mulig??
 			return "";
 		} else {
-			return formatAdresseEntity(hentForsendelseResponseTo.getMottaker().getMottakerNavn()) +
-					formatAdresseEntity(postadresseTo.getAdresselinje1()) +
-					formatAdresseEntity(postadresseTo.getAdresselinje2()) +
-					formatAdresseEntity(postadresseTo.getAdresselinje3()) +
-					formatPostnummerAndPoststed(postadresseTo.getPostnummer(), postadresseTo.getPoststed()) +
-					postadresseTo.getLandkode();
+			return formatAdresseEntity(mottakerNavn) +
+					formatAdresseEntity(adresse.getAdresselinje1()) +
+					formatAdresseEntity(adresse.getAdresselinje2()) +
+					formatAdresseEntity(adresse.getAdresselinje3()) +
+					formatPostnummerAndPoststed(adresse.getPostnummer(), adresse.getPoststed()) +
+					adresse.getLandkode();
 		}
 	}
 

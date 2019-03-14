@@ -61,13 +61,6 @@
 					<xs:documentation>skatteyternummer = dokdist.DokumentInfo.mottakerId</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element type="xs:string" name="Adresse">
-				<xs:annotation>
-					<xs:documentation>adresse = dokdist.Postadresse.adresselinje1-3 + dokdist.Postadresse.postnummer +
-						dokdist.Postadresse.poststed
-					</xs:documentation>
-				</xs:annotation>
-			</xs:element>
 			<xs:element type="xs:string" name="Navn">
 				<xs:annotation>
 					<xs:documentation>navn = dokdist.DokumentInfo.mottakerNavn</xs:documentation>

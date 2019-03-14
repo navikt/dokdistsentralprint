@@ -9,7 +9,6 @@ import lombok.Value;
 @Value
 @Builder
 public class DokumenttypeInfoTo {
-	private final String dokumentTittel;
 	private final String portoklasse;
 	private final String konvoluttvinduType;
 	private final String sentralPrintDokumentType;

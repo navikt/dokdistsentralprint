@@ -53,15 +53,18 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
 		HttpEntity entity = createRequestWithHeader(request, retrieveSamlTokenAndCreateHeader());
 		try {
-			return restTemplate.postForObject(this.hentMottakerOgAdresseUrl, entity, HentMottakerOgAdresseResponseTo.class).getAdresse();
-
+			return restTemplate.postForObject(this.hentMottakerOgAdresseUrl, entity, HentMottakerOgAdresseResponseTo.class)
+					.getAdresse();
 		} catch (HttpClientErrorException e) {
 			if (e.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-				throw new RegoppslagHentAdresseSecurityException(String.format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e.getMessage()));
+				throw new RegoppslagHentAdresseSecurityException(String.format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e
+						.getMessage()));
 			}
-			throw new RegoppslagHentAdresseFunctionalException(String.format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, Feilmelding=%s", e.getStatusCode(), e.getMessage()));
+			throw new RegoppslagHentAdresseFunctionalException(String.format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, Feilmelding=%s", e
+					.getStatusCode(), e.getMessage()));
 		} catch (HttpServerErrorException e) {
-			throw new RegoppslagHentAdresseTechnicalException(String.format("Kall mot TREG002 feilet teknisk. HttpStatusKode=%s, Feilmelding=%s", e.getStatusCode(), e.getMessage()));
+			throw new RegoppslagHentAdresseTechnicalException(String.format("Kall mot TREG002 feilet teknisk. HttpStatusKode=%s, Feilmelding=%s", e
+					.getStatusCode(), e.getMessage()));
 		}
 	}
 
@@ -69,7 +72,8 @@ public class RegoppslagRestConsumer implements Regoppslag {
 		try {
 			String samlAssertionToken = stsTokenRetriever.requestSecurityToken();
 			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.set("Authorization", "SAML " + Base64.getEncoder().encodeToString(samlAssertionToken.getBytes(StandardCharsets.UTF_8)));
+			httpHeaders.set(HttpHeaders.AUTHORIZATION, "SAML " + Base64.getEncoder()
+					.encodeToString(samlAssertionToken.getBytes(StandardCharsets.UTF_8)));
 			return httpHeaders;
 		} catch (Exception e) {
 			throw new StsRetriveTokenException(String.format("Henting av samltoken fra STS feilet. Feilmelding=%s", e.getMessage()));
