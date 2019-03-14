@@ -1,15 +1,15 @@
 package no.nav.dokdistsentralprint.storage;
 
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
  */
-@Value
+@Data
 @Builder
 public class DokdistDokument {
-
 	private byte[] pdf;
+	private String dokumentObjektReferanse;
 
 }

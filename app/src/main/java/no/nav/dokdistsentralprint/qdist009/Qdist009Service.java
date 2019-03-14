@@ -1,8 +1,11 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
-import static no.nav.dokdistsentralprint.constants.DomainConstants.FORSENDELSE_STATUS_KLAR_FOR_DIST;
-import static no.nav.dokdistsentralprint.constants.DomainConstants.HOVEDDOKUMENT;
+import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.marshalBestillingToXmlString;
+import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.zipBytes;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.createBestillingEntities;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.getDokumenttypeIdHoveddokument;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.validateForsendelseStatus;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
@@ -12,7 +15,6 @@ import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.exception.functional.DokumentIkkeFunnetIS3Exception;
-import no.nav.dokdistsentralprint.exception.functional.InvalidForsendelseStatusException;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
@@ -21,7 +23,7 @@ import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,33 +38,32 @@ public class Qdist009Service {
 	private final AdministrerForsendelse administrerForsendelse;
 	private final Regoppslag regoppslag;
 	private final Storage storage;
+	private final BestillingMapper bestillingMapper;
 
 	@Inject
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
 						   AdministrerForsendelse administrerForsendelse,
 						   Storage storage,
-						   Regoppslag regoppslag) {
+						   Regoppslag regoppslag, BestillingMapper bestillingMapper) {
 		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
 		this.administrerForsendelse = administrerForsendelse;
 		this.regoppslag = regoppslag;
 		this.storage = storage;
+		this.bestillingMapper = bestillingMapper;
 	}
 
 	@Handler
-	public File distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo) {
-
+	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo) throws IOException {
 		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(distribuerForsendelseTilSentralPrintTo.forsendelseId);
 		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
 		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));
 		Adresse adresse = getAdresse(hentForsendelseResponseTo);
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromS3(hentForsendelseResponseTo);
 
-		//todo: bygg bestillingsXml
-		Bestilling bestilling = new BestillingUtil().createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse);
-
-		//todo: pakk forsendelse til zip-fil
-
-		return new File("");
+		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse);
+		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
+		List<BestillingEntity> betstillingEntities = createBestillingEntities(hentForsendelseResponseTo.getBestillingsId(), bestillingXmlString, dokdistDokumentList);
+		return zipBytes(betstillingEntities);
 	}
 
 	private Adresse getAdresse(HentForsendelseResponseTo hentForsendelseResponseTo) {
@@ -77,7 +78,6 @@ public class Qdist009Service {
 					.postnummer(adresseRegoppslag.getPostnummer())
 					.poststed(adresseRegoppslag.getPoststed())
 					.build();
-
 		} else {
 			return Adresse.builder()
 					.adresselinje1(adresseDokdist.getAdresselinje1())
@@ -97,31 +97,19 @@ public class Qdist009Service {
 				.build());
 	}
 
-	private void validateForsendelseStatus(String forsendelseStatus) {
-		if (!FORSENDELSE_STATUS_KLAR_FOR_DIST.equals(forsendelseStatus)) {
-			throw new InvalidForsendelseStatusException(format("ForsendelseStatus må være %s. Fant forsendelseStatus=%s", FORSENDELSE_STATUS_KLAR_FOR_DIST, forsendelseStatus));
-		}
-	}
-
-	private String getDokumenttypeIdHoveddokument(HentForsendelseResponseTo hentForsendelseResponseTo) {
-		return hentForsendelseResponseTo.getDokumenter().stream()
-				.filter(dokumentTo -> HOVEDDOKUMENT.equals(dokumentTo.getTilknyttetSom()))
-				.map(HentForsendelseResponseTo.DokumentTo::getDokumenttypeId)
-				.collect(Collectors.toList())
-				.get(0);
-	}
-
+	/**
+	 * Her er rekkefølgen viktig. HentForsendelseResponseTo.dokumenter består av en ordnet liste av dokumenter i rekkefølgen HOVEDDOK, VEDLEGG1, VEDLEGG2, ...
+	 * Denne rekkefølgen må bevares slik at bestillingen blir korrekt. Siden vi bruker List.java blir denne rekkefølgen ivaretatt
+	 **/
 	private List<DokdistDokument> getDocumentsFromS3(HentForsendelseResponseTo hentForsendelseResponseTo) {
-		/**
-		 * Her er rekkefølgen viktig. HentForsendelseResponseTo.getDokumenter består av en ordnet liste av dokumenter i rekkefølgen HOVEDDOK, VEDLEGG1, VEDLEGG2, ...
-		 * Denne rekkefølgen må bevares slik at bestillingen blir korrekt. Siden vi bruker List.java blir denne rekkefølgen ivaretatt
-		 **/
 		return hentForsendelseResponseTo.getDokumenter().stream()
 				.map(dokumentTo -> {
 					String jsonPayload = storage.get(dokumentTo.getDokumentObjektReferanse())
 							.orElseThrow(() -> new DokumentIkkeFunnetIS3Exception(format("Kunne ikke finne dokument i S3 med key=dokumentObjektReferanse=%s", dokumentTo
 									.getDokumentObjektReferanse())));
-					return JsonSerializer.deserialize(jsonPayload, DokdistDokument.class); //todo catch deserialization exception
+					DokdistDokument dokdistDokument = JsonSerializer.deserialize(jsonPayload, DokdistDokument.class); //todo catch deserialization exception
+					dokdistDokument.setDokumentObjektReferanse(dokumentTo.getDokumentObjektReferanse());
+					return dokdistDokument;
 				})
 				.collect(Collectors.toList());
 	}

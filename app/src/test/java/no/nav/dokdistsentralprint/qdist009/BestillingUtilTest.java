@@ -1,12 +1,13 @@
 package no.nav.dokdistsentralprint.qdist009;
 
+import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.marshalBestillingToXmlString;
+
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.util.Arrays;
 
 /**
@@ -35,11 +36,18 @@ class BestillingUtilTest {
 	@Test
 	@Ignore
 	public void shouldMarshal() throws Throwable {
-		BestillingUtil bestillingUtil = new BestillingUtil();
-		Bestilling bestilling = bestillingUtil.createBestilling(createHentForsendelseResponseTo(), createDokumenttypeInfoTo(), createAdresse());
-//		String outputXml = bestillingUtil.marshalBestillingToXmlString(bestilling);
-		File file = bestillingUtil.marshalBestillingToXmlFile(bestilling);
-		bestillingUtil.zipFile(file);
+		BestillingMapper bestillingMapper = new BestillingMapper();
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(), createDokumenttypeInfoTo(), createAdresse());
+		String outputXml = marshalBestillingToXmlString(bestilling);
+	}
+
+	@Test
+	public void shouldZip() throws Throwable {
+		BestillingMapper bestillingMapper = new BestillingMapper();
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(), createDokumenttypeInfoTo(), createAdresse());
+		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
+
+//		bestillingUtil.zipBytes("TEST.xml", bestillingXmlString.getBytes());
 	}
 
 	private Adresse createAdresse() {
