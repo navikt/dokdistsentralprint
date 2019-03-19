@@ -28,7 +28,7 @@ fasitResources:
   - alias: sftp_privateKey
     resourceType: certificate
     propertyMap:
-      keystorepassword: sftp_privateKeyPassphrase
+      password: sftp_privateKeyPassphrase
       keystore: sftp_privateKeyFile
   - alias: dokdistsentralprint_s3_creds
     resourceType: credential
