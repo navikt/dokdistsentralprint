@@ -78,7 +78,7 @@ public class Qdist009Route extends SpringRouteBuilder {
 				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerForsendelseTilSentralPrint.class)))
 				.bean(distribuerForsendelseTilSentralPrintValidatorAndMapper)
 				.bean(qdist009Service)
-				.to(SFTP_SERVER)
+//				.to(SFTP_SERVER)
 				.log(LoggingLevel.INFO, log, "qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
 				.bean(dokdistStatusUpdater)
 				.log(LoggingLevel.INFO, log, "qdist009 har oppdatert forsendelseStatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());

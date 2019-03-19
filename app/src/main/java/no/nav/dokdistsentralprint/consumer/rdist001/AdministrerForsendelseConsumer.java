@@ -5,9 +5,11 @@ import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
+import no.nav.dokdistsentralprint.exception.functional.Rdist001GetPostDestinasjonFunctionalException;
 import no.nav.dokdistsentralprint.exception.functional.Rdist001HentForsendelseFunctionalException;
 import no.nav.dokdistsentralprint.exception.functional.Rdist001OppdaterForsendelseStatusFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
+import no.nav.dokdistsentralprint.exception.technical.Rdist001GetPostDestinasjonTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.Rdist001HentForsendelseTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.Rdist001OppdaterForsendelseStatusTechnicalException;
 import org.slf4j.MDC;
@@ -78,6 +80,24 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 					.getStatusCode(), e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
 			throw new Rdist001OppdaterForsendelseStatusTechnicalException(String.format("Kall mot rdist001 - oppdaterForsendelseStatus feilet teknisk med statusKode=%s, feilmelding=%s", e
+					.getStatusCode(), e.getMessage()), e);
+		}
+	}
+
+
+	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	public String findPostDestinasjon(String landkode) {
+		try {
+			HttpEntity entity = new HttpEntity<>(createHeaders());
+			String uri = UriComponentsBuilder.fromHttpUrl(administrerforsendelseV1Url)
+					.queryParam("landkode", landkode)
+					.toUriString();
+			return restTemplate.exchange(uri, HttpMethod.GET, entity, HentPostDestinasjonResponseTo.class).getBody().getPostDestinasjon();
+		} catch (HttpClientErrorException e) {
+			throw new Rdist001GetPostDestinasjonFunctionalException(String.format("Kall mot rdist001 - GetPostDestinasjon feilet funksjonelt med statusKode=%s, feilmelding=%s", e
+					.getStatusCode(), e.getMessage()), e);
+		} catch (HttpServerErrorException e) {
+			throw new Rdist001GetPostDestinasjonTechnicalException(String.format("Kall mot rdist001 - GetPostDestinasjon feilet teknisk med statusKode=%s, feilmelding=%s", e
 					.getStatusCode(), e.getMessage()), e);
 		}
 	}

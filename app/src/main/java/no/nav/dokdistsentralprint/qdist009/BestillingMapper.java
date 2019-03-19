@@ -2,6 +2,7 @@ package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
 
+import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
@@ -13,6 +14,7 @@ import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
 import no.nav.dokdistsentralprint.printoppdrag.Ressurs;
 import org.springframework.stereotype.Component;
 
+import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
@@ -27,6 +29,9 @@ public class BestillingMapper {
 	public static final String PRINT = "PRINT";
 	public static final String LANDKODE_NO = "NO";
 
+	@Inject
+	private AdministrerForsendelseConsumer administrerForsendelseConsumer;
+
 	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse) {
 		return new Bestilling()
 				.withBestillingsInfo(new BestillingsInfo()
@@ -36,7 +41,7 @@ public class BestillingMapper {
 						.withKundeOpprettet(LocalDate.now().toString())
 						.withDokumentInfo(new DokumentInfo()
 								.withSorteringsfelt(USORTERT)
-								.withDestinasjon("DEST")) //todo fix!
+								.withDestinasjon(findPostDestinasjon(adresse)))
 						.withKanal(new Kanal()
 								.withType(PRINT)
 								.withBehandling(getBehandling(dokumenttypeInfoTo))))
@@ -63,6 +68,14 @@ public class BestillingMapper {
 			return null;
 		} else {
 			return adresse.getLandkode();
+		}
+	}
+
+	public String findPostDestinasjon(Adresse adresse) {
+		if (adresse.getPoststed() == null) {
+			return administrerForsendelseConsumer.findPostDestinasjon(adresse.getLandkode());
+		} else {
+			return adresse.getPoststed();
 		}
 	}
 
