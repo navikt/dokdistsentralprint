@@ -55,24 +55,6 @@ public class S3StorageTest {
 
 
 	@Test
-	public void shouldEncryptAndPutObjectWithShortKey() {
-		storage.put("12", JsonSerializer.serialize(createDokument()));
-
-		verify(s3).putObject(BUCKET_NAME, "12", new Crypto(encryptPsw, "12").encrypt(JsonSerializer.serialize(createDokument())));
-	}
-
-	/**
-	 * Hvis S3 kalles så skal DoksysDokument serialiseres til Json string og krypteres før den lagres i S3 med key=bestillingsId
-	 */
-	@Test
-	public void shouldEncryptAndPutObject() {
-		storage.put(key, JsonSerializer.serialize(createDokument()));
-
-		verify(s3).putObject(BUCKET_NAME, key, new Crypto(encryptPsw, key).encrypt(JsonSerializer.serialize(createDokument())));
-	}
-
-
-	@Test
 	public void shouldRetryGetWhenFailed() {
 		when(s3.getObject(any(String.class), any(String.class))).thenThrow(new KunneIkkeLeseFraS3BucketTechnicalException("asd"));
 
