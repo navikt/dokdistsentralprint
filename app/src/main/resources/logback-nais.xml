@@ -23,4 +23,8 @@
 	<logger name="no.nav.dokdistsentralprint" level="INFO" additivity="false">
 		<appender-ref ref="applikasjonslogg"/>
 	</logger>
+
+	<logger name="com.jcraft.jsch" level="DEBUG" additivity="false">
+		<appender-ref ref="applikasjonslogg"/>
+	</logger>
 </included>
