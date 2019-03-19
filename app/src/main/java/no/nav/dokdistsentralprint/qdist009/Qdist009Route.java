@@ -26,6 +26,10 @@ public class Qdist009Route extends SpringRouteBuilder {
 	public static final String SERVICE_ID = "qdist009";
 	static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";
 	static final String PROPERTY_FORSENDELSE_ID = "forsendelseId";
+	private static final String SFTP_FILETYPE = ".zip";
+	private static final String SFTP_FILE_CONFIG = "binary=true&fileName=${exchangeProperty." + PROPERTY_BESTILLINGS_ID + "}" + SFTP_FILETYPE;
+	private static final String SFTP_SECURITY_CONFIG = "&privateKeyFile={{sftp.privateKeyFile}}&privateKeyPassphrase={{sftp.privateKeyPassphrase}}&useUserKnownHostsFile=false&preferredAuthentications=publickey";
+	private static final String SFTP_SERVER = "sftp://{{sftp.url}}:{{sftp.port}}/{{sftp.remoteFilePath}}?" + SFTP_FILE_CONFIG + SFTP_SECURITY_CONFIG;
 
 	private final Qdist009Service qdist009Service;
 	private final DistribuerForsendelseTilSentralPrintValidatorAndMapper distribuerForsendelseTilSentralPrintValidatorAndMapper;
@@ -74,7 +78,7 @@ public class Qdist009Route extends SpringRouteBuilder {
 				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerForsendelseTilSentralPrint.class)))
 				.bean(distribuerForsendelseTilSentralPrintValidatorAndMapper)
 				.bean(qdist009Service)
-//				.to("{{ftp.client}}") todo fix integration
+				.to(SFTP_SERVER)
 				.log(LoggingLevel.INFO, log, "qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
 				.bean(dokdistStatusUpdater)
 				.log(LoggingLevel.INFO, log, "qdist009 har oppdatert forsendelseStatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());

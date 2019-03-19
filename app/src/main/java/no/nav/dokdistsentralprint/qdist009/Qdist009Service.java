@@ -5,7 +5,6 @@ import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.marshalBestilli
 import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.zipBytes;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.createBestillingEntities;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.getDokumenttypeIdHoveddokument;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.validateForsendelseStatus;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
@@ -55,7 +54,7 @@ public class Qdist009Service {
 	@Handler
 	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo) throws IOException {
 		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(distribuerForsendelseTilSentralPrintTo.forsendelseId);
-		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
+//		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
 		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));
 		Adresse adresse = getAdresse(hentForsendelseResponseTo);
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromS3(hentForsendelseResponseTo);

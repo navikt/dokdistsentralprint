@@ -43,12 +43,12 @@ public final class FileUtils {
 			}
 		});
 		zos.close();
-		Path resourcepathBestilling = Paths.get("app", "src", "test", "resources");
-		String dirNameBestilling = resourcepathBestilling.toAbsolutePath().toString();
-		File file = new File(dirNameBestilling + "/TEST.zip");
-		try (FileOutputStream fos = new FileOutputStream(file)) {
-			fos.write(baos.toByteArray());
-		}
+//		Path resourcepathBestilling = Paths.get("app", "src", "test", "resources");
+//		String dirNameBestilling = resourcepathBestilling.toAbsolutePath().toString();
+//		File file = new File(dirNameBestilling + "/TEST.zip");
+//		try (FileOutputStream fos = new FileOutputStream(file)) {
+//			fos.write(baos.toByteArray());
+//		}
 
 		return baos.toByteArray();
 	}

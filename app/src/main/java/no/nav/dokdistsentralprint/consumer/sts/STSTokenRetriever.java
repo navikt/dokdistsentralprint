@@ -2,7 +2,6 @@ package no.nav.dokdistsentralprint.consumer.sts;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.cxf.ws.security.trust.STSClient;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
 
@@ -20,7 +19,6 @@ import java.io.StringWriter;
  */
 @Slf4j
 @Component
-@Profile("nais")
 public class STSTokenRetriever {
 	private final STSClient stsClient;
 

@@ -36,7 +36,6 @@ public class JmsConfig {
 		return new MQQueue(qdist009FunksjonellFeil);
 	}
 
-
 	@Bean
 	public ConnectionFactory wmqConnectionFactory(final MqGatewayAlias mqGatewayAlias,
 												  final @Value("${dokdistsentralprint_channel.name}") String channelName,

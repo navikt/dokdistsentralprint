@@ -20,8 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -31,6 +33,7 @@ import java.io.ByteArrayInputStream;
 /**
  * @author Ugur Alpay Cenar, Visma Consulting.
  */
+@ActiveProfiles("unittest")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = S3StorageTest.Config.class)
 public class S3StorageTest {
@@ -103,6 +106,7 @@ public class S3StorageTest {
 				.build();
 	}
 
+	@Profile("unittest")
 	@EnableRetry
 	@Configuration
 	public static class Config {

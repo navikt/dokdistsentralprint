@@ -32,20 +32,9 @@ public class S3Storage implements Storage {
 		this.encryptionPassphrase = encryptionPassphrase;
 	}
 
-//	@Override
-//	@Retryable(include = dokdistsentralprintTechnicalException.class, maxAttempts = MAX_ATTEMPTS_SHORT, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-//	public void put(String key, String value) {
-//		throw new UnsupportedOperationException("dokdistsentralprint støtter ikke persistering av objekter til dokdistmellomlager");
-//	}
-
-	//Todo bare brukt for testing
+	@Override
 	public void put(String key, String value) {
-		try {
-			String encryptedValue = encrypt(value, key);
-			writeString(key, encryptedValue);
-		} catch (Exception e) {
-			throw new KunneIkkeLeseFraS3BucketTechnicalException(String.format("Feilet ved sending av dokument til S3. Nøkkel=%s", key), e);
-		}
+		throw new UnsupportedOperationException("dokdistsentralprint støtter ikke persistering av objekter til dokdistmellomlager");
 	}
 
 	@Override
@@ -67,10 +56,6 @@ public class S3Storage implements Storage {
 		throw new UnsupportedOperationException("dokdistsentralprint støtter ikke sletting av objekter fra dokdistmellomlager");
 	}
 
-	private void writeString(String key, String value) {
-		s3.putObject(BUCKET_NAME, key, value);
-	}
-
 	private String readString(String key) {
 		S3Object object;
 		try {
@@ -87,10 +72,6 @@ public class S3Storage implements Storage {
 
 	private String decrypt(String encrypted, String key) {
 		return new Crypto(encryptionPassphrase, key).decrypt(encrypted);
-	}
-
-	private String encrypt(String plaintext, String key) {
-		return new Crypto(encryptionPassphrase, key).encrypt(plaintext);
 	}
 
 }
