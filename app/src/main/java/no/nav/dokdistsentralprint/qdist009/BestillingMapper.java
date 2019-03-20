@@ -2,7 +2,6 @@ package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
 
-import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
@@ -14,7 +13,6 @@ import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
 import no.nav.dokdistsentralprint.printoppdrag.Ressurs;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
