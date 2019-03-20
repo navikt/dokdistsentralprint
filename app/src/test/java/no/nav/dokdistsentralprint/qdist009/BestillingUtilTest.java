@@ -31,20 +31,21 @@ class BestillingUtilTest {
 	private static final String KONVOLUTTVINDU_TYPE = "konvoluttvinduType";
 	private static final String PORTOKLASSE = "portoklasse";
 	private static final String SENTRALPRINT_DOKTYPE = "sentPrintDokType";
+	private static final String POST_DESTINASJON = "EUROPA";
 
 
 	@Test
 	@Ignore
 	public void shouldMarshal() throws Throwable {
 		BestillingMapper bestillingMapper = new BestillingMapper();
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(), createDokumenttypeInfoTo(), createAdresse());
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(), createDokumenttypeInfoTo(), createAdresse(), POST_DESTINASJON);
 		String outputXml = marshalBestillingToXmlString(bestilling);
 	}
 
 	@Test
 	public void shouldZip() throws Throwable {
 		BestillingMapper bestillingMapper = new BestillingMapper();
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(), createDokumenttypeInfoTo(), createAdresse());
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(), createDokumenttypeInfoTo(), createAdresse(), POST_DESTINASJON);
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
 
 //		bestillingUtil.zipBytes("TEST.xml", bestillingXmlString.getBytes());

@@ -32,7 +32,7 @@ public class BestillingMapper {
 	@Inject
 	private AdministrerForsendelseConsumer administrerForsendelseConsumer;
 
-	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse) {
+	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse, String postDestinasjon) {
 		return new Bestilling()
 				.withBestillingsInfo(new BestillingsInfo()
 						.withModus(hentForsendelseResponseTo.getModus())
@@ -41,7 +41,7 @@ public class BestillingMapper {
 						.withKundeOpprettet(LocalDate.now().toString())
 						.withDokumentInfo(new DokumentInfo()
 								.withSorteringsfelt(USORTERT)
-								.withDestinasjon(findPostDestinasjon(adresse)))
+								.withDestinasjon(postDestinasjon))
 						.withKanal(new Kanal()
 								.withType(PRINT)
 								.withBehandling(getBehandling(dokumenttypeInfoTo))))
@@ -68,14 +68,6 @@ public class BestillingMapper {
 			return null;
 		} else {
 			return adresse.getLandkode();
-		}
-	}
-
-	public String findPostDestinasjon(Adresse adresse) {
-		if (adresse.getPoststed() == null) {
-			return administrerForsendelseConsumer.findPostDestinasjon(adresse.getLandkode());
-		} else {
-			return adresse.getPoststed();
 		}
 	}
 
