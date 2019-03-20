@@ -88,10 +88,10 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public String findPostDestinasjon(String landkode) {
 		try {
+
 			HttpEntity entity = new HttpEntity<>(createHeaders());
-			String uri = UriComponentsBuilder.fromHttpUrl(administrerforsendelseV1Url)
-					.queryParam("landkode", landkode)
-					.toUriString();
+			String uri = administrerforsendelseV1Url + "/hentpostdestinasjon/" + landkode;
+
 			return restTemplate.exchange(uri, HttpMethod.GET, entity, HentPostDestinasjonResponseTo.class).getBody().getPostDestinasjon();
 		} catch (HttpClientErrorException e) {
 			throw new Rdist001GetPostDestinasjonFunctionalException(String.format("Kall mot rdist001 - GetPostDestinasjon feilet funksjonelt med statusKode=%s, feilmelding=%s", e
