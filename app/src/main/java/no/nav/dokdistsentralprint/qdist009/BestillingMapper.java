@@ -29,9 +29,6 @@ public class BestillingMapper {
 	public static final String PRINT = "PRINT";
 	public static final String LANDKODE_NO = "NO";
 
-	@Inject
-	private AdministrerForsendelseConsumer administrerForsendelseConsumer;
-
 	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse, String postDestinasjon) {
 		return new Bestilling()
 				.withBestillingsInfo(new BestillingsInfo()
