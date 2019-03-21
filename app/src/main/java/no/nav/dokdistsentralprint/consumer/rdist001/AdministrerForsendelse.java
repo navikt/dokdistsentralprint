@@ -8,4 +8,6 @@ public interface AdministrerForsendelse {
 	HentForsendelseResponseTo hentForsendelse(final String forsendelseId);
 
 	void oppdaterForsendelseStatus(final String forsendelseId, final String forsendelseStatus);
+
+	String findPostDestinasjon(final String landkode);
 }

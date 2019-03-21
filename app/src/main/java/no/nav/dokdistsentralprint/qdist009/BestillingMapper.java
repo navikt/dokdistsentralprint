@@ -27,7 +27,7 @@ public class BestillingMapper {
 	public static final String PRINT = "PRINT";
 	public static final String LANDKODE_NO = "NO";
 
-	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse) {
+	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse, String postDestinasjon) {
 		return new Bestilling()
 				.withBestillingsInfo(new BestillingsInfo()
 						.withModus(hentForsendelseResponseTo.getModus())
@@ -36,7 +36,7 @@ public class BestillingMapper {
 						.withKundeOpprettet(LocalDate.now().toString())
 						.withDokumentInfo(new DokumentInfo()
 								.withSorteringsfelt(USORTERT)
-								.withDestinasjon("DEST")) //todo fix!
+								.withDestinasjon(postDestinasjon))
 						.withKanal(new Kanal()
 								.withType(PRINT)
 								.withBehandling(getBehandling(dokumenttypeInfoTo))))
