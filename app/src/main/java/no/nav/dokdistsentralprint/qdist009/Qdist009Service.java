@@ -2,9 +2,10 @@ package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.marshalBestillingToXmlString;
-import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.zipBytes;
+import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.zipPrintbestillingToBytes;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.createBestillingEntities;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.getDokumenttypeIdHoveddokument;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.validateForsendelseStatus;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
@@ -22,7 +23,6 @@ import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,17 +52,17 @@ public class Qdist009Service {
 	}
 
 	@Handler
-	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo) throws IOException {
+	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo) {
 		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(distribuerForsendelseTilSentralPrintTo.forsendelseId);
-//		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
+		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
 		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));
 		Adresse adresse = getAdresse(hentForsendelseResponseTo);
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromS3(hentForsendelseResponseTo);
 
 		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse);
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
-		List<BestillingEntity> betstillingEntities = createBestillingEntities(hentForsendelseResponseTo.getBestillingsId(), bestillingXmlString, dokdistDokumentList);
-		return zipBytes(betstillingEntities);
+		List<BestillingEntity> bestillingEntities = createBestillingEntities(hentForsendelseResponseTo.getBestillingsId(), bestillingXmlString, dokdistDokumentList);
+		return zipPrintbestillingToBytes(bestillingEntities);
 	}
 
 	private Adresse getAdresse(HentForsendelseResponseTo hentForsendelseResponseTo) {

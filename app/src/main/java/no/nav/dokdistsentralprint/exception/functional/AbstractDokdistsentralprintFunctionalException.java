@@ -13,6 +13,4 @@ public abstract class AbstractDokdistsentralprintFunctionalException extends Run
 		super(message, cause);
 	}
 
-	public AbstractDokdistsentralprintFunctionalException(String message, String shortMessage) {
-	}
 }

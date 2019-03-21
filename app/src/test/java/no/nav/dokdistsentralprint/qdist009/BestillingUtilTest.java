@@ -47,7 +47,7 @@ class BestillingUtilTest {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(), createDokumenttypeInfoTo(), createAdresse());
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
 
-//		bestillingUtil.zipBytes("TEST.xml", bestillingXmlString.getBytes());
+//		bestillingUtil.zipPrintbestillingToBytes("TEST.xml", bestillingXmlString.getBytes());
 	}
 
 	private Adresse createAdresse() {

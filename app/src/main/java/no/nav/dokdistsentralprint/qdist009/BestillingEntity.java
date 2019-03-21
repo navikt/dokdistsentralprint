@@ -1,5 +1,7 @@
 package no.nav.dokdistsentralprint.qdist009;
 
+import static java.lang.String.format;
+
 import lombok.Builder;
 import lombok.Value;
 
@@ -11,4 +13,8 @@ import lombok.Value;
 public class BestillingEntity {
 	private final String fileName;
 	private final byte[] entity;
+
+	public String toString() {
+		return format("BestillingEntity{filnavn=%s, entity.length=%s}", this.fileName, this.entity == null ? null : this.entity.length);
+	}
 }
