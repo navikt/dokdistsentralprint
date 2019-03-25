@@ -1,6 +1,7 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
+import static no.nav.dokdistsentralprint.metrics.MetricUpdater.updateQdist009Metrics;
 import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.marshalBestillingToXmlString;
 import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.zipPrintbestillingToBytes;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.createBestillingEntities;
@@ -61,10 +62,12 @@ public class Qdist009Service {
 
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromS3(hentForsendelseResponseTo);
 
-
 		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse, postdestinasjon);
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
 		List<BestillingEntity> bestillingEntities = createBestillingEntities(hentForsendelseResponseTo.getBestillingsId(), bestillingXmlString, dokdistDokumentList);
+
+		updateQdist009Metrics(postdestinasjon, adresse.getLandkode());
+
 		return zipPrintbestillingToBytes(bestillingEntities);
 	}
 
