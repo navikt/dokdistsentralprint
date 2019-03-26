@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MetricUpdater {
 
-	private static final String QDIST009_SERVICE = "service";
+	private static final String QDIST009_SERVICE = "dok_business_counter";
 	private static final String LABEL_LANDKODE = "landkode";
 	private static final String LABEL_POSTDESTINASJON = "postdestinasjon";
 

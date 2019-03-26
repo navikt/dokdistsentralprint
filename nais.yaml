@@ -14,6 +14,9 @@ healthcheck:
     path: /isReady
     initialDelay: 30
     timeout: 3
+prometheus:
+  enabled: true
+  path: /actuator/prometheus
 resources:
   limits:
     cpu: 3000m
