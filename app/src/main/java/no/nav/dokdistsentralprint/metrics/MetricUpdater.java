@@ -26,4 +26,5 @@ public class MetricUpdater {
 				LABEL_LANDKODE, landkode,
 				LABEL_POSTDESTINASJON, postdestinasjon).increment();
 	}
+
 }
