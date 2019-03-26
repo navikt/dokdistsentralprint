@@ -72,15 +72,6 @@ public class DokMonitoringAspect {
 		Timer.Sample sample = Timer.start(registry);
 		try {
 			return pjp.proceed();
-		} catch (Exception e) {
-			Counter.builder(monitor.value() + "_exception")
-					.tags("error_type", isFunctionalException(e) ? "functional" : "technical")
-					.tags("exception_name", e.getClass().getSimpleName())
-					.tags(monitor.extraTags())
-					.tags(tagsBasedOnJoinpoint.apply(pjp))
-					.register(registry)
-					.increment();
-			throw e;
 		} finally {
 			sample.stop(Timer.builder(monitor.value())
 					.description(monitor.description().isEmpty() ? null : monitor.description())
@@ -90,10 +81,6 @@ public class DokMonitoringAspect {
 					.publishPercentiles(monitor.percentiles().length == 0 ? null : monitor.percentiles())
 					.register(registry));
 		}
-	}
-
-	private boolean isFunctionalException(Exception e) {
-		return e instanceof AbstractDokdistsentralprintFunctionalException;
 	}
 
 }

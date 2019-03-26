@@ -6,8 +6,6 @@ import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.SERVICE_ID;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-
 @Component
 public class MetricUpdater {
 
@@ -15,14 +13,13 @@ public class MetricUpdater {
 	private static final String LABEL_LANDKODE = "landkode";
 	private static final String LABEL_POSTDESTINASJON = "postdestinasjon";
 
-	private static MeterRegistry meterRegistry;
+	private final MeterRegistry meterRegistry;
 
-	@Inject
 	public MetricUpdater(MeterRegistry meterRegistry) {
-		MetricUpdater.meterRegistry = meterRegistry;
+		this.meterRegistry = meterRegistry;
 	}
 
-	public static void updateQdist009Metrics(String landkode,
+	public void updateQdist009Metrics(String landkode,
 											 String postdestinasjon) {
 		meterRegistry.counter(QDIST009_SERVICE,
 				LABEL_PROCESS, SERVICE_ID,

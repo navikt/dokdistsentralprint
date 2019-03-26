@@ -1,7 +1,6 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
-import static no.nav.dokdistsentralprint.metrics.MetricUpdater.updateQdist009Metrics;
 import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.marshalBestillingToXmlString;
 import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.zipPrintbestillingToBytes;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.createBestillingEntities;
@@ -16,6 +15,7 @@ import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.exception.functional.DokumentIkkeFunnetIS3Exception;
+import no.nav.dokdistsentralprint.metrics.MetricUpdater;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
@@ -39,17 +39,20 @@ public class Qdist009Service {
 	private final Regoppslag regoppslag;
 	private final Storage storage;
 	private final BestillingMapper bestillingMapper;
+	private final MetricUpdater metricUpdater;
 
 	@Inject
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
 						   AdministrerForsendelse administrerForsendelse,
 						   Storage storage,
-						   Regoppslag regoppslag, BestillingMapper bestillingMapper) {
+						   Regoppslag regoppslag, BestillingMapper bestillingMapper,
+						   MetricUpdater metricUpdater) {
 		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
 		this.administrerForsendelse = administrerForsendelse;
 		this.regoppslag = regoppslag;
 		this.storage = storage;
 		this.bestillingMapper = bestillingMapper;
+		this.metricUpdater = metricUpdater;
 	}
 
 	@Handler
@@ -66,7 +69,7 @@ public class Qdist009Service {
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
 		List<BestillingEntity> bestillingEntities = createBestillingEntities(hentForsendelseResponseTo.getBestillingsId(), bestillingXmlString, dokdistDokumentList);
 
-		updateQdist009Metrics(postdestinasjon, adresse.getLandkode());
+		metricUpdater.updateQdist009Metrics(postdestinasjon, adresse.getLandkode());
 
 		return zipPrintbestillingToBytes(bestillingEntities);
 	}

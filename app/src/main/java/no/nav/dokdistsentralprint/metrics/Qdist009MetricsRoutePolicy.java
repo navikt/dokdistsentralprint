@@ -12,7 +12,6 @@ import io.micrometer.core.instrument.Timer;
 import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Route;
-import org.apache.camel.ValidationException;
 import org.apache.camel.support.RoutePolicySupport;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +27,7 @@ public class Qdist009MetricsRoutePolicy extends RoutePolicySupport {
 	private Timer.Sample timer;
 
 	private static final String QDIST009_PROCESS_TIMER = "dok_request_latency_histogram";
-	private static final String QDIST009_PROCESS_TIMER_DESCRIPTION = "prosesseringstid for kall inn til qdist008";
-	private static final String QDIST009_START = "Qdist009_start";
+	private static final String QDIST009_PROCESS_TIMER_DESCRIPTION = "prosesseringstid for kall inn til qdist009";
 	private static final String QDIST009_EXCEPTION = "request_exception_total";
 
 	@Inject
@@ -40,7 +38,6 @@ public class Qdist009MetricsRoutePolicy extends RoutePolicySupport {
 	@Override
 	public void onExchangeBegin(Route route, Exchange exchange) {
 		timer = Timer.start(registry);
-		registry.counter(QDIST009_START).increment();
 	}
 
 	@Override
@@ -69,7 +66,7 @@ public class Qdist009MetricsRoutePolicy extends RoutePolicySupport {
 	}
 
 	private boolean isFunctionalException(Exception e) {
-		return (e instanceof AbstractDokdistsentralprintFunctionalException) || (e instanceof ValidationException);
+		return (e instanceof AbstractDokdistsentralprintFunctionalException);
 	}
 
 	private Exception getException(Exchange exchange) {

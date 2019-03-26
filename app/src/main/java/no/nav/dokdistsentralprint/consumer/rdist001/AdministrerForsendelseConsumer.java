@@ -69,6 +69,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	}
 
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Monitor(value = "dok_consumer", extraTags = {"process", "oppdaterForsendelseStatus"}, histogram = true)
 	public void oppdaterForsendelseStatus(String forsendelseId, String forsendelseStatus) {
 		try {
 			HttpEntity entity = new HttpEntity<>(createHeaders());
