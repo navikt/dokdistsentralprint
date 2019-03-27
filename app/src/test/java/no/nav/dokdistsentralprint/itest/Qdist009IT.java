@@ -157,6 +157,7 @@ public class Qdist009IT {
 		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
 		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
 		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+
 	}
 
 
