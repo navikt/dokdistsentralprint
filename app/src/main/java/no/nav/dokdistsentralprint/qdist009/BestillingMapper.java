@@ -75,16 +75,12 @@ public class BestillingMapper {
 	}
 
 	private String getAdresse(Adresse adresse, String mottakerNavn) {
-		if (adresse == null) { //todo mulig??
-			return "";
-		} else {
-			return formatAdresseEntity(mottakerNavn) +
-					formatAdresseEntity(adresse.getAdresselinje1()) +
-					formatAdresseEntity(adresse.getAdresselinje2()) +
-					formatAdresseEntity(adresse.getAdresselinje3()) +
-					formatPostnummerAndPoststed(adresse.getPostnummer(), adresse.getPoststed()) +
-					adresse.getLandkode();
-		}
+		return formatAdresseEntity(mottakerNavn) +
+				formatAdresseEntity(adresse.getAdresselinje1()) +
+				formatAdresseEntity(adresse.getAdresselinje2()) +
+				formatAdresseEntity(adresse.getAdresselinje3()) +
+				formatPostnummerAndPoststed(adresse.getPostnummer(), adresse.getPoststed()) +
+				adresse.getLandkode();
 	}
 
 	private String formatAdresseEntity(String entity) {
