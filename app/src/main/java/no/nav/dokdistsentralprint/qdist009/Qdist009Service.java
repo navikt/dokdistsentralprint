@@ -75,7 +75,7 @@ public class Qdist009Service {
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
 		List<BestillingEntity> bestillingEntities = createBestillingEntities(hentForsendelseResponseTo.getBestillingsId(), bestillingXmlString, dokdistDokumentList);
 
-		metricUpdater.updateQdist009Metrics("todo fix this, postdestinasjon", adresse.getLandkode());
+		metricUpdater.updateQdist009Metrics(hentPostDestinasjonResponseTo.getPostDestinasjon(), adresse.getLandkode());
 
 		return zipPrintbestillingToBytes(bestillingEntities);
 	}
