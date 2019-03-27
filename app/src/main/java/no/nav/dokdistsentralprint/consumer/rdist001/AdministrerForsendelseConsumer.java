@@ -12,6 +12,7 @@ import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprin
 import no.nav.dokdistsentralprint.exception.technical.Rdist001GetPostDestinasjonTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.Rdist001HentForsendelseTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.Rdist001OppdaterForsendelseStatusTechnicalException;
+import no.nav.dokdistsentralprint.metrics.Monitor;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -53,6 +54,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Monitor(value = "dok_consumer", extraTags = {"process", "hentForsendelse"}, histogram = true)
 	public HentForsendelseResponseTo hentForsendelse(final String forsendelseId) {
 		try {
 			HttpEntity entity = new HttpEntity<>(createHeaders());
@@ -69,6 +71,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Monitor(value = "dok_consumer", extraTags = {"process", "oppdaterForsendelseStatus"}, histogram = true)
 	public void oppdaterForsendelseStatus(String forsendelseId, String forsendelseStatus) {
 		try {
 			HttpEntity entity = new HttpEntity<>(createHeaders());
@@ -88,6 +91,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Monitor(value = "dok_consumer", extraTags = {"process", "findPostDestinasjon"}, histogram = true)
 	public HentPostDestinasjonResponseTo hentPostDestinasjon(String landkode) {
 		try {
 			HttpEntity entity = new HttpEntity<>(createHeaders());

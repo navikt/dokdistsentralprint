@@ -153,10 +153,11 @@ public class Qdist009IT {
 		String vedlegg1Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
 		String vedlegg2Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
 
-		assertEquals(expectedBestillingXmlString, actualBestillingXmlString);
+		assertEquals(expectedBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>",""), actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>",""));
 		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
 		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
 		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+
 	}
 
 

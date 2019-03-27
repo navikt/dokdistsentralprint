@@ -18,6 +18,7 @@ import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.exception.functional.DokumentIkkeFunnetIS3Exception;
 import no.nav.dokdistsentralprint.exception.technical.KunneIkkeLeseFraS3BucketTechnicalException;
+import no.nav.dokdistsentralprint.metrics.MetricUpdater;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
@@ -43,17 +44,20 @@ public class Qdist009Service {
 	private final AdministrerForsendelse administrerForsendelse;
 	private final Regoppslag regoppslag;
 	private final Storage storage;
+	private final MetricUpdater metricUpdater;
 	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
 	@Inject
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
 						   AdministrerForsendelse administrerForsendelse,
 						   Storage storage,
-						   Regoppslag regoppslag) {
+						   Regoppslag regoppslag,
+						   MetricUpdater metricUpdater) {
 		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
 		this.administrerForsendelse = administrerForsendelse;
 		this.regoppslag = regoppslag;
 		this.storage = storage;
+		this.metricUpdater = metricUpdater;
 	}
 
 	@Handler
@@ -70,6 +74,9 @@ public class Qdist009Service {
 		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse, hentPostDestinasjonResponseTo);
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
 		List<BestillingEntity> bestillingEntities = createBestillingEntities(hentForsendelseResponseTo.getBestillingsId(), bestillingXmlString, dokdistDokumentList);
+
+		metricUpdater.updateQdist009Metrics(hentPostDestinasjonResponseTo.getPostDestinasjon(), adresse.getLandkode());
+
 		return zipPrintbestillingToBytes(bestillingEntities);
 	}
 
