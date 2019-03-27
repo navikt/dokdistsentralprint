@@ -4,6 +4,7 @@ import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static org.apache.camel.LoggingLevel.ERROR;
 
 import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
+import no.nav.dokdistsentralprint.metrics.Qdist009MetricsRoutePolicy;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -36,18 +37,21 @@ public class Qdist009Route extends SpringRouteBuilder {
 	private final DokdistStatusUpdater dokdistStatusUpdater;
 	private final Queue qdist009;
 	private final Queue qdist009FunksjonellFeil;
+	private final Qdist009MetricsRoutePolicy qdist009MetricsRoutePolicy;
 
 	@Inject
 	public Qdist009Route(Qdist009Service qdist009Service,
 						 DistribuerForsendelseTilSentralPrintValidatorAndMapper distribuerForsendelseTilSentralPrintValidatorAndMapper,
 						 DokdistStatusUpdater dokdistStatusUpdater,
 						 Queue qdist009,
-						 Queue qdist009FunksjonellFeil) {
+						 Queue qdist009FunksjonellFeil,
+						 Qdist009MetricsRoutePolicy qdist009MetricsRoutePolicy) {
 		this.qdist009Service = qdist009Service;
 		this.distribuerForsendelseTilSentralPrintValidatorAndMapper = distribuerForsendelseTilSentralPrintValidatorAndMapper;
 		this.dokdistStatusUpdater = dokdistStatusUpdater;
 		this.qdist009 = qdist009;
 		this.qdist009FunksjonellFeil = qdist009FunksjonellFeil;
+		this.qdist009MetricsRoutePolicy = qdist009MetricsRoutePolicy;
 	}
 
 	@Override
@@ -67,6 +71,7 @@ public class Qdist009Route extends SpringRouteBuilder {
 		from("jms:" + qdist009.getQueueName() +
 				"?transacted=true")
 				.routeId(SERVICE_ID)
+				.routePolicy(qdist009MetricsRoutePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)
 				.doTry()
 				.setProperty(PROPERTY_BESTILLINGS_ID, simple("${in.header.callId}", String.class))
