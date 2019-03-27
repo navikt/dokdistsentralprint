@@ -3,6 +3,7 @@ package no.nav.dokdistsentralprint.qdist009;
 import static java.lang.String.format;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
+import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.BestillingsInfo;
@@ -11,7 +12,7 @@ import no.nav.dokdistsentralprint.printoppdrag.DokumentInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Kanal;
 import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
 import no.nav.dokdistsentralprint.printoppdrag.Ressurs;
-import org.springframework.stereotype.Component;
+import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
 
 import java.time.LocalDate;
 import java.util.stream.Collectors;
@@ -19,7 +20,6 @@ import java.util.stream.Collectors;
 /**
  * @author Sigurd Midttun, Visma Consulting.
  */
-@Component
 public class BestillingMapper {
 
 	public static final String KUNDE_ID_NAV_IKT = "NAV_IKT";
@@ -27,7 +27,7 @@ public class BestillingMapper {
 	public static final String PRINT = "PRINT";
 	public static final String LANDKODE_NO = "NO";
 
-	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse, String postDestinasjon) {
+	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse, HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo) {
 		return new Bestilling()
 				.withBestillingsInfo(new BestillingsInfo()
 						.withModus(hentForsendelseResponseTo.getModus())
@@ -36,7 +36,7 @@ public class BestillingMapper {
 						.withKundeOpprettet(LocalDate.now().toString())
 						.withDokumentInfo(new DokumentInfo()
 								.withSorteringsfelt(USORTERT)
-								.withDestinasjon(postDestinasjon))
+								.withDestinasjon(hentPostDestinasjonResponseTo.getPostDestinasjon()))
 						.withKanal(new Kanal()
 								.withType(PRINT)
 								.withBehandling(getBehandling(dokumenttypeInfoTo))))
@@ -75,16 +75,12 @@ public class BestillingMapper {
 	}
 
 	private String getAdresse(Adresse adresse, String mottakerNavn) {
-		if (adresse == null) { //todo mulig??
-			return "";
-		} else {
-			return formatAdresseEntity(mottakerNavn) +
-					formatAdresseEntity(adresse.getAdresselinje1()) +
-					formatAdresseEntity(adresse.getAdresselinje2()) +
-					formatAdresseEntity(adresse.getAdresselinje3()) +
-					formatPostnummerAndPoststed(adresse.getPostnummer(), adresse.getPoststed()) +
-					adresse.getLandkode();
-		}
+		return formatAdresseEntity(mottakerNavn) +
+				formatAdresseEntity(adresse.getAdresselinje1()) +
+				formatAdresseEntity(adresse.getAdresselinje2()) +
+				formatAdresseEntity(adresse.getAdresselinje3()) +
+				formatPostnummerAndPoststed(adresse.getPostnummer(), adresse.getPoststed()) +
+				adresse.getLandkode();
 	}
 
 	private String formatAdresseEntity(String entity) {

@@ -6,5 +6,6 @@ import lombok.Value;
 @Value
 @Builder
 public class HentMottakerOgAdresseResponseTo {
+
 	private final AdresseTo adresse;
 }

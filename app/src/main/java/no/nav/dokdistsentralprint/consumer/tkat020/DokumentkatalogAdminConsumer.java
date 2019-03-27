@@ -47,6 +47,7 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 				.build();
 	}
 
+	@Override
 	@Cacheable(TKAT020_CACHE)
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	@Monitor(value = "dok_consumer", extraTags = {"process", "getDokumenttypeInfo"}, histogram = true)

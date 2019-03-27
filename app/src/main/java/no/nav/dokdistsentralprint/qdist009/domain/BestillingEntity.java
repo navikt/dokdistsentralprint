@@ -1,4 +1,4 @@
-package no.nav.dokdistsentralprint.qdist009;
+package no.nav.dokdistsentralprint.qdist009.domain;
 
 import static java.lang.String.format;
 

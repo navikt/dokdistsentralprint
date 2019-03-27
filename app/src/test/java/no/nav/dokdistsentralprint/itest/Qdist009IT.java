@@ -120,7 +120,6 @@ public class Qdist009IT {
 
 	@Test
 	public void shouldProcessForsendelse() throws Exception {
-		DokdistDokument.builder().pdf("HOVEDDOK_TEST".getBytes()).build();
 		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("dokumentinfov4/tkat020-happy.json")));

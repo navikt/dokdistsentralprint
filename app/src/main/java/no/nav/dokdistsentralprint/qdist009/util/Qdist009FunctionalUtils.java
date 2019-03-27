@@ -6,7 +6,7 @@ import static no.nav.dokdistsentralprint.constants.DomainConstants.HOVEDDOKUMENT
 
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.exception.functional.InvalidForsendelseStatusException;
-import no.nav.dokdistsentralprint.qdist009.BestillingEntity;
+import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 
 import java.util.ArrayList;
@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 /**
  * @author Sigurd Midttun, Visma Consulting.
  */
-public final class Qdist009Utils {
-	private Qdist009Utils() {
+public final class Qdist009FunctionalUtils {
+	private Qdist009FunctionalUtils() {
 	}
 
 	public static void validateForsendelseStatus(String forsendelseStatus) {

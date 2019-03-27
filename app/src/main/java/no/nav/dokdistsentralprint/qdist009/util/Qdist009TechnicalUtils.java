@@ -5,7 +5,7 @@ import static java.lang.String.format;
 import no.nav.dokdistsentralprint.exception.technical.KunneIkkeMarshalleBestillingTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.KunneIkkeZippeBestillingTechnicalException;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
-import no.nav.dokdistsentralprint.qdist009.BestillingEntity;
+import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -21,9 +21,9 @@ import java.util.zip.ZipOutputStream;
  * @author Sigurd Midttun, Visma Consulting.
  */
 
-public final class FileUtils {
+public final class Qdist009TechnicalUtils {
 
-	private FileUtils() {
+	private Qdist009TechnicalUtils() {
 	}
 
 	public static byte[] zipPrintbestillingToBytes(List<BestillingEntity> bestillingEntities) {

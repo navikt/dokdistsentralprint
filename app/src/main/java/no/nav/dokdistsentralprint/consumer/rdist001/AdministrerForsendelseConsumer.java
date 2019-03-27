@@ -52,6 +52,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.build();
 	}
 
+	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	@Monitor(value = "dok_consumer", extraTags = {"process", "hentForsendelse"}, histogram = true)
 	public HentForsendelseResponseTo hentForsendelse(final String forsendelseId) {
@@ -68,6 +69,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 		}
 	}
 
+	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	@Monitor(value = "dok_consumer", extraTags = {"process", "oppdaterForsendelseStatus"}, histogram = true)
 	public void oppdaterForsendelseStatus(String forsendelseId, String forsendelseStatus) {
@@ -87,16 +89,14 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 		}
 	}
 
-
+	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	@Monitor(value = "dok_consumer", extraTags = {"process", "findPostDestinasjon"}, histogram = true)
-	public String findPostDestinasjon(String landkode) {
+	public HentPostDestinasjonResponseTo hentPostDestinasjon(String landkode) {
 		try {
-
 			HttpEntity entity = new HttpEntity<>(createHeaders());
-			String uri = administrerforsendelseV1Url + "/hentpostdestinasjon/" + landkode;
-
-			return restTemplate.exchange(uri, HttpMethod.GET, entity, HentPostDestinasjonResponseTo.class).getBody().getPostDestinasjon();
+			return restTemplate.exchange(administrerforsendelseV1Url + "/hentpostdestinasjon/" + landkode, HttpMethod.GET, entity, HentPostDestinasjonResponseTo.class)
+					.getBody();
 		} catch (HttpClientErrorException e) {
 			throw new Rdist001GetPostDestinasjonFunctionalException(String.format("Kall mot rdist001 - GetPostDestinasjon feilet funksjonelt med statusKode=%s, feilmelding=%s", e
 					.getStatusCode(), e.getMessage()), e);
