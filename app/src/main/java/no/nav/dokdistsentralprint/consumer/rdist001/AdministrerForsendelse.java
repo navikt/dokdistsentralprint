@@ -9,5 +9,5 @@ public interface AdministrerForsendelse {
 
 	void oppdaterForsendelseStatus(final String forsendelseId, final String forsendelseStatus);
 
-	String findPostDestinasjon(final String landkode);
+	HentPostDestinasjonResponseTo hentPostDestinasjon(final String landkode);
 }

@@ -1,4 +1,4 @@
-package no.nav.dokdistsentralprint.qdist009;
+package no.nav.dokdistsentralprint.qdist009.domain;
 
 import lombok.Builder;
 import lombok.Value;
@@ -11,5 +11,5 @@ import lombok.Value;
 @Builder
 public class DistribuerForsendelseTilSentralPrintTo {
 
-	protected String forsendelseId;
+	private String forsendelseId;
 }

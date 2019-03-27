@@ -51,6 +51,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.build();
 	}
 
+	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public HentForsendelseResponseTo hentForsendelse(final String forsendelseId) {
 		try {
@@ -66,6 +67,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 		}
 	}
 
+	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public void oppdaterForsendelseStatus(String forsendelseId, String forsendelseStatus) {
 		try {
@@ -84,15 +86,13 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 		}
 	}
 
-
+	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	public String findPostDestinasjon(String landkode) {
+	public HentPostDestinasjonResponseTo hentPostDestinasjon(String landkode) {
 		try {
-
 			HttpEntity entity = new HttpEntity<>(createHeaders());
-			String uri = administrerforsendelseV1Url + "/hentpostdestinasjon/" + landkode;
-
-			return restTemplate.exchange(uri, HttpMethod.GET, entity, HentPostDestinasjonResponseTo.class).getBody().getPostDestinasjon();
+			return restTemplate.exchange(administrerforsendelseV1Url + "/hentpostdestinasjon/" + landkode, HttpMethod.GET, entity, HentPostDestinasjonResponseTo.class)
+					.getBody();
 		} catch (HttpClientErrorException e) {
 			throw new Rdist001GetPostDestinasjonFunctionalException(String.format("Kall mot rdist001 - GetPostDestinasjon feilet funksjonelt med statusKode=%s, feilmelding=%s", e
 					.getStatusCode(), e.getMessage()), e);

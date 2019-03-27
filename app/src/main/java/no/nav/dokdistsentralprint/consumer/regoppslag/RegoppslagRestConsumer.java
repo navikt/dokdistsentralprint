@@ -1,5 +1,8 @@
 package no.nav.dokdistsentralprint.consumer.regoppslag;
 
+import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
+
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
@@ -7,6 +10,7 @@ import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentMottakerOgAdresseResponseTo;
 import no.nav.dokdistsentralprint.consumer.sts.STSTokenRetriever;
 import no.nav.dokdistsentralprint.exception.functional.RegoppslagHentAdresseFunctionalException;
+import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseSecurityException;
 import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.StsRetriveTokenException;
@@ -15,6 +19,8 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -50,6 +56,7 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	}
 
 	@Override
+	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
 		HttpEntity entity = createRequestWithHeader(request, retrieveSamlTokenAndCreateHeader());
 		try {

@@ -1,15 +1,16 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import static java.lang.String.format;
-import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.marshalBestillingToXmlString;
-import static no.nav.dokdistsentralprint.qdist009.util.FileUtils.zipPrintbestillingToBytes;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.createBestillingEntities;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.getDokumenttypeIdHoveddokument;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.validateForsendelseStatus;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.createBestillingEntities;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.getDokumenttypeIdHoveddokument;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.validateForsendelseStatus;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.marshalBestillingToXmlString;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.zipPrintbestillingToBytes;
 
 import com.amazonaws.SdkClientException;
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
+import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.Regoppslag;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
@@ -18,6 +19,9 @@ import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.exception.functional.DokumentIkkeFunnetIS3Exception;
 import no.nav.dokdistsentralprint.exception.technical.KunneIkkeLeseFraS3BucketTechnicalException;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
+import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
+import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
+import no.nav.dokdistsentralprint.qdist009.domain.DistribuerForsendelseTilSentralPrintTo;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
 import no.nav.dokdistsentralprint.storage.Storage;
@@ -39,31 +43,31 @@ public class Qdist009Service {
 	private final AdministrerForsendelse administrerForsendelse;
 	private final Regoppslag regoppslag;
 	private final Storage storage;
-	private final BestillingMapper bestillingMapper;
+	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
 	@Inject
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
 						   AdministrerForsendelse administrerForsendelse,
 						   Storage storage,
-						   Regoppslag regoppslag, BestillingMapper bestillingMapper) {
+						   Regoppslag regoppslag) {
 		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
 		this.administrerForsendelse = administrerForsendelse;
 		this.regoppslag = regoppslag;
 		this.storage = storage;
-		this.bestillingMapper = bestillingMapper;
 	}
 
 	@Handler
 	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo) {
-		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(distribuerForsendelseTilSentralPrintTo.forsendelseId);
+		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(distribuerForsendelseTilSentralPrintTo
+				.getForsendelseId());
 		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
 		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));
 		Adresse adresse = getAdresse(hentForsendelseResponseTo);
-		String postdestinasjon = administrerForsendelse.findPostDestinasjon(adresse.getLandkode());
+		HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo = administrerForsendelse.hentPostDestinasjon(adresse.getLandkode());
 
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromS3(hentForsendelseResponseTo);
 
-		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse, postdestinasjon);
+		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse, hentPostDestinasjonResponseTo);
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
 		List<BestillingEntity> bestillingEntities = createBestillingEntities(hentForsendelseResponseTo.getBestillingsId(), bestillingXmlString, dokdistDokumentList);
 		return zipPrintbestillingToBytes(bestillingEntities);

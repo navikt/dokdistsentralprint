@@ -3,6 +3,7 @@ package no.nav.dokdistsentralprint.qdist009;
 import static java.lang.String.format;
 
 import no.nav.dokdistsentralprint.exception.functional.ValidationException;
+import no.nav.dokdistsentralprint.qdist009.domain.DistribuerForsendelseTilSentralPrintTo;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
