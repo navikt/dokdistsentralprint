@@ -7,6 +7,7 @@ import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.createBesti
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.getDokumenttypeIdHoveddokument;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009Utils.validateForsendelseStatus;
 
+import com.amazonaws.SdkClientException;
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.Regoppslag;
@@ -15,6 +16,7 @@ import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.exception.functional.DokumentIkkeFunnetIS3Exception;
+import no.nav.dokdistsentralprint.exception.technical.KunneIkkeLeseFraS3BucketTechnicalException;
 import no.nav.dokdistsentralprint.metrics.MetricUpdater;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
@@ -115,11 +117,20 @@ public class Qdist009Service {
 					String jsonPayload = storage.get(dokumentTo.getDokumentObjektReferanse())
 							.orElseThrow(() -> new DokumentIkkeFunnetIS3Exception(format("Kunne ikke finne dokument i S3 med key=dokumentObjektReferanse=%s", dokumentTo
 									.getDokumentObjektReferanse())));
-					DokdistDokument dokdistDokument = JsonSerializer.deserialize(jsonPayload, DokdistDokument.class); //todo catch deserialization exception
-					dokdistDokument.setDokumentObjektReferanse(dokumentTo.getDokumentObjektReferanse());
-					return dokdistDokument;
+					return deserializeS3JsonPayloadToDokdistDokument(jsonPayload, dokumentTo.getDokumentObjektReferanse());
 				})
 				.collect(Collectors.toList());
+	}
+
+	private DokdistDokument deserializeS3JsonPayloadToDokdistDokument(String jsonPayload, String objektReferanse) {
+		DokdistDokument dokdistDokument;
+		try {
+			dokdistDokument = JsonSerializer.deserialize(jsonPayload, DokdistDokument.class);
+			dokdistDokument.setDokumentObjektReferanse(objektReferanse);
+		} catch (SdkClientException e) {
+			throw new KunneIkkeLeseFraS3BucketTechnicalException(format("Kunne ikke deserialisere jsonPayload fra s3 bucket for dokument med dokumentobjektreferanse=%s. Dokumentet er ikke persistert til s3 i korrekt format!", objektReferanse));
+		}
+		return dokdistDokument;
 	}
 
 

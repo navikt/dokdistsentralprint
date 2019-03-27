@@ -20,5 +20,6 @@ public class ApplicationTestConfig {
 	public Storage storage() {
 		return mock(Storage.class);
 	}
+
 }
 

@@ -1,7 +1,7 @@
 package no.nav.dokdistsentralprint.exception.technical;
 
 /**
- * @author Jarl Øystein Samseth, Visma Consulting
+ * @author Sigurd Midttun, Visma Consulting
  */
 public class KunneIkkeLeseFraS3BucketTechnicalException extends AbstractDokdistsentralprintTechnicalException {
 

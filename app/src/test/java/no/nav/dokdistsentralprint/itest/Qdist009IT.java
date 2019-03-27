@@ -6,8 +6,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
+import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
+import static no.nav.dokdistsentralprint.testUtils.classpathToString;
+import static no.nav.dokdistsentralprint.testUtils.fileToString;
+import static no.nav.dokdistsentralprint.testUtils.unzipToDirectory;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
@@ -18,13 +24,15 @@ import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
 import no.nav.dokdistsentralprint.storage.Storage;
 import org.apache.activemq.command.ActiveMQTextMessage;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
+import org.apache.sshd.server.SshServer;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -39,27 +47,29 @@ import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {Application.class, ApplicationTestConfig.class},
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
-@Disabled
 public class Qdist009IT {
 
 	private static final String FORSENDELSE_ID = "33333";
 	private static final String DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK = "dokumentObjektReferanseHoveddok";
 	private static final String DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 = "dokumentObjektReferanseVedlegg1";
 	private static final String DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 = "dokumentObjektReferanseVedlegg2";
+	private static final String HOVEDDOK_TEST_CONTENT = "HOVEDDOK_TEST_CONTENT";
+	private static final String VEDLEGG1_TEST_CONTENT = "VEDLEGG1_TEST_CONTENT";
+	private static final String VEDLEGG2_TEST_CONTENT = "VEDLEGG2_TEST_CONTENT";
+	private static final String CALL_ID = "cd236b4c-9c8e-4d6f-ab1a-9ee8566ffe02";
 
 	@Inject
 	private JmsTemplate jmsTemplate;
@@ -79,31 +89,51 @@ public class Qdist009IT {
 	@Inject
 	public CacheManager cacheManager;
 
+	private static SshServer sshServer;
+
+	@TempDir
+	static Path tempDir;
+
+	@BeforeAll
+	public static void setupBeforeAll() throws IOException {
+		sshServer = startSshServer(tempDir);
+		System.setProperty("sftp.privateKeyFile", new ClassPathResource("ssh/id_rsa").getURL().getPath());
+		System.setProperty("sftp.port", Integer.toString(sshServer.getPort()));
+	}
+
+	@AfterAll
+	public static void stopServer() throws Exception {
+		sshServer.stop(true);
+	}
+
 	@BeforeEach
 	public void setupBefore() {
-		DokdistDokument dokdistDokument = DokdistDokument.builder().pdf("HOVEDDOK_TEST".getBytes()).build();
 		cacheManager.getCache(TKAT020_CACHE).clear();
 		reset(storage);
 		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK)).thenReturn(Optional.of(JsonSerializer.serialize(DokdistDokument.builder()
-				.pdf("HOVEDDOK_TEST".getBytes()).build())));
+				.pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build())));
 		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1)).thenReturn(Optional.of(JsonSerializer.serialize(DokdistDokument.builder()
-				.pdf("VEDLEGG1_TEST".getBytes()).build())));
+				.pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build())));
 		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2)).thenReturn(Optional.of(JsonSerializer.serialize(DokdistDokument.builder()
-				.pdf("VEDLEGG2_TEST".getBytes()).build())));
+				.pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build())));
 	}
 
 	@Test
 	public void shouldProcessForsendelse() throws Exception {
 		DokdistDokument.builder().pdf("HOVEDDOK_TEST".getBytes()).build();
-		stubFor(get(urlMatching("/dokkat-tkat020/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
+		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("dokumentinfov4/tkat020-happy.json")));
-		stubFor(get("/administrerforsendelse/v1/" + FORSENDELSE_ID)
+		stubFor(get("/administrerforsendelse/" + FORSENDELSE_ID)
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("rjoark001/getForsendelse_noAdresse-happy.json")));
-		stubFor(put("/administrerforsendelse/v1?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")
+		stubFor(put("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())));
+		stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
+				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
 		stubFor(post("/hentMottakerOgAdresse")
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
@@ -114,13 +144,20 @@ public class Qdist009IT {
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
-		//todo assert ftp
+		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
 
-//		verify(getRequestedFor(urlEqualTo("/dokkat-tkat020/dokumenttypeIdHoveddok")));
-//
-//		verify(postRequestedFor(urlEqualTo("/administrerforsendelse/v1"))
-//				.withRequestBody(equalToJson(getRequestAsJson("__files//rjoark001/administrerForsendelseOutHappy.json"))));
+		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
+		String actualBestillingXmlString = fileToString(new File(tempDir.toString() + "/" + CALL_ID + ".xml"));
+		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml.xml");
+		String hoveddokContent = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		String vedlegg1Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		String vedlegg2Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
 
+		assertEquals(expectedBestillingXmlString, actualBestillingXmlString);
+		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
+		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
+		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
 	}
 
 
@@ -128,17 +165,10 @@ public class Qdist009IT {
 		jmsTemplate.send(queue, session -> {
 			TextMessage msg = new ActiveMQTextMessage();
 			msg.setText(message);
+			msg.setStringProperty("callId", CALL_ID);
 			return msg;
 		});
 	}
-
-	private String classpathToString(String classpathResource) throws IOException {
-		InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
-		String message = IOUtils.toString(inputStream, UTF_8);
-		IOUtils.closeQuietly(inputStream);
-		return message;
-	}
-
 
 	@SuppressWarnings("unchecked")
 	private <T> T receive(Queue queue) {
@@ -149,15 +179,6 @@ public class Qdist009IT {
 		return (T) response;
 	}
 
-	private String getRequestAsJson(String filename) throws IOException {
-
-		File file = new ClassPathResource(filename).getFile();
-		byte[] data = new byte[(int) file.length()];
-		FileInputStream fileInputStream = new FileInputStream(file);
-		fileInputStream.read(data);
-		fileInputStream.close();
-		return new String(data);
-	}
 }
 
 

@@ -24,7 +24,4 @@
 		<appender-ref ref="applikasjonslogg"/>
 	</logger>
 
-	<!--<logger name="org.apache.camel.component.file.remote" level="TRACE" additivity="false">-->
-		<!--<appender-ref ref="applikasjonslogg"/>-->
-	<!--</logger>-->
 </included>
