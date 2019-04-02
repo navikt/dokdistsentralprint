@@ -17,7 +17,7 @@ import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.exception.functional.DokumentIkkeFunnetIS3Exception;
-import no.nav.dokdistsentralprint.exception.technical.KunneIkkeLeseFraS3BucketTechnicalException;
+import no.nav.dokdistsentralprint.exception.functional.KunneIkkeDeserialisereS3JsonPayloadFunctionalException;
 import no.nav.dokdistsentralprint.metrics.MetricUpdater;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
@@ -132,7 +132,7 @@ public class Qdist009Service {
 			dokdistDokument = JsonSerializer.deserialize(jsonPayload, DokdistDokument.class);
 			dokdistDokument.setDokumentObjektReferanse(objektReferanse);
 		} catch (SdkClientException e) {
-			throw new KunneIkkeLeseFraS3BucketTechnicalException(format("Kunne ikke deserialisere jsonPayload fra s3 bucket for dokument med dokumentobjektreferanse=%s. Dokumentet er ikke persistert til s3 i korrekt format!", objektReferanse));
+			throw new KunneIkkeDeserialisereS3JsonPayloadFunctionalException(format("Kunne ikke deserialisere jsonPayload fra s3 bucket for dokument med dokumentobjektreferanse=%s. Dokumentet er ikke persistert til s3 med korrekt format!", objektReferanse));
 		}
 		return dokdistDokument;
 	}

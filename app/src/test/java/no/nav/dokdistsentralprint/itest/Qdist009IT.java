@@ -167,7 +167,6 @@ public class Qdist009IT {
 
 	@Test
 	public void shouldProcessForsendelseWithoutCallingRegoppslag() throws Exception {
-
 		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("dokumentinfov4/tkat020-happy.json")));
@@ -220,7 +219,6 @@ public class Qdist009IT {
 
 	@Test
 	public void shouldThrowRdist001HentForsendelseTechnicalException() throws Exception {
-
 		stubFor(get("/administrerforsendelse/" + FORSENDELSE_ID)
 				.willReturn(aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 
@@ -235,7 +233,6 @@ public class Qdist009IT {
 
 	@Test
 	public void shouldThrowInvalidForsendelseStatusException() throws Exception {
-
 		stubFor(get("/administrerforsendelse/" + FORSENDELSE_ID)
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -351,10 +348,6 @@ public class Qdist009IT {
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString("__files/rjoark001/getForsendelse_noAdresse-happy.json").replace("insertCallIdHere", CALL_ID))));
-		stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
-				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
-						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
 		stubFor(post("/hentMottakerOgAdresse")
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
@@ -403,7 +396,7 @@ public class Qdist009IT {
 	}
 
 	@Test
-	public void shouldThrowKunneIkkeLeseFraS3BucketTechnicalException() throws Exception {
+	public void shouldThrowKunneIkkeDeserialisereS3PayloadFunctionalException() throws Exception {
 		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK_CORRUPT)).thenReturn(Optional.of("notJsonSerializedString"));
 
 		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
@@ -420,27 +413,30 @@ public class Qdist009IT {
 		stubFor(post("/sts")
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withBodyFile("sts/sts-happy.xml")));
+		stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
+				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
-			String resultOnQdist009BackoutQueue = receive(backoutQueue);
-			assertNotNull(resultOnQdist009BackoutQueue);
-			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
 	}
 
 	@Test
 	public void shouldThrowDokumentIkkeFunnetIS3Exception() throws Exception {
-
-		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
+		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddokNotInS3")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("dokumentinfov4/tkat020-happy.json")));
 		stubFor(get("/administrerforsendelse/" + FORSENDELSE_ID)
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString("__files/rjoark001/getForsendelse_withAdresse-NotInS3-happy.json").replace("insertCallIdHere", CALL_ID))));
-		stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
+		stubFor(get("/administrerforsendelse/hentpostdestinasjon/NO")
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
@@ -465,7 +461,6 @@ public class Qdist009IT {
 
 	@Test
 	public void shouldThrowRdist001OppdaterForsendelseStatusFunctionalException() throws Exception {
-
 		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("dokumentinfov4/tkat020-happy.json")));
@@ -499,7 +494,6 @@ public class Qdist009IT {
 
 	@Test
 	public void shouldThrowRdist001OppdaterForsendelseStatusTechnicalException() throws Exception {
-
 		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("dokumentinfov4/tkat020-happy.json")));

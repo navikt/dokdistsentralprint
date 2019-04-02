@@ -64,7 +64,7 @@ public final class Qdist009TechnicalUtils {
 
 	private static String printBestillingEntities(List<BestillingEntity> bestillingEntities) {
 		StringBuilder bestillingEntitiesStr = new StringBuilder();
-		bestillingEntities.forEach(bestillingEntity -> bestillingEntitiesStr.append(bestillingEntity.toString() + ", "));
+		bestillingEntities.forEach(bestillingEntity -> bestillingEntitiesStr.append(bestillingEntity.toString()).append(", "));
 		return bestillingEntitiesStr.toString();
 	}
 
