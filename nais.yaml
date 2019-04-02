@@ -33,6 +33,8 @@ fasitResources:
     propertyMap:
       password: sftp_privateKeyPassphrase
       keystore: sftp_privateKeyFile
+  - alias: dokdistsentralprint_config
+    resourceType: applicationproperties
   - alias: dokdistsentralprint_s3_creds
     resourceType: credential
   - alias: dokdistmellomlager_s3_storage_crypto
