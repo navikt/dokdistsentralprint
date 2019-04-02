@@ -2,11 +2,17 @@ package no.nav.dokdistsentralprint.itest;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
 import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
 import static no.nav.dokdistsentralprint.testUtils.classpathToString;
 import static no.nav.dokdistsentralprint.testUtils.fileToString;
@@ -19,6 +25,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.dokdistsentralprint.Application;
 import no.nav.dokdistsentralprint.itest.config.ApplicationTestConfig;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
@@ -113,6 +120,10 @@ public class Qdist009IT {
 	public void setupBefore() {
 		CALL_ID = UUID.randomUUID().toString();
 
+		WireMock.reset();
+		WireMock.resetAllRequests();
+		WireMock.removeAllMappings();
+
 		cacheManager.getCache(TKAT020_CACHE).clear();
 		reset(storage);
 		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK)).thenReturn(Optional.of(JsonSerializer.serialize(DokdistDokument.builder()
@@ -163,6 +174,8 @@ public class Qdist009IT {
 		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
 		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
 		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+
+		verifyAllStubs();
 	}
 
 	@Test
@@ -180,9 +193,6 @@ public class Qdist009IT {
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
-		stubFor(post("/sts")
-				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
-						.withBodyFile("sts/sts-happy.xml")));
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -200,6 +210,11 @@ public class Qdist009IT {
 		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
 		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
 		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+
+		verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/NO")));
 	}
 
 	@Test
@@ -215,6 +230,8 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 	}
 
 	@Test
@@ -229,6 +246,8 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009BackoutQueue);
 			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(MAX_ATTEMPTS_SHORT, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 	}
 
 	@Test
@@ -245,6 +264,8 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 	}
 
 	@Test
@@ -263,6 +284,9 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
 	}
 
 	@Test
@@ -281,6 +305,9 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009BackoutQueue);
 			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(MAX_ATTEMPTS_SHORT, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 	}
 
 	@Test
@@ -292,10 +319,6 @@ public class Qdist009IT {
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString("__files/rjoark001/getForsendelse_noAdresse-happy.json").replace("insertCallIdHere", CALL_ID))));
-		stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
-				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
-						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
 		stubFor(post("/hentMottakerOgAdresse")
 				.willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
 		stubFor(post("/sts")
@@ -309,6 +332,11 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
+		verify(1, postRequestedFor(urlEqualTo("/sts")));
 	}
 
 	@Test
@@ -320,10 +348,6 @@ public class Qdist009IT {
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString("__files/rjoark001/getForsendelse_noAdresse-happy.json").replace("insertCallIdHere", CALL_ID))));
-		stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
-				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
-						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
 		stubFor(post("/hentMottakerOgAdresse")
 				.willReturn(aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 		stubFor(post("/sts")
@@ -337,6 +361,11 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009BackoutQueue);
 			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(MAX_ATTEMPTS_SHORT, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
+		verify(MAX_ATTEMPTS_SHORT, postRequestedFor(urlEqualTo("/sts")));
 	}
 
 	@Test
@@ -365,6 +394,12 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
+		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
+		verify(1, postRequestedFor(urlEqualTo("/sts")));
 	}
 
 	@Test
@@ -393,6 +428,12 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009BackoutQueue);
 			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(MAX_ATTEMPTS_SHORT, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
+		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
+		verify(1, postRequestedFor(urlEqualTo("/sts")));
 	}
 
 	@Test
@@ -425,6 +466,12 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
+		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
+		verify(1, postRequestedFor(urlEqualTo("/sts")));
 	}
 
 	@Test
@@ -440,16 +487,8 @@ public class Qdist009IT {
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
-		stubFor(post("/hentMottakerOgAdresse")
-				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
-						.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
-						.withBodyFile("regoppslag/treg002-happy.json")));
 		stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
 				.willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
-		stubFor(post("/sts")
-				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
-						.withBodyFile("sts/sts-happy.xml")));
-
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
@@ -457,6 +496,10 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddokNotInS3")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/NO")));
 	}
 
 	@Test
@@ -489,6 +532,8 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+
+		verifyAllStubs();
 	}
 
 
@@ -522,6 +567,12 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009BackoutQueue);
 			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
+		verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(MAX_ATTEMPTS_SHORT, putRequestedFor(urlEqualTo("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
+		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
+		verify(1, postRequestedFor(urlEqualTo("/sts")));
 	}
 
 	private void sendStringMessage(Queue queue, final String message) {
@@ -542,6 +593,14 @@ public class Qdist009IT {
 		return (T) response;
 	}
 
+	private void verifyAllStubs() {
+		verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")));
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
+		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
+		verify(1, postRequestedFor(urlEqualTo("/sts")));
+	}
 }
 
 
