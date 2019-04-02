@@ -56,7 +56,7 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 			DokumentTypeInfoToV4 response = restTemplate.getForObject(this.dokumenttypeInfoV4Url + "/" + dokumenttypeId, DokumentTypeInfoToV4.class);
 			return mapResponse(response);
 		} catch (HttpClientErrorException e) {
-			throw new Tkat020TechnicalException(format("TKAT020 feilet med statusKode=%s. Fant ingen dokumenttypeInfo med dokumenttypeId=%s. Feilmelding=%s", e
+			throw new Tkat020FunctionalException(format("TKAT020 feilet med statusKode=%s. Fant ingen dokumenttypeInfo med dokumenttypeId=%s. Feilmelding=%s", e
 					.getStatusCode(), dokumenttypeId, e.getResponseBodyAsString()), e);
 		} catch (HttpServerErrorException e) {
 			throw new Tkat020TechnicalException(format("TKAT020 feilet teknisk med statusKode=%s, feilmelding=%s", e

@@ -1,6 +1,6 @@
 {
   "bestillingsId": "insertCallIdHere",
-  "forsendelseStatus": "KLAR_FOR_DIST",
+  "forsendelseStatus": "BEKREFTET",
   "mottaker": {
     "mottakerId": "mottakerId",
     "mottakerNavn": "mottakerNavn",

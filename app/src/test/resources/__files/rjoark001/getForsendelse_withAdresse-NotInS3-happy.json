@@ -17,18 +17,8 @@
   "dokumenter": [
     {
       "tilknyttetSom": "HOVEDDOKUMENT",
-      "dokumentObjektReferanse": "dokumentObjektReferanseHoveddok",
-      "dokumenttypeId": "dokumenttypeIdHoveddok"
-    },
-    {
-      "tilknyttetSom": "VEDLEGG",
-      "dokumentObjektReferanse": "dokumentObjektReferanseVedlegg1",
-      "dokumenttypeId": "dokumenttypeId2Vedlegg1"
-    },
-    {
-      "tilknyttetSom": "VEDLEGG",
-      "dokumentObjektReferanse": "dokumentObjektReferanseVedlegg2",
-      "dokumenttypeId": "dokumenttypeIdVedlegg2"
+      "dokumentObjektReferanse": "dokumentObjektReferanseHoveddokNotInS3",
+      "dokumenttypeId": "dokumenttypeIdHoveddokNotInS3"
     }
   ]
 }
