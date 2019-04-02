@@ -60,9 +60,9 @@ public class BestillingMapper {
 
 	public String getLandkode(Adresse adresse) {
 		if (LANDKODE_NO.equals(adresse.getLandkode())) {
-			return adresse.getLandkode();
-		} else {
 			return null;
+		} else {
+			return adresse.getLandkode();
 		}
 	}
 
