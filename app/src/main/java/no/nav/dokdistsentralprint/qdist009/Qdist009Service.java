@@ -26,6 +26,7 @@ import no.nav.dokdistsentralprint.qdist009.domain.DistribuerForsendelseTilSentra
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
 import no.nav.dokdistsentralprint.storage.Storage;
+import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
 
@@ -61,8 +62,8 @@ public class Qdist009Service {
 	}
 
 	@Handler
-	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo) {
-		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(distribuerForsendelseTilSentralPrintTo
+	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerTilKanal distribuerTilKanal) {
+		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(distribuerTilKanal
 				.getForsendelseId());
 		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
 		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));

@@ -120,6 +120,11 @@
 			<artifactId>dokkat-api</artifactId>
 			<version>${dokkat-api}</version>
 		</dependency>
+		<dependency>
+			<groupId>no.nav.meldinger.virksomhet</groupId>
+			<artifactId>melding-virksomhet-dokdistfordeling</artifactId>
+			<version>${melding-virksomhet-dokdistfordeling.version}</version>
+		</dependency>
 		<!--test-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
