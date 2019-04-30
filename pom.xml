@@ -37,6 +37,7 @@
 		<activemq.version>5.15.2</activemq.version>
 		<commons-io.version>2.4</commons-io.version>
 		<awaitility.version>3.1.2</awaitility.version>
+		<melding-virksomhet-dokdistfordeling.version>2.0.2</melding-virksomhet-dokdistfordeling.version>
 	</properties>
 
 	<dependencyManagement>
@@ -108,6 +109,11 @@
 				<artifactId>awaitility</artifactId>
 				<version>${awaitility.version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.meldinger.virksomhet</groupId>
+				<artifactId>melding-virksomhet-dokdistfordeling</artifactId>
+				<version>${melding-virksomhet-dokdistfordeling.version}</version>
 			</dependency>
 
 			<!--Selftest metrics-->

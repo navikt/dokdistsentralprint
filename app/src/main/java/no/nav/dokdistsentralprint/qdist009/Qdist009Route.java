@@ -2,9 +2,9 @@ package no.nav.dokdistsentralprint.qdist009;
 
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static org.apache.camel.LoggingLevel.ERROR;
-
 import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
 import no.nav.dokdistsentralprint.metrics.Qdist009MetricsRoutePolicy;
+import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -33,7 +33,8 @@ public class Qdist009Route extends SpringRouteBuilder {
 	private static final String SFTP_SERVER = "sftp://{{sftp.url}}:{{sftp.port}}/{{sftp.remoteFilePath}}?username={{sftp.username}}&***passord=gammelt_passord***;
 
 	private final Qdist009Service qdist009Service;
-	private final DistribuerForsendelseTilSentralPrintValidatorAndMapper distribuerForsendelseTilSentralPrintValidatorAndMapper;
+	private final DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper;
+
 	private final DokdistStatusUpdater dokdistStatusUpdater;
 	private final Queue qdist009;
 	private final Queue qdist009FunksjonellFeil;
@@ -41,13 +42,13 @@ public class Qdist009Route extends SpringRouteBuilder {
 
 	@Inject
 	public Qdist009Route(Qdist009Service qdist009Service,
-						 DistribuerForsendelseTilSentralPrintValidatorAndMapper distribuerForsendelseTilSentralPrintValidatorAndMapper,
+						 DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper,
 						 DokdistStatusUpdater dokdistStatusUpdater,
 						 Queue qdist009,
 						 Queue qdist009FunksjonellFeil,
 						 Qdist009MetricsRoutePolicy qdist009MetricsRoutePolicy) {
 		this.qdist009Service = qdist009Service;
-		this.distribuerForsendelseTilSentralPrintValidatorAndMapper = distribuerForsendelseTilSentralPrintValidatorAndMapper;
+		this.distribuerForsendelseTilSentralPrintMapper = distribuerForsendelseTilSentralPrintMapper;
 		this.dokdistStatusUpdater = dokdistStatusUpdater;
 		this.qdist009 = qdist009;
 		this.qdist009FunksjonellFeil = qdist009FunksjonellFeil;
@@ -80,8 +81,8 @@ public class Qdist009Route extends SpringRouteBuilder {
 				.process(exchange -> MDC.put(CALL_ID, (String) exchange.getProperty(PROPERTY_BESTILLINGS_ID)))
 				.doCatch(Exception.class)
 				.end()
-				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerForsendelseTilSentralPrint.class)))
-				.bean(distribuerForsendelseTilSentralPrintValidatorAndMapper)
+				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
+				.bean(distribuerForsendelseTilSentralPrintMapper)
 				.bean(qdist009Service)
 				.to(SFTP_SERVER)
 				.log(LoggingLevel.INFO, log, "qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
