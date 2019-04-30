@@ -33,6 +33,8 @@ public class Qdist009Route extends SpringRouteBuilder {
 	private static final String SFTP_SERVER = "sftp://{{sftp.url}}:{{sftp.port}}/{{sftp.remoteFilePath}}?username={{sftp.username}}&***passord=gammelt_passord***;
 
 	private final Qdist009Service qdist009Service;
+	private final DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper;
+
 	private final DokdistStatusUpdater dokdistStatusUpdater;
 	private final Queue qdist009;
 	private final Queue qdist009FunksjonellFeil;
@@ -40,11 +42,13 @@ public class Qdist009Route extends SpringRouteBuilder {
 
 	@Inject
 	public Qdist009Route(Qdist009Service qdist009Service,
+						 DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper,
 						 DokdistStatusUpdater dokdistStatusUpdater,
 						 Queue qdist009,
 						 Queue qdist009FunksjonellFeil,
 						 Qdist009MetricsRoutePolicy qdist009MetricsRoutePolicy) {
 		this.qdist009Service = qdist009Service;
+		this.distribuerForsendelseTilSentralPrintMapper = distribuerForsendelseTilSentralPrintMapper;
 		this.dokdistStatusUpdater = dokdistStatusUpdater;
 		this.qdist009 = qdist009;
 		this.qdist009FunksjonellFeil = qdist009FunksjonellFeil;
@@ -78,6 +82,7 @@ public class Qdist009Route extends SpringRouteBuilder {
 				.doCatch(Exception.class)
 				.end()
 				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
+				.bean(distribuerForsendelseTilSentralPrintMapper)
 				.bean(qdist009Service)
 				.to(SFTP_SERVER)
 				.log(LoggingLevel.INFO, log, "qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")

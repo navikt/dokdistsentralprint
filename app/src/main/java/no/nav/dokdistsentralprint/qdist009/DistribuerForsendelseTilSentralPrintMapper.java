@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class DistribuerForsendelseTilSentralPrintMapper {
 
 	@Handler
-	public DistribuerForsendelseTilSentralPrintTo ValidateAndMap(DistribuerTilKanal distribuerTilKanal) {
+	public DistribuerForsendelseTilSentralPrintTo Map(DistribuerTilKanal distribuerTilKanal) {
 		return DistribuerForsendelseTilSentralPrintTo.builder()
 				.forsendelseId(distribuerTilKanal.getForsendelseId())
 				.build();
