@@ -26,7 +26,6 @@ import no.nav.dokdistsentralprint.qdist009.domain.DistribuerForsendelseTilSentra
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
 import no.nav.dokdistsentralprint.storage.Storage;
-import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
 
