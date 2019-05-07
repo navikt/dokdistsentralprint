@@ -1,7 +1,11 @@
 package no.nav.dokdistsentralprint.qdist009;
 
-import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static org.apache.camel.LoggingLevel.ERROR;
+
+import javax.inject.Inject;
+import javax.jms.Queue;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
 import no.nav.dokdistsentralprint.metrics.Qdist009MetricsRoutePolicy;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
@@ -9,13 +13,7 @@ import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.spring.SpringRouteBuilder;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import javax.jms.Queue;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 
 
 /**
@@ -74,20 +72,18 @@ public class Qdist009Route extends SpringRouteBuilder {
 				.routeId(SERVICE_ID)
 				.routePolicy(qdist009MetricsRoutePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)
-				.doTry()
-				.setProperty(PROPERTY_BESTILLINGS_ID, simple("${in.header.callId}", String.class))
-				.setProperty(PROPERTY_FORSENDELSE_ID, xpath("//forsendelseId/text()", String.class))
-				.log(LoggingLevel.INFO, log, "qdist009 har mottatt forsendelse med " + getIdsForLogging())
-				.process(exchange -> MDC.put(CALL_ID, (String) exchange.getProperty(PROPERTY_BESTILLINGS_ID)))
-				.doCatch(Exception.class)
-				.end()
+				.process(new IdsProcessor())
 				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
 				.bean(distribuerForsendelseTilSentralPrintMapper)
 				.bean(qdist009Service)
 				.to(SFTP_SERVER)
-				.log(LoggingLevel.INFO, log, "qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
+				.log(LoggingLevel.INFO,
+						log,
+						"qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
 				.bean(dokdistStatusUpdater)
-				.log(LoggingLevel.INFO, log, "qdist009 har oppdatert forsendelseStatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());
+				.log(LoggingLevel.INFO,
+						log,
+						"qdist009 har oppdatert forsendelseStatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());
 	}
 
 	public static String getIdsForLogging() {
