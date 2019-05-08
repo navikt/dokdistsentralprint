@@ -20,7 +20,7 @@ public class Qdist009FunksjonellBOQCheck extends AbstractDependencyCheck {
 
 	@Inject
 	public Qdist009FunksjonellBOQCheck(MeterRegistry registry, Queue qdist009FunksjonellFeil, JmsTemplate jmsTemplate) throws JMSException {
-		super(DependencyType.QUEUE, "qdist008FunksjonellFeilQueue", qdist009FunksjonellFeil.getQueueName(), Importance.CRITICAL, registry);
+		super(DependencyType.QUEUE, "qdist009FunksjonellFeilQueue", qdist009FunksjonellFeil.getQueueName(), Importance.CRITICAL, registry);
 		this.qdist009FunksjonellFeil = qdist009FunksjonellFeil;
 		this.jmsTemplate = jmsTemplate;
 	}

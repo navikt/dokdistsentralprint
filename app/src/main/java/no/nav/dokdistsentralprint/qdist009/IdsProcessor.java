@@ -36,13 +36,10 @@ public class IdsProcessor implements Processor {
 	}
 
 	private void setForsendelseIdAsProperty(Exchange exchange) {
-		String forsendelseId = XPathBuilder.xpath("//forsendelseId/text()").evaluate(exchange, String.class);
-		if (forsendelseId == null) {
+		String forsendelseId = XPathBuilder.xpath("//forsendelseId/text()") .evaluate(exchange, String.class);
+		if (forsendelseId.trim().isEmpty()) {
 			throw new ForsendelseManglerForsendelseIdFunctionalException(
-					"qdist009 har mottatt forsendelse uten påkrevd forsendelseId");
-		} else if (forsendelseId.trim().isEmpty()) {
-			throw new ForsendelseManglerForsendelseIdFunctionalException(
-					"qdist009 har mottatt forsendelse med tom forsendelseId");
+					"qdist009 har mottatt forsendelse med tom påkrevd forsendelseId");
 		}
 		exchange.setProperty(PROPERTY_FORSENDELSE_ID, forsendelseId);
 	}
