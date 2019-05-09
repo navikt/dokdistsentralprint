@@ -144,9 +144,7 @@ public class Qdist009IT {
 		stubFor(get("/administrerforsendelse/" + FORSENDELSE_ID)
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(classpathToString("__files/rjoark001/getForsendelse_noAdresse-happy.json").replace(
-								"insertCallIdHere",
-								CALL_ID))));
+						.withBody(classpathToString("__files/rjoark001/getForsendelse_noAdresse-happy.json").replace("insertCallIdHere", CALL_ID))));
 		stubFor(put("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())));
 		stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")

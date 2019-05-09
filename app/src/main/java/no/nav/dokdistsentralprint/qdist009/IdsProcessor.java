@@ -38,8 +38,7 @@ public class IdsProcessor implements Processor {
 	private void setForsendelseIdAsProperty(Exchange exchange) {
 		String forsendelseId = XPathBuilder.xpath("//forsendelseId/text()") .evaluate(exchange, String.class);
 		if (forsendelseId.trim().isEmpty()) {
-			throw new ForsendelseManglerForsendelseIdFunctionalException(
-					"qdist009 har mottatt forsendelse med tom påkrevd forsendelseId");
+			throw new ForsendelseManglerForsendelseIdFunctionalException("qdist009 har mottatt forsendelse med uten påkrevd forsendelseId");
 		}
 		exchange.setProperty(PROPERTY_FORSENDELSE_ID, forsendelseId);
 	}

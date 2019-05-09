@@ -73,17 +73,14 @@ public class Qdist009Route extends SpringRouteBuilder {
 				.routePolicy(qdist009MetricsRoutePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)
 				.process(new IdsProcessor())
+				.to("validator:no/nav/meldinger/virksomhet/dokdistfordeling/xsd/qdist008/out/distribuertilkanal.xsd")
 				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
 				.bean(distribuerForsendelseTilSentralPrintMapper)
 				.bean(qdist009Service)
 				.to(SFTP_SERVER)
-				.log(LoggingLevel.INFO,
-						log,
-						"qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
+				.log(LoggingLevel.INFO, log, "qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
 				.bean(dokdistStatusUpdater)
-				.log(LoggingLevel.INFO,
-						log,
-						"qdist009 har oppdatert forsendelseStatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());
+				.log(LoggingLevel.INFO, log, "qdist009 har oppdatert forsendelseStatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());
 	}
 
 	public static String getIdsForLogging() {
