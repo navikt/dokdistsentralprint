@@ -1,7 +1,11 @@
 package no.nav.dokdistsentralprint.qdist009;
 
-import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static org.apache.camel.LoggingLevel.ERROR;
+
+import javax.inject.Inject;
+import javax.jms.Queue;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
 import no.nav.dokdistsentralprint.metrics.Qdist009MetricsRoutePolicy;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
@@ -9,13 +13,7 @@ import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.spring.SpringRouteBuilder;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import javax.jms.Queue;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 
 
 /**
@@ -74,13 +72,8 @@ public class Qdist009Route extends SpringRouteBuilder {
 				.routeId(SERVICE_ID)
 				.routePolicy(qdist009MetricsRoutePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)
-				.doTry()
-				.setProperty(PROPERTY_BESTILLINGS_ID, simple("${in.header.callId}", String.class))
-				.setProperty(PROPERTY_FORSENDELSE_ID, xpath("//forsendelseId/text()", String.class))
-				.log(LoggingLevel.INFO, log, "qdist009 har mottatt forsendelse med " + getIdsForLogging())
-				.process(exchange -> MDC.put(CALL_ID, (String) exchange.getProperty(PROPERTY_BESTILLINGS_ID)))
-				.doCatch(Exception.class)
-				.end()
+				.process(new IdsProcessor())
+				.to("validator:no/nav/meldinger/virksomhet/dokdistfordeling/xsd/qdist008/out/distribuertilkanal.xsd")
 				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
 				.bean(distribuerForsendelseTilSentralPrintMapper)
 				.bean(qdist009Service)

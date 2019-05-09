@@ -20,7 +20,7 @@ public class Qdist009QueueCheck extends AbstractDependencyCheck {
 
 	@Inject
 	public Qdist009QueueCheck(MeterRegistry registry, Queue qdist009, JmsTemplate jmsTemplate) throws JMSException {
-		super(DependencyType.QUEUE, "Qdist008Queue", qdist009.getQueueName(), Importance.CRITICAL, registry);
+		super(DependencyType.QUEUE, "Qdist009Queue", qdist009.getQueueName(), Importance.CRITICAL, registry);
 		this.qdist009 = qdist009;
 		this.jmsTemplate = jmsTemplate;
 	}
