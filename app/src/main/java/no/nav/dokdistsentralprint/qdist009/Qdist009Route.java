@@ -58,7 +58,8 @@ public class Qdist009Route extends SpringRouteBuilder {
 		errorHandler(defaultErrorHandler()
 				.maximumRedeliveries(0)
 				.log(log)
-				.logExhaustedMessageBody(true)
+				.logExhaustedMessageBody(false)
+				.logStackTrace(true)
 				.loggingLevel(ERROR));
 
 		onException(AbstractDokdistsentralprintFunctionalException.class, JAXBException.class)
