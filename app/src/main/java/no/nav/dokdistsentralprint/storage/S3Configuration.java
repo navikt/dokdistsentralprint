@@ -36,7 +36,7 @@ import java.util.List;
 @Profile("nais")
 public class S3Configuration {
 
-	private static final String REGION_TO_USE_FOR_S3_TO_WORK_ONPREM = Regions.US_EAST_1.name();
+	private static final String REGION_TO_USE_FOR_S3_TO_WORK_ONPREM = Regions.US_EAST_1.getName();
 	public static final String BUCKET_NAME = "dokdistmellomlager";
 
 	private SecretKey secretKey;
@@ -58,10 +58,6 @@ public class S3Configuration {
 		secretKey = key(encryptionPassphrase);
 		AmazonS3 s3 = s3(secretKey);
 
-		ensureBucketExists(s3);
-		configureBucketLifecycle(s3);
-		configureBucketAccessPolicy(s3);
-
 		return new S3Storage(s3);
 	}
 
@@ -76,42 +72,6 @@ public class S3Configuration {
 				.withCryptoConfiguration(new CryptoConfiguration(CryptoMode.StrictAuthenticatedEncryption))
 				.withEncryptionMaterials(new StaticEncryptionMaterialsProvider(new EncryptionMaterials(secretKey)))
 				.build();
-	}
-
-	private void ensureBucketExists(AmazonS3 s3) {
-		boolean bucketExists = s3.listBuckets().stream()
-				.anyMatch(b -> b.getName().equals(BUCKET_NAME));
-		if (!bucketExists) {
-			createBucket(s3);
-		}
-	}
-
-	private void configureBucketLifecycle(AmazonS3 s3) {
-		List<BucketLifecycleConfiguration.Rule> ruleList = new ArrayList<>();
-		ruleList.add(new BucketLifecycleConfiguration.Rule()
-				.withId("Object lifecycle rule")
-				.withFilter(new LifecycleFilter())
-				.withStatus(BucketLifecycleConfiguration.ENABLED)
-				.withExpirationInDays(60));
-
-		BucketLifecycleConfiguration configuration = new BucketLifecycleConfiguration();
-		configuration.setRules(ruleList);
-
-		s3.setBucketLifecycleConfiguration(BUCKET_NAME, configuration);
-	}
-
-	private void configureBucketAccessPolicy(AmazonS3 s3) {
-		Statement allowDokarkivRead = new Statement(Statement.Effect.Allow)
-				.withPrincipals(new Principal("arn:aws:iam:::user/dokdistsentralprint"))
-				.withActions(S3Actions.GetObject)
-				.withResources(new S3ObjectResource(BUCKET_NAME, "*"));
-		Policy accessPolicy = new Policy().withStatements(allowDokarkivRead);
-		s3.setBucketPolicy(BUCKET_NAME, accessPolicy.toJson());
-	}
-
-	private void createBucket(AmazonS3 s3) {
-		s3.createBucket(new CreateBucketRequest(BUCKET_NAME)
-				.withCannedAcl(CannedAccessControlList.Private));
 	}
 
 	private SecretKey key(String passphrase) {
