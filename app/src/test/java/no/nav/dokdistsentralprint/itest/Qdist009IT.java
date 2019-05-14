@@ -14,6 +14,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
 import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
+import static no.nav.dokdistsentralprint.storage.S3Configuration.BUCKET_NAME;
 import static no.nav.dokdistsentralprint.testUtils.classpathToString;
 import static no.nav.dokdistsentralprint.testUtils.fileToString;
 import static no.nav.dokdistsentralprint.testUtils.unzipToDirectory;
@@ -21,10 +22,13 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.dokdistsentralprint.Application;
 import no.nav.dokdistsentralprint.itest.config.ApplicationTestConfig;
@@ -54,11 +58,9 @@ import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -95,7 +97,7 @@ public class Qdist009IT {
 	private Queue backoutQueue;
 
 	@Inject
-	private Storage storage;
+	private AmazonS3 amazonS3;
 
 	@Inject
 	public CacheManager cacheManager;
@@ -126,13 +128,10 @@ public class Qdist009IT {
 		WireMock.removeAllMappings();
 
 		cacheManager.getCache(TKAT020_CACHE).clear();
-		reset(storage);
-		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK)).thenReturn(Optional.of(JsonSerializer.serialize(DokdistDokument.builder()
-				.pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build())));
-		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1)).thenReturn(Optional.of(JsonSerializer.serialize(DokdistDokument.builder()
-				.pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build())));
-		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2)).thenReturn(Optional.of(JsonSerializer.serialize(DokdistDokument.builder()
-				.pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build())));
+		reset(amazonS3);
+		when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK))).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
+		when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1))).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build()));
+		when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2))).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build()));
 	}
 
 	@Test
@@ -482,7 +481,7 @@ public class Qdist009IT {
 
 	@Test
 	public void shouldThrowKunneIkkeDeserialisereS3PayloadFunctionalException() throws Exception {
-		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK_CORRUPT)).thenReturn(Optional.of("notJsonSerializedString"));
+		when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2))).thenReturn("notJsonSerializedString");
 
 		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
