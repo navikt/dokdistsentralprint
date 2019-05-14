@@ -1,7 +1,7 @@
 package no.nav.dokdistsentralprint.storage;
 
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
-import static no.nav.dokdistsentralprint.storage.config.StorageConfiguration.BUCKET_NAME;
+import static no.nav.dokdistsentralprint.storage.S3Configuration.BUCKET_NAME;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.any;
@@ -68,7 +68,7 @@ public class S3StorageTest {
 	@Test
 	public void shouldGetObjectAndDecrypt() {
 		when(s3.getObject(any(String.class), any(String.class))).thenReturn(createEncryptedS3Object());
-		String result = storage.get(key).get();
+		String result = storage.get(key);
 
 		verify(s3).getObject(BUCKET_NAME, key);
 		assertThat(result, equalTo(JsonSerializer.serialize(createDokument())));
@@ -107,7 +107,7 @@ public class S3StorageTest {
 
 		@Bean
 		public Storage storage(AmazonS3 s3) {
-			return new S3Storage(s3, encryptPsw);
+			return new S3Storage(s3);
 		}
 
 	}

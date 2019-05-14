@@ -54,11 +54,9 @@ import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -127,12 +125,9 @@ public class Qdist009IT {
 
 		cacheManager.getCache(TKAT020_CACHE).clear();
 		reset(storage);
-		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK)).thenReturn(Optional.of(JsonSerializer.serialize(DokdistDokument.builder()
-				.pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build())));
-		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1)).thenReturn(Optional.of(JsonSerializer.serialize(DokdistDokument.builder()
-				.pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build())));
-		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2)).thenReturn(Optional.of(JsonSerializer.serialize(DokdistDokument.builder()
-				.pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build())));
+		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK)).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
+		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1)).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build()));
+		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2)).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build()));
 	}
 
 	@Test
@@ -482,7 +477,7 @@ public class Qdist009IT {
 
 	@Test
 	public void shouldThrowKunneIkkeDeserialisereS3PayloadFunctionalException() throws Exception {
-		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK_CORRUPT)).thenReturn(Optional.of("notJsonSerializedString"));
+		when(storage.get(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK_CORRUPT)).thenReturn("notJsonSerializedString");
 
 		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())

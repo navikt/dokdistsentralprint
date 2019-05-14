@@ -16,7 +16,6 @@ import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
-import no.nav.dokdistsentralprint.exception.functional.DokumentIkkeFunnetIS3Exception;
 import no.nav.dokdistsentralprint.exception.functional.KunneIkkeDeserialisereS3JsonPayloadFunctionalException;
 import no.nav.dokdistsentralprint.metrics.MetricUpdater;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
@@ -118,9 +117,7 @@ public class Qdist009Service {
 	private List<DokdistDokument> getDocumentsFromS3(HentForsendelseResponseTo hentForsendelseResponseTo) {
 		return hentForsendelseResponseTo.getDokumenter().stream()
 				.map(dokumentTo -> {
-					String jsonPayload = storage.get(dokumentTo.getDokumentObjektReferanse())
-							.orElseThrow(() -> new DokumentIkkeFunnetIS3Exception(format("Kunne ikke finne dokument i S3 med key=dokumentObjektReferanse=%s", dokumentTo
-									.getDokumentObjektReferanse())));
+					String jsonPayload = storage.get(dokumentTo.getDokumentObjektReferanse());
 					return deserializeS3JsonPayloadToDokdistDokument(jsonPayload, dokumentTo.getDokumentObjektReferanse());
 				})
 				.collect(Collectors.toList());
