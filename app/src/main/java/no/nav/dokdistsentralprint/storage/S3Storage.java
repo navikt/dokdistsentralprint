@@ -42,7 +42,7 @@ public class S3Storage implements Storage {
 				throw new DocumentNotFoundInS3FunctionalException(String.format("Henting fra AmazonS3 på key=%s returnerte tom verdi", key));
 			}
 		} catch (SdkClientException e) {
-			throw new S3FailedToGetDocumentTechnicalException(String.format("Teknisk feil mot AmazonS3 ved henting på key=%s", key), e);
+			throw new S3FailedToGetDocumentTechnicalException(String.format("Teknisk feil mot AmazonS3 ved henting på key=%s. 403 FORBIDDEN betyr mest sannsynlig at ingen dokument finnes på angitt key", key), e);
 		} catch (SecurityException e) {
 			throw new S3FailedToGetDocumentTechnicalException(String.format("Objektet som ble forsøkt hentet fra AmazonS3 på key=%s var ikke kryptert.", key), e);
 		}
