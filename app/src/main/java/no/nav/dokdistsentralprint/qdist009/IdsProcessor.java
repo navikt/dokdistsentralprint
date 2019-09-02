@@ -31,8 +31,7 @@ public class IdsProcessor implements Processor {
 			throw new ForsendelseManglerPaakrevdHeaderFunctionalException(
 					"qdist009 har mottatt forsendelse med tom header callId");
 		}
-		exchange.setProperty(PROPERTY_BESTILLINGS_ID, callId);
-		MDC.put(CALL_ID, exchange.getProperty(PROPERTY_BESTILLINGS_ID, String.class));
+		MDC.put(CALL_ID, callId);
 	}
 
 	private void setForsendelseIdAsProperty(Exchange exchange) {
