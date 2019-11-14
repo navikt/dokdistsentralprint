@@ -8,11 +8,8 @@ import no.nav.dokdistsentralprint.exception.technical.KunneIkkeZippeBestillingTe
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
-import no.nav.dokdistsentralprint.qdist009.util.cdata.CDataCapableNoStartEndDocumentStreamWriter;
-import no.nav.dokdistsentralprint.qdist009.util.cdata.CDataCapableStaxEventItemWriter;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
-import javax.sql.rowset.spi.XmlWriter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;

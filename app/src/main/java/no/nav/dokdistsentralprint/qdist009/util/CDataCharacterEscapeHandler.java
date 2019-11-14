@@ -10,8 +10,6 @@ import java.io.Writer;
  */
 public class CDataCharacterEscapeHandler implements CharacterEscapeHandler {
 
-	private static final char[] cdataPrefix = "<![CDATA[".toCharArray();
-	private static final char[] cDataSuffix = "]]>".toCharArray();
 	private static final char[] chars = {'\\', '\\', 'r'};
 
 	@Override
