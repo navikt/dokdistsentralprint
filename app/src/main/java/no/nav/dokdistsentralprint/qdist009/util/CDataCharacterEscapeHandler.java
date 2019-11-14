@@ -13,6 +13,7 @@ public class CDataCharacterEscapeHandler implements CharacterEscapeHandler {
 
 	private static final char[] cdataPrefix = "<![CDATA[".toCharArray();
 	private static final char[] cDataSuffix = "]]>".toCharArray();
+	private static final char[] chars = {'\\', '\\', 'r'};
 
 	@Override
 	public void escape(char[] ch, int start, int length, boolean isAttVal, Writer out) throws IOException {
@@ -33,7 +34,8 @@ public class CDataCharacterEscapeHandler implements CharacterEscapeHandler {
 			}
 
 		}if(isCData){
-			out.write(ch, start,length);
+			String s = new String(ch).substring(start, start + length).replaceAll("\r", new String(chars));
+			out.write(s);
 		} else {
 			MinimumEscapeHandler.theInstance.escape(ch, start, length, isAttVal, out);
 		}
