@@ -2,10 +2,13 @@ package no.nav.dokdistsentralprint.qdist009.util;
 
 import static java.lang.String.format;
 
+import com.sun.xml.bind.marshaller.CharacterEscapeHandler;
 import no.nav.dokdistsentralprint.exception.technical.KunneIkkeMarshalleBestillingTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.KunneIkkeZippeBestillingTechnicalException;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
+import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -41,6 +44,7 @@ public final class Qdist009TechnicalUtils {
 			JAXBContext jaxbContext = JAXBContext.newInstance(Bestilling.class);
 			Marshaller marshaller = jaxbContext.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION, "printoppdrag-2_2.xsd");
+			marshaller.setProperty(CharacterEscapeHandler.class.getName(), new CDataCharacterEscapeHandler());
 			StringWriter sw = new StringWriter();
 			marshaller.marshal(bestilling, sw);
 			return sw.toString();
