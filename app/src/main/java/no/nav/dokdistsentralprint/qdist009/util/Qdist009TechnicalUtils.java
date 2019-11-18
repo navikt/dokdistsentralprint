@@ -72,11 +72,4 @@ public final class Qdist009TechnicalUtils {
 		return bestillingEntitiesStr.toString();
 	}
 
-	public org.springframework.oxm.Marshaller jaxb2MailpieceTypeMarshaller() {
-		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
-		jaxb2Marshaller.setCheckForXmlRootElement(true);
-		jaxb2Marshaller.setClassesToBeBound(Mailpiece.class);
-		return jaxb2Marshaller;
-	}
-
 }

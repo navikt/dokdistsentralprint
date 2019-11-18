@@ -1,4 +1,4 @@
-package no.nav.dokdistsentralprint.qdist009;
+package no.nav.dokdistsentralprint.qdist009.map;
 
 import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.KUNDE_ID_NAV_IKT;
 import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.PRINT;
@@ -11,6 +11,7 @@ import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseT
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.Dokument;
+import no.nav.dokdistsentralprint.qdist009.BestillingMapper;
 import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
 import org.junit.jupiter.api.Test;
 

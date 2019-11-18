@@ -18,22 +18,24 @@ public class CDataCharacterEscapeHandler implements CharacterEscapeHandler {
 	@Override
 	public void escape(char[] ch, int start, int length, boolean isAttVal, Writer out) throws IOException {
 		boolean isCData = length > cdataPrefix.length + cDataSuffix.length;
-		if(isCData){
-			for(int i = 0, j = start; i < cdataPrefix.length; ++i , ++j) {
+		if (isCData) {
+			for (int i = 0, j = start; i < cdataPrefix.length; ++i, ++j) {
 				if (cdataPrefix[i] != ch[j]) {
 					isCData = false;
 					break;
 				}
 			}
-		}if(isCData){
-			for(int i = cDataSuffix.length -1, j = start + length -1; i >= 0; --i, --j) {
+		}
+		if (isCData) {
+			for (int i = cDataSuffix.length - 1, j = start + length - 1; i >= 0; --i, --j) {
 				if (cDataSuffix[i] != ch[j]) {
 					isCData = false;
 					break;
 				}
 			}
 
-		}if(isCData){
+		}
+		if (isCData) {
 			String s = new String(ch).substring(start, start + length).replaceAll("\r", new String(chars));
 			out.write(s);
 		} else {
