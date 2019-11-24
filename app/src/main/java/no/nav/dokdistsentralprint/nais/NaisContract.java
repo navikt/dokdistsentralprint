@@ -28,9 +28,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 public class NaisContract {
-
-	public static final String APPLICATION_ALIVE = "Application is alive!";
-	public static final String APPLICATION_READY = "Application is ready for traffic!";
+	private static final String APPLICATION_ALIVE = "Application is alive!";
+	private static final String APPLICATION_READY = "Application is ready for traffic!";
 	private static final String APPLICATION_NOT_READY = "Application is not ready for traffic :-(";
 
 	private final String appName;
@@ -116,5 +115,4 @@ public class NaisContract {
 				.map(payload -> payload.check().get())
 				.sequential().blockingSubscribe(results::add);
 	}
-
 }

@@ -28,7 +28,6 @@ import java.util.function.Supplier;
 @Setter
 @Getter
 public abstract class AbstractDependencyCheck {
-
 	protected final DependencyType type;
 	protected final Importance importance;
 	protected String name;
@@ -68,7 +67,7 @@ public abstract class AbstractDependencyCheck {
 				.onSuccess(success -> dependency_status.set(1))
 				.onFailure(throwable -> {
 					dependency_status.set(0);
-					log.error("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", getName(), getType(), getAddress(), throwable);
+					log.info("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", getName(), getType(), getAddress(), throwable);
 				})
 				.recover(throwable -> DependencyCheckResult.builder()
 						.endpoint(getName())
@@ -82,7 +81,7 @@ public abstract class AbstractDependencyCheck {
 				);
 	}
 
-	public Callable<DependencyCheckResult> getCheckCallable() {
+	private Callable<DependencyCheckResult> getCheckCallable() {
 		return () -> {
 			DependencyCheckResult.DependencyCheckResultBuilder builder = DependencyCheckResult.builder()
 					.type(getType())
@@ -93,22 +92,15 @@ public abstract class AbstractDependencyCheck {
 			Instant start = Instant.now();
 			doCheck();
 			Instant end = Instant.now();
-			Long responseTime = Duration.between(start, end).toMillis();
-			return builder.result(Result.OK).responseTime(String.valueOf(responseTime) + "ms").build();
+			long responseTime = Duration.between(start, end).toMillis();
+			return builder.result(Result.OK).responseTime(responseTime + "ms").build();
 		};
 	}
 
-	protected String getErrorMessageFromThrowable(Throwable e) {
+	private String getErrorMessageFromThrowable(Throwable e) {
 		if (e instanceof TimeoutException) {
 			return "Call to dependency timed out by circuitbreaker";
 		}
 		return e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
 	}
-
-	protected String getErrorMessage(Exception e) {
-		String message = e.getMessage().trim();
-		String causeMessage = e.getCause() == null ? "" : ": " + e.getCause().getMessage();
-		return message + causeMessage;
-	}
-
 }

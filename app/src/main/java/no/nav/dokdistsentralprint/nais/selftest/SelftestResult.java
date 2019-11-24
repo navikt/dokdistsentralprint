@@ -11,7 +11,6 @@ import java.util.List;
 @Data
 @Builder
 public class SelftestResult {
-
 	private String appName;
 	private String version;
 	private Result result;

@@ -20,5 +20,4 @@ public class DependencyCheckResult {
 
 	@JsonIgnore
 	private Throwable throwable;
-
 }
