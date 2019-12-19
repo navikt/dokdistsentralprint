@@ -50,13 +50,17 @@ class BestillingMapperTest {
 	private static final String POST_DESTINASJON_INNLAND = "INNLAND";
 	private static final boolean TOSIDIG_PRINT_TRUE = true;
 	private static final boolean TOSIDIG_PRINT_FALSE = false;
+	private static final String MOTTAKERTYPE_PERSON = "PERSON";
+	private static final String MOTTAKERTYPE_ORGANISASJON = "ORGANISASJON";
+	private static final String MOTTAKERTYPE_UKJENT = "UKJENT";
+	private static final String CDATA_MOTTAKER_NAVN = "<![CDATA[" + MOTTAKER_NAVN + "]]>";
 
 	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
 
 	@Test
 	public void shouldMap() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
 				createAdresse(LAND_NO),
 				createHentPostDestinasjonresponseTo());
@@ -85,7 +89,7 @@ class BestillingMapperTest {
 		Dokument hovedDokument = bestilling.getMailpiece().getDokument().get(0);
 
 		assertEquals(SENTRALPRINT_DOKTYPE, hovedDokument.getDokumentType());
-		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "]]>", hovedDokument.getNavn());
+		assertEquals(CDATA_MOTTAKER_NAVN, hovedDokument.getNavn());
 		assertEquals(OBJEKT_REFERANSE_HOVEDDOK, hovedDokument.getDokumentId());
 		assertEquals(MOTTAKER_ID, hovedDokument.getSkattyternummer());
 		assertNull(hovedDokument.getLandkode());
@@ -94,7 +98,7 @@ class BestillingMapperTest {
 		Dokument vedlegg1 = bestilling.getMailpiece().getDokument().get(1);
 
 		assertEquals(SENTRALPRINT_DOKTYPE, vedlegg1.getDokumentType());
-		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "]]>", vedlegg1.getNavn());
+		assertEquals(CDATA_MOTTAKER_NAVN, vedlegg1.getNavn());
 		assertEquals(OBJEKT_REFERANSE_VEDLEGG1, vedlegg1.getDokumentId());
 		assertEquals(MOTTAKER_ID, vedlegg1.getSkattyternummer());
 		assertNull(vedlegg1.getLandkode());
@@ -103,7 +107,7 @@ class BestillingMapperTest {
 		Dokument vedlegg2 = bestilling.getMailpiece().getDokument().get(2);
 
 		assertEquals(SENTRALPRINT_DOKTYPE, vedlegg2.getDokumentType());
-		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "]]>", vedlegg2.getNavn());
+		assertEquals(CDATA_MOTTAKER_NAVN, vedlegg2.getNavn());
 		assertEquals(OBJEKT_REFERANSE_VEDLEGG2, vedlegg2.getDokumentId());
 		assertEquals(MOTTAKER_ID, vedlegg2.getSkattyternummer());
 		assertNull(vedlegg2.getLandkode());
@@ -112,7 +116,7 @@ class BestillingMapperTest {
 
 	@Test
 	public void shouldMapBestillingWithTosidigPrintFalse() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_ORGANISASJON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createAdresse(LAND_NO),
 				createHentPostDestinasjonresponseTo());
@@ -123,7 +127,7 @@ class BestillingMapperTest {
 
 	@Test
 	public void shouldMapBestillingWithUtenlandsLandkode() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_ORGANISASJON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createAdresse(LAND_US),
 				createHentPostDestinasjonresponseTo());
@@ -142,7 +146,7 @@ class BestillingMapperTest {
 		Dokument hovedDokument = bestilling.getMailpiece().getDokument().iterator().next();
 
 		assertEquals(SENTRALPRINT_DOKTYPE, hovedDokument.getDokumentType());
-		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "]]>", hovedDokument.getNavn());
+		assertEquals(CDATA_MOTTAKER_NAVN, hovedDokument.getNavn());
 		assertEquals(OBJEKT_REFERANSE_HOVEDDOK, hovedDokument.getDokumentId());
 		assertEquals(MOTTAKER_ID, hovedDokument.getSkattyternummer());
 		assertEquals(LAND_US, hovedDokument.getLandkode());
@@ -151,7 +155,7 @@ class BestillingMapperTest {
 		Dokument vedlegg1 = bestilling.getMailpiece().getDokument().get(1);
 
 		assertEquals(SENTRALPRINT_DOKTYPE, vedlegg1.getDokumentType());
-		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "]]>", vedlegg1.getNavn());
+		assertEquals(CDATA_MOTTAKER_NAVN, vedlegg1.getNavn());
 		assertEquals(OBJEKT_REFERANSE_VEDLEGG1, vedlegg1.getDokumentId());
 		assertEquals(MOTTAKER_ID, vedlegg1.getSkattyternummer());
 		assertNull(vedlegg1.getPostnummer());
@@ -160,7 +164,7 @@ class BestillingMapperTest {
 		Dokument vedlegg2 = bestilling.getMailpiece().getDokument().get(2);
 
 		assertEquals(SENTRALPRINT_DOKTYPE, vedlegg2.getDokumentType());
-		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "]]>", vedlegg2.getNavn());
+		assertEquals(CDATA_MOTTAKER_NAVN, vedlegg2.getNavn());
 		assertEquals(OBJEKT_REFERANSE_VEDLEGG2, vedlegg2.getDokumentId());
 		assertEquals(MOTTAKER_ID, vedlegg2.getSkattyternummer());
 		assertNull(vedlegg2.getPostnummer());
@@ -168,8 +172,54 @@ class BestillingMapperTest {
 	}
 
 	@Test
+	public void shouldMapBestillingDokumenterSkatteyternummerWhenMottakerTypeErIkkeOrganizationEllerPerson() {
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_UKJENT),
+				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
+				createAdresse(LAND_US),
+				createHentPostDestinasjonresponseTo());
+
+
+		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
+						ADRESSELINJE_1 + "\r" +
+						ADRESSELINJE_2 + "\r" +
+						ADRESSELINJE_3 + "\r" +
+						POSTNUMMER + " " + POSTSTED + "\r" + LAND_US + "]]>",
+				bestilling.getMailpiece().getRessurs().getAdresse());
+
+		assertEquals(LAND_US, bestilling.getMailpiece().getLandkode());
+		assertNull(bestilling.getMailpiece().getPostnummer());
+
+		Dokument hovedDokument = bestilling.getMailpiece().getDokument().iterator().next();
+
+		assertEquals(SENTRALPRINT_DOKTYPE, hovedDokument.getDokumentType());
+		assertEquals(CDATA_MOTTAKER_NAVN, hovedDokument.getNavn());
+		assertEquals(OBJEKT_REFERANSE_HOVEDDOK, hovedDokument.getDokumentId());
+		assertNull(hovedDokument.getSkattyternummer());
+		assertEquals(LAND_US, hovedDokument.getLandkode());
+		assertNull(hovedDokument.getPostnummer());
+
+		Dokument vedlegg1 = bestilling.getMailpiece().getDokument().get(1);
+
+		assertEquals(SENTRALPRINT_DOKTYPE, vedlegg1.getDokumentType());
+		assertEquals(CDATA_MOTTAKER_NAVN, vedlegg1.getNavn());
+		assertEquals(OBJEKT_REFERANSE_VEDLEGG1, vedlegg1.getDokumentId());
+		assertNull(vedlegg1.getSkattyternummer());
+		assertNull(vedlegg1.getPostnummer());
+		assertEquals(LAND_US, vedlegg1.getLandkode());
+
+		Dokument vedlegg2 = bestilling.getMailpiece().getDokument().get(2);
+
+		assertEquals(SENTRALPRINT_DOKTYPE, vedlegg2.getDokumentType());
+		assertEquals(CDATA_MOTTAKER_NAVN, vedlegg2.getNavn());
+		assertEquals(OBJEKT_REFERANSE_VEDLEGG2, vedlegg2.getDokumentId());
+		assertNull(vedlegg2.getSkattyternummer());
+		assertNull(vedlegg2.getPostnummer());
+		assertEquals(LAND_US, vedlegg2.getLandkode());
+	}
+
+	@Test
 	public void shouldMapWithOnlyOneAddress() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
 				createAdresseWithSingleAdress(LAND_NO),
 				createHentPostDestinasjonresponseTo());
@@ -180,13 +230,14 @@ class BestillingMapperTest {
 				bestilling.getMailpiece().getRessurs().getAdresse());
 	}
 
-	private HentForsendelseResponseTo createHentForsendelseResponseTo() {
+	private HentForsendelseResponseTo createHentForsendelseResponseTo(String mottakerType) {
 		return HentForsendelseResponseTo.builder()
 				.bestillingsId(BESTILLINGS_ID)
 				.modus(MODUS)
 				.mottaker(HentForsendelseResponseTo.MottakerTo.builder()
 						.mottakerId(MOTTAKER_ID)
 						.mottakerNavn(MOTTAKER_NAVN)
+						.mottakerType(mottakerType)
 						.build())
 				.dokumenter(Arrays.asList(HentForsendelseResponseTo.DokumentTo.builder()
 								.dokumentObjektReferanse(OBJEKT_REFERANSE_HOVEDDOK)

@@ -56,7 +56,7 @@
 	</xs:complexType>
 	<xs:complexType name="Dokument">
 		<xs:sequence>
-			<xs:element type="xs:string" name="Skattyternummer">
+			<xs:element type="xs:string" name="Skattyternummer" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>skatteyternummer = dokdist.DokumentInfo.mottakerId</xs:documentation>
 				</xs:annotation>

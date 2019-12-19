@@ -61,7 +61,7 @@
 							<generatePackage>no.nav.dokdistsentralprint.printoppdrag</generatePackage>
 							<schemaDirectory>src/main/resources/no/nav/dokdistsentralprint/printoppdrag/xsd</schemaDirectory>
 							<bindingDirectory>src/main/resources/no/nav/dokdistsentralprint/printoppdrag/bindings</bindingDirectory>
-							<generateDirectory>${project.build.directory}/no/nav/dokdistsentralprint/printoppdrag/</generateDirectory>
+							<generateDirectory>${project.basedir}/target/generated-sources/printoppdarg</generateDirectory>
 							<strict>false</strict>
 							<plugins>
 								<plugin>

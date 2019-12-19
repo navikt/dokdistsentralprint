@@ -1,40 +1,11 @@
 package no.nav.dokdistsentralprint.itest;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.put;
-import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
-import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
-import static no.nav.dokdistsentralprint.storage.S3Configuration.BUCKET_NAME;
-import static no.nav.dokdistsentralprint.testUtils.classpathToString;
-import static no.nav.dokdistsentralprint.testUtils.fileToString;
-import static no.nav.dokdistsentralprint.testUtils.unzipToDirectory;
-import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
-import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
-
 import com.amazonaws.services.s3.AmazonS3;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.dokdistsentralprint.Application;
 import no.nav.dokdistsentralprint.itest.config.ApplicationTestConfig;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
-import no.nav.dokdistsentralprint.storage.Storage;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
@@ -64,6 +35,33 @@ import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
+import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
+import static no.nav.dokdistsentralprint.storage.S3Configuration.BUCKET_NAME;
+import static no.nav.dokdistsentralprint.testUtils.classpathToString;
+import static no.nav.dokdistsentralprint.testUtils.fileToString;
+import static no.nav.dokdistsentralprint.testUtils.unzipToDirectory;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
+import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
+
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
@@ -78,34 +76,25 @@ public class Qdist009IT {
 	private static final String DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK = "dokumentObjektReferanseHoveddok";
 	private static final String DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 = "dokumentObjektReferanseVedlegg1";
 	private static final String DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 = "dokumentObjektReferanseVedlegg2";
-	private static final String DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK_CORRUPT = "dokumentObjektReferanseHoveddokCorrupt";
 	private static final String HOVEDDOK_TEST_CONTENT = "HOVEDDOK_TEST_CONTENT";
 	private static final String VEDLEGG1_TEST_CONTENT = "VEDLEGG1_TEST_CONTENT";
 	private static final String VEDLEGG2_TEST_CONTENT = "VEDLEGG2_TEST_CONTENT";
-	private static String CALL_ID;
-
-	@Inject
-	private JmsTemplate jmsTemplate;
-
-	@Inject
-	private Queue qdist009;
-
-	@Inject
-	private Queue qdist009FunksjonellFeil;
-
-	@Inject
-	private Queue backoutQueue;
-
-	@Inject
-	private AmazonS3 amazonS3;
-
-	@Inject
-	public CacheManager cacheManager;
-
-	private static SshServer sshServer;
-
 	@TempDir
 	static Path tempDir;
+	private static String CALL_ID;
+	private static SshServer sshServer;
+	@Inject
+	public CacheManager cacheManager;
+	@Inject
+	private JmsTemplate jmsTemplate;
+	@Inject
+	private Queue qdist009;
+	@Inject
+	private Queue qdist009FunksjonellFeil;
+	@Inject
+	private Queue backoutQueue;
+	@Inject
+	private AmazonS3 amazonS3;
 
 	@BeforeAll
 	public static void setupBeforeAll() throws IOException {
@@ -222,6 +211,55 @@ public class Qdist009IT {
 				putRequestedFor(urlEqualTo("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")));
 		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/NO")));
 	}
+
+
+	@Test
+	public void shouldProcessForsendelseWithoutInkludertSkatteyternummerIXml() throws Exception {
+
+		stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
+				.withBodyFile("dokumentinfov4/tkat020-happy.json")));
+		stubFor(get("/administrerforsendelse/" + FORSENDELSE_ID)
+				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody(classpathToString("__files/rjoark001/getForsendelse_withUkjent_motakertype-happy.json")
+								.replace("insertCallIdHere", CALL_ID))));
+		stubFor(put("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")
+				.willReturn(aResponse().withStatus(HttpStatus.OK.value())));
+		stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
+				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
+		stubFor(post("/hentMottakerOgAdresse")
+				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
+						.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
+						.withBodyFile("regoppslag/treg002-happy.json")));
+		stubFor(post("/sts")
+				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
+						.withBodyFile("sts/sts-happy.xml")));
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
+
+		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
+		String actualBestillingXmlString = fileToString(new File(tempDir.toString() + "/" + CALL_ID + ".xml"));
+		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml_uten_skattyternummer.xml").replaceAll("insertCallIdHere",
+				CALL_ID);
+		String hoveddokContent = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		String vedlegg1Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		String vedlegg2Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+
+		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
+		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
+		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
+		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+
+		verifyAllStubs();
+
+	}
+
 
 	@Test
 	public void shouldThrowForsendelseManglerForsendelseIdFunctionalExceptionManglerForsendelseId() throws Exception {
