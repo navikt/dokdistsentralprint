@@ -172,7 +172,7 @@ class BestillingMapperTest {
 	}
 
 	@Test
-	public void shouldMapBestillingDokumenterSkatteyternummerWhenMottakerTypeErIkkeOrganizationEllerPerson() {
+	public void shouldNotMapSkatteyternummerInneBestillingWhenMottakerTypeErIkkeOrganizationEllerPerson() {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_UKJENT),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createAdresse(LAND_US),
