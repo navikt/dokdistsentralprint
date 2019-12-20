@@ -1,7 +1,5 @@
 package no.nav.dokdistsentralprint.qdist009;
 
-import static java.lang.String.format;
-
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
@@ -15,7 +13,10 @@ import no.nav.dokdistsentralprint.printoppdrag.Ressurs;
 import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
@@ -25,7 +26,9 @@ public class BestillingMapper {
 	public static final String KUNDE_ID_NAV_IKT = "NAV_IKT";
 	public static final String USORTERT = "USORTERT";
 	public static final String PRINT = "PRINT";
-	public static final String LANDKODE_NO = "NO";
+	private static final String LANDKODE_NO = "NO";
+	private static final String MOTTAKERTYPE_PERSON = "PERSON";
+	private static final String MOTTAKERTYPE_ORGANISASJON = "ORGANISASJON";
 
 	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse, HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo) {
 		return new Bestilling()
@@ -47,18 +50,34 @@ public class BestillingMapper {
 										.getMottakerNavn()))))
 						.withLandkode(getLandkode(adresse))
 						.withPostnummer(getPostnummer(adresse))
-						.withDokument(hentForsendelseResponseTo.getDokumenter().stream()
-								.map(dokumentTo -> new Dokument()
+						.withDokument(mapDokumenter(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse)));
+	}
+
+	private List<Dokument> mapDokumenter(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse) {
+		return hentForsendelseResponseTo.getDokumenter().stream()
+				.map(dokumentTo ->
+						isMottakerSkattyter(hentForsendelseResponseTo.getMottaker().getMottakerType()) ?
+								new Dokument()
 										.withDokumentType(dokumenttypeInfoTo.getSentralPrintDokumentType())
 										.withDokumentId(dokumentTo.getDokumentObjektReferanse())
 										.withSkattyternummer(hentForsendelseResponseTo.getMottaker().getMottakerId())
 										.withNavn(addCDataToString(hentForsendelseResponseTo.getMottaker().getMottakerNavn()))
 										.withLandkode(getLandkode(adresse))
+										.withPostnummer(getPostnummer(adresse)) :
+								new Dokument()
+										.withDokumentType(dokumenttypeInfoTo.getSentralPrintDokumentType())
+										.withDokumentId(dokumentTo.getDokumentObjektReferanse())
+										.withNavn(addCDataToString(hentForsendelseResponseTo.getMottaker().getMottakerNavn()))
+										.withLandkode(getLandkode(adresse))
 										.withPostnummer(getPostnummer(adresse)))
-								.collect(Collectors.toList())));
+				.collect(Collectors.toList());
 	}
 
-	public String getLandkode(Adresse adresse) {
+	public boolean isMottakerSkattyter(String mottakerType) {
+		return MOTTAKERTYPE_PERSON.equals(mottakerType) || MOTTAKERTYPE_ORGANISASJON.equals(mottakerType);
+	}
+
+	private String getLandkode(Adresse adresse) {
 		if (LANDKODE_NO.equals(adresse.getLandkode())) {
 			return null;
 		} else {
