@@ -56,7 +56,7 @@ public class BestillingMapper {
 	private List<Dokument> mapDokumenter(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse) {
 		return hentForsendelseResponseTo.getDokumenter().stream()
 				.map(dokumentTo ->
-						isValidMottakerType(hentForsendelseResponseTo.getMottaker().getMottakerType()) ?
+						isMottakerSkattyter(hentForsendelseResponseTo.getMottaker().getMottakerType()) ?
 								new Dokument()
 										.withDokumentType(dokumenttypeInfoTo.getSentralPrintDokumentType())
 										.withDokumentId(dokumentTo.getDokumentObjektReferanse())
@@ -73,7 +73,7 @@ public class BestillingMapper {
 				.collect(Collectors.toList());
 	}
 
-	private boolean isValidMottakerType(String mottakerType) {
+	public boolean isMottakerSkattyter(String mottakerType) {
 		return MOTTAKERTYPE_PERSON.equals(mottakerType) || MOTTAKERTYPE_ORGANISASJON.equals(mottakerType);
 	}
 

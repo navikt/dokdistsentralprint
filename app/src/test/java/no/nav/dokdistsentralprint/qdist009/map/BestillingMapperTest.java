@@ -4,7 +4,9 @@ import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.KUNDE_ID_NAV_
 import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.PRINT;
 import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.USORTERT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
@@ -255,6 +257,18 @@ class BestillingMapperTest {
 								.tilknyttetSom(TILKNYTTET_SOM_VEDLEGG)
 								.build()))
 				.build();
+	}
+
+	@Test
+	public void shouldAssertMottakerSkattyterToTrueWhenMottakerTypeErPersonOrOrganization(){
+		assertTrue(bestillingMapper.isMottakerSkattyter(MOTTAKERTYPE_ORGANISASJON));
+		assertTrue(bestillingMapper.isMottakerSkattyter(MOTTAKERTYPE_PERSON));
+	}
+
+	@Test
+	public void shouldAssertMottakerSkattyterToFalseWhenMottakerTypeErIkkePersonOrOrganization(){
+		assertFalse(bestillingMapper.isMottakerSkattyter(MOTTAKERTYPE_UKJENT));
+		assertFalse(bestillingMapper.isMottakerSkattyter(null));
 	}
 
 	private DokumenttypeInfoTo createDokumenttypeInfoTo(boolean tosidigPrint) {
