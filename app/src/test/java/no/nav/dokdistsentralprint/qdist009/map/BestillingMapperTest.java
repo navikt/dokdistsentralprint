@@ -36,7 +36,7 @@ class BestillingMapperTest {
 	private static final String POSTSTED = "poststed";
 	private static final String LAND_NO = "NO";
 	private static final String LAND_SE = "SE";
-	private static final String LAND_SE_NAVN = "Sverige";
+	private static final String LAND_SE_NAVN = "SVERIGE";
 	private static final String OBJEKT_REFERANSE_HOVEDDOK = "objektreferanseHoveddok";
 	private static final String DOKUMENTTYPE_ID_HOVEDDOK = "dokumenttypeIdHoveddok";
 	private static final String TILKNYTTET_SOM_HOVEDDOK = "HOVEDDOKUMENT";
