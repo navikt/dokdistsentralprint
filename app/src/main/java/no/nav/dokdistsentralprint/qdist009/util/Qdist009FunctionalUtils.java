@@ -8,7 +8,11 @@ import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.exception.functional.InvalidForsendelseStatusException;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
+import no.nav.dokdistsentralprint.storage.JsonSerializer;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

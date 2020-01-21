@@ -1,5 +1,6 @@
 package no.nav.dokdistsentralprint.qdist009;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
@@ -11,6 +12,7 @@ import no.nav.dokdistsentralprint.printoppdrag.Kanal;
 import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
 import no.nav.dokdistsentralprint.printoppdrag.Ressurs;
 import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
+import no.nav.dokdistsentralprint.qdist009.util.Landkoder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,6 +23,7 @@ import static java.lang.String.format;
 /**
  * @author Sigurd Midttun, Visma Consulting.
  */
+@Slf4j
 public class BestillingMapper {
 
 	public static final String KUNDE_ID_NAV_IKT = "NAV_IKT";
@@ -99,7 +102,7 @@ public class BestillingMapper {
 				formatAdresseEntity(adresse.getAdresselinje2()) +
 				formatAdresseEntity(adresse.getAdresselinje3()) +
 				formatPostnummerAndPoststed(adresse.getPostnummer(), adresse.getPoststed()) +
-				adresse.getLandkode();
+				formatLandkode(adresse.getLandkode());
 	}
 
 	private String formatAdresseEntity(String entity) {
@@ -115,6 +118,20 @@ public class BestillingMapper {
 			return "";
 		} else {
 			return format("%s %s\r", postnummer, poststed);
+		}
+	}
+
+	private String formatLandkode(String landkode) {
+		if (landkode == null || LANDKODE_NO.equals(landkode)) {
+			return "";
+		} else {
+			try {
+				String landNavn = Landkoder.valueOf(landkode).getLandnavn();
+				return landNavn;
+			} catch (IllegalArgumentException e) {
+				log.error("Country code {} is either wrong or not registered.", landkode, e);
+				return landkode;
+			}
 		}
 	}
 
