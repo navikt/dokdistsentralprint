@@ -151,9 +151,11 @@ public class Qdist009IT {
 
 		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
-
 		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
-		String actualBestillingXmlString = fileToString(new File(tempDir.toString() + "/" + CALL_ID + ".xml"));
+
+		String bestillingXmlPath = tempDir.toString() + "/" + CALL_ID + ".xml";
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> assertTrue(new File(bestillingXmlPath).exists())); // Test sometimes get FileNotFound. This check prevents it
+		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
 		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml.xml").replaceAll("insertCallIdHere",
 				CALL_ID);
 		String hoveddokContent = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
@@ -190,9 +192,11 @@ public class Qdist009IT {
 
 		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
-
 		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
-		String actualBestillingXmlString = fileToString(new File(tempDir.toString() + "/" + CALL_ID + ".xml"));
+
+		String bestillingXmlPath = tempDir.toString() + "/" + CALL_ID + ".xml";
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> assertTrue(new File(bestillingXmlPath).exists())); // Test sometimes get FileNotFound. This check prevents it
+		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
 		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_utenRegoppslag_xml.xml").replaceAll(
 				"insertCallIdHere",
 				CALL_ID);
@@ -242,9 +246,11 @@ public class Qdist009IT {
 
 		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
-
 		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
-		String actualBestillingXmlString = fileToString(new File(tempDir.toString() + "/" + CALL_ID + ".xml"));
+
+		String bestillingXmlPath = tempDir.toString() + "/" + CALL_ID + ".xml";
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> assertTrue(new File(bestillingXmlPath).exists())); // Test sometimes get FileNotFound. This check prevents it
+		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
 		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml_uten_skattyternummer.xml").replaceAll("insertCallIdHere",
 				CALL_ID);
 		String hoveddokContent = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
