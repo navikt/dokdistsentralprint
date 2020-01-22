@@ -126,8 +126,7 @@ public class BestillingMapper {
 			return "";
 		} else {
 			try {
-				String landNavn = Landkoder.valueOf(landkode).getLandnavn();
-				return landNavn;
+				return Landkoder.valueOf(landkode).getLandnavn();
 			} catch (IllegalArgumentException e) {
 				log.error("Country code {} is either wrong or not registered.", landkode, e);
 				return landkode;
