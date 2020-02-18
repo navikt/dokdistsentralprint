@@ -9,8 +9,6 @@ spec:
   env:
     - name: SFTP_URL
       value: {{ SFTP_URL }}
-    - name: SFTP_PRIVATE_KEY
-      value: {{ SFTP_PRIVATE_KEY }}
     - name: DOKUMENTTYPEINFO_V4_URL
       value: {{ DOKUMENTTYPEINFO_V4_URL }}
     - name: ADMINISTRERFORSENDELSE_V1_URL
