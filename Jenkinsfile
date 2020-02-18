@@ -1,6 +1,5 @@
-naisPipeline {
+naiseratorPipeline {
     applicationName = "dokdistsentralprint"
     dockerfileDir = "."
-    deployEnvironmentT = "t8"
-    deployEnvironmentQ = "q1"
+    deployEnvironmentQ = "q1,q2"
 }
