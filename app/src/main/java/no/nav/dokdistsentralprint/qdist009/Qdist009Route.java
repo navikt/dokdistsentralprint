@@ -26,7 +26,7 @@ public class Qdist009Route extends SpringRouteBuilder {
 	static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";
 	static final String PROPERTY_FORSENDELSE_ID = "forsendelseId";
 	private static final String SFTP_FILETYPE = ".zip";
-	private static final String SFTP_FILE_CONFIG = "binary=true&fileName=${exchangeProperty." + PROPERTY_BESTILLINGS_ID + "}" + SFTP_FILETYPE + "&";
+	private static final String SFTP_FILE_CONFIG = "autoCreate=false&binary=true&fileName=${exchangeProperty." + PROPERTY_BESTILLINGS_ID + "}" + SFTP_FILETYPE + "&";
 	private static final String SFTP_SECURITY_CONFIG = "privateKeyFile={{sftp.privateKeyFile}}&jschLoggingLevel=TRACE&privateKeyPassphrase={{sftp.privateKeyPassphrase}}&preferredAuthentications=publickey";
 	private static final String SFTP_SERVER = "sftp://{{sftp.url}}:{{sftp.port}}/{{sftp.remoteFilePath}}?username={{sftp.username}}&***passord=gammelt_passord***;
 

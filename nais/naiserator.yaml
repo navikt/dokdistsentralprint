@@ -48,12 +48,15 @@ spec:
     timeout: 3
   replicas:
     min: 1
-    max: 2
+    max: 6
     cpuThresholdPercentage: 50
   resources:
     limits:
       cpu: 3000m
-      memory: 1024Mi
+      memory: 1280Mi
+    requests:
+      cpu: 100m
+      memory: 768Mi
   vault:
     enabled: true
     paths:
