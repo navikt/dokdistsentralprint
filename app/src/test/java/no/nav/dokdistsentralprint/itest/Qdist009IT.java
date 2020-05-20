@@ -31,7 +31,6 @@ import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -99,8 +98,6 @@ public class Qdist009IT {
 
 	@BeforeAll
 	public static void setupBeforeAll() throws IOException {
-		final Path mottakDir = tempDir.resolve("outbound/dokdistsentralprint");
-		Files.createDirectories(mottakDir);
 		sshServer = startSshServer(tempDir);
 		System.setProperty("sftp.privateKeyFile", new ClassPathResource("ssh/id_rsa").getURL().getPath());
 		System.setProperty("sftp.port", Integer.toString(sshServer.getPort()));
