@@ -1,5 +1,7 @@
 package no.nav.dokdistsentralprint.consumer.regoppslag;
 
+import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
+import static no.nav.dokdistsentralprint.constants.MdcConstants.NAV_CALLID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 
@@ -30,6 +32,9 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.UUID;
+
+import org.slf4j.MDC;
 
 /**
  * @author Ugur Alpay Cenar, Visma Consulting.
@@ -69,8 +74,8 @@ public class RegoppslagRestConsumer implements Regoppslag {
 				throw new RegoppslagHentAdresseSecurityException(String.format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e
 						.getMessage()));
 			}
-			throw new RegoppslagHentAdresseFunctionalException(String.format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, Feilmelding=%s", e
-					.getStatusCode(), e.getMessage()));
+			throw new RegoppslagHentAdresseFunctionalException(String.format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, HttpRespons=%s, Feilmelding=%s", e
+					.getStatusCode(), e.getResponseBodyAsString(), e.getMessage()));
 		} catch (HttpServerErrorException e) {
 			throw new RegoppslagHentAdresseTechnicalException(String.format("Kall mot TREG002 feilet teknisk. HttpStatusKode=%s, Feilmelding=%s", e
 					.getStatusCode(), e.getMessage()));
@@ -80,13 +85,24 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	private HttpHeaders retrieveSamlTokenAndCreateHeader() {
 		try {
 			String samlAssertionToken = stsTokenRetriever.requestSecurityToken();
+			String callId = getCallId();
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.set(HttpHeaders.AUTHORIZATION, "SAML " + Base64.getEncoder()
 					.encodeToString(samlAssertionToken.getBytes(StandardCharsets.UTF_8)));
+			httpHeaders.set(CALL_ID, callId);
+			httpHeaders.set(NAV_CALLID, callId);
 			return httpHeaders;
 		} catch (Exception e) {
 			throw new StsRetriveTokenException(String.format("Henting av samltoken fra STS feilet. Feilmelding=%s", e.getMessage()));
 		}
+	}
+
+	private String getCallId() {
+		String callId = MDC.get(CALL_ID);
+		if(callId == null) {
+			return UUID.randomUUID().toString();
+		}
+		return callId;
 	}
 
 	private HttpEntity createRequestWithHeader(Object request, HttpHeaders httpHeaders) {
