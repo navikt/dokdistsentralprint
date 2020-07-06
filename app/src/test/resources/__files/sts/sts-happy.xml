@@ -42,7 +42,7 @@
 									</X509Certificate>
 									<X509IssuerSerial>
 										<X509IssuerName>CN=D26 Issuing CA Intern, DC=test, DC=local</X509IssuerName>
-										<X509SerialNumber>***gammelt_fnr******gammelt_fnr******gammelt_fnr******gammelt_fnr***6</X509SerialNumber>
+										<X509SerialNumber>579819418258013541424141683728872668728926316</X509SerialNumber>
 									</X509IssuerSerial>
 								</X509Data>
 							</KeyInfo>

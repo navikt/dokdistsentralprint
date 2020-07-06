@@ -9,7 +9,7 @@ fi
 if test -f /var/run/secrets/nais.io/srvdokdistsentralprint/password;
 then
     echo "Setting SERVICEUSER_PASSWORD"
-    export SERVICEUSER_***passord=gammelt_passord***)
+    export SERVICEUSER_PASSWORD=$(cat /var/run/secrets/nais.io/srvdokdistsentralprint/password)
 fi
 
 if test -f /var/run/secrets/nais.io/privateKey/privateKeyFile;
