@@ -15,30 +15,32 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.3.RELEASE</version>
+        <version>2.3.3.RELEASE</version>
     </parent>
 
     <properties>
-        <java.version>1.8</java.version>
-        <camel.version>2.23.1</camel.version>
+        <java.version>11</java.version>
+        <camel.version>3.5.0</camel.version>
         <javax.inject.version>1</javax.inject.version>
-        <logstash-logback-encoder.version>5.2</logstash-logback-encoder.version>
-        <resilience4j.version>0.11.0</resilience4j.version>
-        <aws-java-sdk-s3.version>1.11.497</aws-java-sdk-s3.version>
-        <dokkat-api>10.4.0</dokkat-api>
-        <wmq.version>8.0.0.6</wmq.version>
-        <cxf.version>3.3.0</cxf.version>
+        <jakarta.xml.ws-api.version>2.3.3</jakarta.xml.ws-api.version>
+        <saaj-impl.version>1.5.2</saaj-impl.version>
+        <logstash-logback-encoder.version>6.4</logstash-logback-encoder.version>
+        <resilience4j.version>1.5.0</resilience4j.version>
+        <aws-java-sdk-s3.version>1.11.873</aws-java-sdk-s3.version>
+        <dokkat-api>11.0.6</dokkat-api>
+        <wmq.version>9.2.0.0</wmq.version>
+        <cxf.version>3.4.0</cxf.version>
         <melding-virksomhet-dokdistfordeling.version>2.0.2</melding-virksomhet-dokdistfordeling.version>
         <jaxb2-basics-runtime.version>1.11.1</jaxb2-basics-runtime.version>
-        <lombok.version>1.18.4</lombok.version>
+        <rxjava.version>2.2.19</rxjava.version>
+        <lombok.version>1.18.12</lombok.version>
         <!-- test -->
-        <spring-cloud-contract-wiremock.version>1.2.5.RELEASE</spring-cloud-contract-wiremock.version>
-        <awaitility.version>3.1.2</awaitility.version>
-        <commons-io.version>2.4</commons-io.version>
-        <activemq.version>5.15.2</activemq.version>
-        <junit5.mockito.version>2.25.1</junit5.mockito.version>
-        <junit-jupiter.version>5.4.1</junit-jupiter.version>
+        <spring-cloud-contract-wiremock.version>2.2.4.RELEASE</spring-cloud-contract-wiremock.version>
+        <awaitility.version>4.0.3</awaitility.version>
+        <commons-io.version>2.8.0</commons-io.version>
+        <activemq.version>5.15.13</activemq.version>
         <sshd-sftp.version>2.0.0</sshd-sftp.version>
+        <junit5.mockito.version>3.5.13</junit5.mockito.version>
     </properties>
 
     <dependencyManagement>
@@ -52,6 +54,11 @@
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
                 <version>${javax.inject.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.xml.ws</groupId>
+                <artifactId>jakarta.xml.ws-api</artifactId>
+                <version>${jakarta.xml.ws-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.logstash.logback</groupId>
@@ -79,29 +86,16 @@
                 <version>${cxf.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-spring-boot-starter</artifactId>
-                <version>${camel.version}</version>
+                <groupId>com.sun.xml.messaging.saaj</groupId>
+                <artifactId>saaj-impl</artifactId>
+                <version>${saaj-impl.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-ftp</artifactId>
+                <groupId>org.apache.camel.springboot</groupId>
+                <artifactId>camel-spring-boot-bom</artifactId>
                 <version>${camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-core</artifactId>
-                <version>${camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-jms</artifactId>
-                <version>${camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-jaxb</artifactId>
-                <version>${camel.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.amazonaws</groupId>
@@ -145,16 +139,15 @@
                 <version>${cxf.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.reactivex.rxjava2</groupId>
+                <artifactId>rxjava</artifactId>
+                <version>${rxjava.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
                 <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter</artifactId>
-                <version>${junit5.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -195,15 +188,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit-jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
     <build>
         <resources>
             <resource>
@@ -221,6 +205,26 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.22.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-toolchains-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>toolchain</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <toolchains>
+                        <jdk>
+                            <version>11</version>
+                            <vendor>openjdk</vendor>
+                        </jdk>
+                    </toolchains>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -3,7 +3,7 @@ package no.nav.dokdistsentralprint.qdist009;
 import no.nav.dokdistsentralprint.exception.functional.ForsendelseManglerForsendelseIdFunctionalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.builder.xml.XPathBuilder;
+import org.apache.camel.language.xpath.XPathBuilder;
 import org.slf4j.MDC;
 
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
