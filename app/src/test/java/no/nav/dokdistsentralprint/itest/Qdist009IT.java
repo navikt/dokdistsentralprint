@@ -263,9 +263,7 @@ public class Qdist009IT {
 		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
 
 		verifyAllStubs();
-
 	}
-
 
 	@Test
 	public void shouldThrowForsendelseManglerForsendelseIdFunctionalExceptionManglerForsendelseId() throws Exception {
@@ -276,7 +274,6 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-feilId.xml"));
 		});
-
 	}
 
 	@Test
@@ -288,7 +285,6 @@ public class Qdist009IT {
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-tom-forsendelseId.xml"));
 		});
-
 	}
 
 	@Test
