@@ -32,7 +32,7 @@
         <cxf.version>3.4.0</cxf.version>
         <melding-virksomhet-dokdistfordeling.version>2.0.2</melding-virksomhet-dokdistfordeling.version>
         <jaxb2-basics-runtime.version>1.11.1</jaxb2-basics-runtime.version>
-        <rxjava.version>2.2.19</rxjava.version>
+        <rxjava.version>2.2.20</rxjava.version>
         <lombok.version>1.18.12</lombok.version>
         <!-- test -->
         <spring-cloud-contract-wiremock.version>2.2.4.RELEASE</spring-cloud-contract-wiremock.version>
