@@ -26,7 +26,7 @@
         <saaj-impl.version>1.5.2</saaj-impl.version>
         <logstash-logback-encoder.version>6.4</logstash-logback-encoder.version>
         <resilience4j.version>1.5.0</resilience4j.version>
-        <aws-java-sdk-s3.version>1.11.873</aws-java-sdk-s3.version>
+        <aws-java-sdk-s3.version>1.11.925</aws-java-sdk-s3.version>
         <dokkat-api>11.0.6</dokkat-api>
         <wmq.version>9.2.0.0</wmq.version>
         <cxf.version>3.4.0</cxf.version>
