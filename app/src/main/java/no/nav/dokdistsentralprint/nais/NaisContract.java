@@ -7,7 +7,6 @@ import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.nais.selftest.AbstractDependencyCheck;
 import no.nav.dokdistsentralprint.nais.selftest.DependencyCheckResult;
-import no.nav.dokdistsentralprint.nais.selftest.Importance;
 import no.nav.dokdistsentralprint.nais.selftest.Result;
 import no.nav.dokdistsentralprint.nais.selftest.SelftestResult;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static no.nav.dokdistsentralprint.nais.selftest.Importance.CRITICAL;
+import static no.nav.dokdistsentralprint.nais.selftest.Result.ERROR;
+import static no.nav.dokdistsentralprint.nais.selftest.Result.WARNING;
 
 @Slf4j
 @RestController
@@ -82,15 +85,15 @@ public class NaisContract {
 	}
 
 	private boolean isAnyVitalDependencyUnhealthy(List<Result> results) {
-		return results.stream().anyMatch((result) -> result.equals(Result.ERROR));
+		return results.stream().anyMatch(result -> result.equals(ERROR));
 	}
 
 
 	private Result getOverallSelftestResult(List<DependencyCheckResult> results) {
-		if (results.stream().anyMatch((result) -> result.getResult().equals(Result.ERROR))) {
-			return Result.ERROR;
-		} else if (results.stream().anyMatch((result) -> result.getResult().equals(Result.WARNING))) {
-			return Result.WARNING;
+		if (results.stream().anyMatch(result -> result.getResult().equals(ERROR))) {
+			return ERROR;
+		} else if (results.stream().anyMatch(result -> result.getResult().equals(WARNING))) {
+			return WARNING;
 		}
 
 		return Result.OK;
@@ -100,7 +103,7 @@ public class NaisContract {
 	private void checkCriticalDependencies(List<DependencyCheckResult> results) {
 
 		Flowable.fromIterable(dependencyCheckList)
-				.filter(dependency -> dependency.getImportance().equals(Importance.CRITICAL))
+				.filter(dependency -> dependency.getImportance().equals(CRITICAL))
 				.parallel()
 				.runOn(Schedulers.io())
 				.map(payload -> payload.check().get())

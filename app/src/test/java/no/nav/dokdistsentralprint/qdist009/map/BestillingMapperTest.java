@@ -62,7 +62,7 @@ class BestillingMapperTest {
 
 
 	@Test
-	public void shouldMap() {
+	void shouldMap() {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
 				createAdresse(LAND_NO),
@@ -119,7 +119,7 @@ class BestillingMapperTest {
 	}
 
 	@Test
-	public void shouldMapBestillingWithTosidigPrintFalse() {
+	void shouldMapBestillingWithTosidigPrintFalse() {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_ORGANISASJON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createAdresse(LAND_NO),
@@ -130,7 +130,7 @@ class BestillingMapperTest {
 
 
 	@Test
-	public void shouldMapBestillingWithUtenlandsLandkode() {
+	void shouldMapBestillingWithUtenlandsLandkode() {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_ORGANISASJON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createAdresse(LAND_SE),
@@ -176,7 +176,7 @@ class BestillingMapperTest {
 	}
 
 	@Test
-	public void shouldNotMapSkatteyternummerInneBestillingWhenMottakerTypeErIkkeOrganizationEllerPerson() {
+	void shouldNotMapSkatteyternummerInneBestillingWhenMottakerTypeErIkkeOrganizationEllerPerson() {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_UKJENT),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createAdresse(LAND_SE),
@@ -222,10 +222,10 @@ class BestillingMapperTest {
 	}
 
 	@Test
-	public void shouldMapWithOnlyOneAddress() {
+	void shouldMapWithOnlyOneAddress() {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
-				createAdresseWithSingleAdress(LAND_NO),
+				createAdresseWithSingleAdress(),
 				createHentPostDestinasjonresponseTo());
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
@@ -262,13 +262,13 @@ class BestillingMapperTest {
 	}
 
 	@Test
-	public void shouldAssertMottakerSkattyterToTrueWhenMottakerTypeErPersonOrOrganization(){
+	void shouldAssertMottakerSkattyterToTrueWhenMottakerTypeErPersonOrOrganization(){
 		assertTrue(bestillingMapper.isMottakerSkattyter(MOTTAKERTYPE_ORGANISASJON));
 		assertTrue(bestillingMapper.isMottakerSkattyter(MOTTAKERTYPE_PERSON));
 	}
 
 	@Test
-	public void shouldAssertMottakerSkattyterToFalseWhenMottakerTypeErIkkePersonOrOrganization(){
+	void shouldAssertMottakerSkattyterToFalseWhenMottakerTypeErIkkePersonOrOrganization(){
 		assertFalse(bestillingMapper.isMottakerSkattyter(MOTTAKERTYPE_UKJENT));
 		assertFalse(bestillingMapper.isMottakerSkattyter(null));
 	}
@@ -293,12 +293,12 @@ class BestillingMapperTest {
 				.build();
 	}
 
-	private Adresse createAdresseWithSingleAdress(String landkode) {
+	private Adresse createAdresseWithSingleAdress() {
 		return Adresse.builder()
 				.adresselinje1(ADRESSELINJE_1)
 				.postnummer(POSTNUMMER)
 				.poststed(POSTSTED)
-				.landkode(landkode)
+				.landkode(BestillingMapperTest.LAND_NO)
 				.build();
 	}
 

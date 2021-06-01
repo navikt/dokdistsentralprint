@@ -9,13 +9,13 @@ import java.io.StringWriter;
 /**
  * @author Olav Røstvold Thorsen, Visma Consulting.
  */
-public class CDataEscapeHandlerTest {
+class CDataEscapeHandlerTest {
 
 	CDataCharacterEscapeHandler cDataCharacterEscapeHandler = new CDataCharacterEscapeHandler();
 	StringWriter sw = new StringWriter();
 
 	@Test
-	public void shouldNotEscapeCharactersInCData() throws IOException {
+	void shouldNotEscapeCharactersInCData() throws IOException {
 
 		String cdata= "<![CDATA[mottakerNavn\\rlinje1\\rlinje2\\rlinje3\\r3020 Drammen\\rTR]]>";
 		char[] test = cdata.toCharArray();
@@ -24,12 +24,11 @@ public class CDataEscapeHandlerTest {
 	}
 
 	@Test
-	public void shouldEscapeCharacters() throws IOException {
+	void shouldEscapeCharacters() throws IOException {
 		String xml= "&,<>,\",\r";
 		String xmlEscaped = "&amp;,&lt;&gt;,&quot;,&#13;";
 		char[] test = xml.toCharArray();
 		cDataCharacterEscapeHandler.escape(test, 0, test.length, true, sw);
 		assertEquals(xmlEscaped, sw.toString());
-
 	}
 }
