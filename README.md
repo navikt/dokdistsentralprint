@@ -54,7 +54,7 @@ kubectl logs -f dokdistsentralprint-<POD-ID> -n teamdokumenthandtering -c dokdis
 
 
 ### Henvendelser
-Spørsmål til koden eller prosjektet kan rettes til Team Dokumentløsninger på:
+Spørsmål kan rettes til Team Dokumentløsninger på:
 * [\#Team Dokumentløsninger](https://nav-it.slack.com/client/T5LNAMWNA/C6W9E5GPJ)
 
 
