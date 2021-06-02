@@ -6,7 +6,7 @@
 * [Drift og støtte](#4-drift-og-sttte)
 
 ## Funksjonelle krav
-Dokdistsentralprint distribuerer maleinger via doksysløpet til print. 
+Dokdistsentralprint er en del av Doksys og distribuerer dokumenter til sentral print hos Skatteetaten.
 
 For mer informasjon: [confluence](https://confluence.adeo.no/display/BOA/dokdistsentralprint)
 
@@ -56,6 +56,5 @@ kubectl logs -f dokdistsentralprint-<POD-ID> -n teamdokumenthandtering -c dokdis
 ### Henvendelser
 Spørsmål til koden eller prosjektet kan rettes til Team Dokumentløsninger på:
 * [\#Team Dokumentløsninger](https://nav-it.slack.com/client/T5LNAMWNA/C6W9E5GPJ)
-
 
 
