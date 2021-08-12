@@ -12,8 +12,8 @@
   "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.P_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
   "SRVDOKDISTSENTRALPRINT": "/serviceuser/data/prod/srvdokdistsentralprint",
   "VAULT": "/kv/prod/fss/dokdistsentralprint/default",
-  "NAMESPACE": "default",
+  "NAMESPACE": "teamdokumenthandtering",
   "INGRESSES": [
-    "https://dokdistsentralprint.nais.adeo.no"
+    "https://dokdistsentralprint.intern.nav.no"
   ]
 }

@@ -14,6 +14,6 @@
   "VAULT": "/kv/preprod/fss/dokdistsentralprint/q1",
   "NAMESPACE": "q1",
   "INGRESSES": [
-    "https://dokdistsentralprint-q1.nais.preprod.local"
+    "https://dokdistsentralprint-q1.dev.intern.nav.no"
   ]
 }
