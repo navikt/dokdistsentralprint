@@ -172,6 +172,52 @@ class Qdist009IT {
     }
 
     @Test
+    void shouldSendTemaRequestTilRegoppslagOgProcessForsendelse() throws Exception {
+        stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+                .withBodyFile("dokumentinfov4/tkat020-happy.json")));
+        stubFor(get("/administrerforsendelse/" + FORSENDELSE_ID)
+                .willReturn(aResponse().withStatus(OK.value())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .withBody(classpathToString("__files/rjoark001/forsendelse_med_tema.json").replace("insertCallIdHere", CALL_ID))));
+        stubFor(put("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")
+                .willReturn(aResponse().withStatus(OK.value())));
+        stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
+                .willReturn(aResponse().withStatus(OK.value())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
+        stubFor(post("/hentMottakerOgAdresse")
+                .willReturn(aResponse().withStatus(OK.value())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+                        .withBodyFile("regoppslag/treg002-happy.json")));
+        stubFor(post("/sts")
+                .willReturn(aResponse().withStatus(OK.value())
+                        .withBodyFile("sts/sts-happy.xml")));
+
+        sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+        String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
+        await().atMost(100, SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
+        unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
+
+        String bestillingXmlPath = tempDir.toString() + "/" + CALL_ID + ".xml";
+        await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(bestillingXmlPath).exists())); // Test sometimes get FileNotFound. This check prevents it
+        String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
+        String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml.xml").replaceAll("insertCallIdHere",
+                CALL_ID);
+        String hoveddokContent = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+        String vedlegg1Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+        String vedlegg2Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+
+        assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
+        assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
+        assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
+        assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+
+        verifyAllStubs();
+    }
+
+    @Test
     void shouldProcessForsendelseWithoutCallingRegoppslag() throws Exception {
         stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())

@@ -111,6 +111,7 @@ public class Qdist009Service {
 		return regoppslag.treg002HentAdresse(HentAdresseRequestTo.builder()
 				.identifikator(hentForsendelseResponseTo.getMottaker().getMottakerId())
 				.type(hentForsendelseResponseTo.getMottaker().getMottakerType())
+				.tema(hentForsendelseResponseTo.getTema())
 				.build());
 	}
 

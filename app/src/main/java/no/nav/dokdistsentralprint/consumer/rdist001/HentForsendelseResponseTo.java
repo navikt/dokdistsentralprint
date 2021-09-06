@@ -15,6 +15,7 @@ public class HentForsendelseResponseTo {
 	private final String bestillingsId;
 	private final String forsendelseStatus;
 	private final String modus;
+	private final String tema;
 	private final MottakerTo mottaker;
 	private final PostadresseTo postadresse;
 	private final List<DokumentTo> dokumenter;
