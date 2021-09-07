@@ -1,0 +1,27 @@
+{
+  "bestillingsId": "insertCallIdHere",
+  "forsendelseStatus": "KLAR_FOR_DIST",
+  "tema": "DAG",
+  "mottaker": {
+    "mottakerId": "mottakerId",
+    "mottakerNavn": "mottakerNavn",
+    "mottakerType": "PERSON"
+  },
+  "dokumenter": [
+    {
+      "tilknyttetSom": "HOVEDDOKUMENT",
+      "dokumentObjektReferanse": "dokumentObjektReferanseHoveddok",
+      "dokumenttypeId": "dokumenttypeIdHoveddok"
+    },
+    {
+      "tilknyttetSom": "VEDLEGG",
+      "dokumentObjektReferanse": "dokumentObjektReferanseVedlegg1",
+      "dokumenttypeId": "dokumenttypeId2Vedlegg1"
+    },
+    {
+      "tilknyttetSom": "VEDLEGG",
+      "dokumentObjektReferanse": "dokumentObjektReferanseVedlegg2",
+      "dokumenttypeId": "dokumenttypeIdVedlegg2"
+    }
+  ]
+}
