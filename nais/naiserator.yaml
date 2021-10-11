@@ -47,7 +47,7 @@ spec:
     initialDelay: 30
     timeout: 3
   replicas:
-    min: 6
+    min: 12
     max: 12
     cpuThresholdPercentage: 50
   resources:
