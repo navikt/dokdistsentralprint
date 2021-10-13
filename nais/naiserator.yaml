@@ -68,5 +68,5 @@ spec:
         mountPath: /var/run/secrets/nais.io/vault
       - kvPath: {{ SFTP_PRIVATE_KEY }}
         mountPath: /var/run/secrets/nais.io/privateKey
-      - kvPath: { { APPDYNAMICS } }
-        mountPath: "/var/run/secrets/nais.io/appdynamics"
+      - kvPath: {{ APPDYNAMICS }}
+        mountPath: /var/run/secrets/nais.io/appdynamics
