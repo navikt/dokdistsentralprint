@@ -4,7 +4,7 @@
   "DOKUMENTTYPEINFO_V4_URL": "https://app-q2.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "ADMINISTRERFORSENDELSE_V1_URL": "https://app-q2.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "SECURITYTOKENSERVICE_URL": "https://sts-q2.preprod.local/SecurityTokenServiceProvider/",
-  "DOKDISTSENTRALPRINT_CHANNEL_NAME": "Q1_DOKDISTSENTPRINT",
+  "DOKDISTSENTRALPRINT_CHANNEL_NAME": "Q2_DOKDISTSENTPRINT",
   "MQGATEWAY01_HOSTNAME": "b27apvl219.preprod.local",
   "MQGATEWAY01_PORT": "1413",
   "MQGATEWAY01_NAME": "MQLS01",
