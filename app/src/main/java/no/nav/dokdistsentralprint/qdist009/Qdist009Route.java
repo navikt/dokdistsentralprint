@@ -15,6 +15,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import static org.apache.camel.LoggingLevel.ERROR;
+import static org.apache.camel.LoggingLevel.INFO;
 
 
 /**
@@ -78,17 +79,22 @@ public class Qdist009Route extends SpringRouteBuilder {
         from("jms:" + qdist009.getQueueName() +
                 "?transacted=true")
                 .routeId(SERVICE_ID)
+                .log(LoggingLevel.INFO, "START: Mottat melding fra mq")
                 .routePolicy(qdist009MetricsRoutePolicy)
                 .setExchangePattern(ExchangePattern.InOnly)
                 .process(new IdsProcessor())
                 .to("validator:no/nav/meldinger/virksomhet/dokdistfordeling/xsd/qdist008/out/distribuertilkanal.xsd")
                 .unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
+                .log(INFO, log, "distribuerer")
                 .bean(distribuerForsendelseTilSentralPrintMapper)
+                .log(INFO, log, "qdist009Service")
                 .bean(qdist009Service)
+                .log(INFO, log, "sending to sftp")
                 .to(SFTP_SERVER)
+                .log(INFO,"Sent to sftp")
                 .log(LoggingLevel.INFO, log, "qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
                 .bean(dokdistStatusUpdater)
-                .log(LoggingLevel.INFO, log, "qdist009 har oppdatert forsendelseStatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());
+                .log(LoggingLevel.INFO, log, "SLUTT: qdist009 har oppdatert forsendelseStatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());
     }
 
     public static String getIdsForLogging() {
