@@ -13,6 +13,8 @@
   "SRVDOKDISTSENTRALPRINT": "/serviceuser/data/prod/srvdokdistsentralprint",
   "VAULT": "/kv/prod/fss/dokdistsentralprint/default",
   "NAMESPACE": "teamdokumenthandtering",
+  "MIN_REPLICAS": "2",
+  "MAX_REPLICAS": "6",
   "INGRESSES": [
     "https://dokdistsentralprint.intern.nav.no"
   ]
