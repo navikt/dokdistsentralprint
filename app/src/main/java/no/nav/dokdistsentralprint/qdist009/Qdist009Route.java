@@ -91,7 +91,6 @@ public class Qdist009Route extends SpringRouteBuilder {
                 .bean(qdist009Service)
                 .log(INFO, log, "TRINN 3:sending to sftp")
                 .to(SFTP_SERVER)
-                .log(INFO,"TRINN 4: Sent to sftp")
                 .log(LoggingLevel.INFO, log, "TRINN 5: qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
                 .bean(dokdistStatusUpdater)
                 .log(LoggingLevel.INFO, log, "SLUTT: qdist009 har oppdatert forsendelseStatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());
