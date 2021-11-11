@@ -13,8 +13,8 @@
   "SRVDOKDISTSENTRALPRINT": "/serviceuser/data/dev/srvdokdistsentralprint",
   "VAULT": "/kv/preprod/fss/dokdistsentralprint/q1",
   "NAMESPACE": "q1",
-  "MIN_REPLICAS": "1",
-  "MAX_REPLICAS": "2",
+  "MIN_REPLICAS": "2",
+  "MAX_REPLICAS": "6",
   "INGRESSES": [
     "https://dokdistsentralprint-q1.dev.intern.nav.no"
   ]
