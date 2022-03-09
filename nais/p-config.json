@@ -4,6 +4,7 @@
   "DOKUMENTTYPEINFO_V4_URL": "https://app.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "ADMINISTRERFORSENDELSE_V1_URL": "https://app.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "SECURITYTOKENSERVICE_URL": "https://sts.adeo.no/SecurityTokenServiceProvider/",
+  "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
   "DOKDISTSENTRALPRINT_CHANNEL_NAME": "P_DOKDISTSENTPRINT",
   "MQGATEWAY01_HOSTNAME": "a01apvl247.adeo.no",
   "MQGATEWAY01_PORT": "1414",

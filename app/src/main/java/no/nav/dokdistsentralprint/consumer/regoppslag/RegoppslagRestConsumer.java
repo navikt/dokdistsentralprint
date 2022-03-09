@@ -10,7 +10,7 @@ import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentMottakerOgAdresseResponseTo;
-import no.nav.dokdistsentralprint.consumer.sts.STSTokenRetriever;
+import no.nav.dokdistsentralprint.consumer.reststs.StsRestConsumer;
 import no.nav.dokdistsentralprint.exception.functional.RegoppslagHentAdresseFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseSecurityException;
@@ -29,9 +29,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Base64;
 import java.util.UUID;
 
 import org.slf4j.MDC;
@@ -45,27 +43,26 @@ public class RegoppslagRestConsumer implements Regoppslag {
 
 	private final RestTemplate restTemplate;
 	private final String hentMottakerOgAdresseUrl;
-	private final STSTokenRetriever stsTokenRetriever;
-
+	private final StsRestConsumer stsRestConsumer;
 
 	public RegoppslagRestConsumer(RestTemplateBuilder restTemplateBuilder,
 								  @Value("${hentMottakerOgAdresse_url}") String hentMottakerOgAdresseUrl,
 								  final ServiceuserAlias serviceuserAlias,
-								  STSTokenRetriever stsTokenRetriever) {
+								  StsRestConsumer stsRestConsumer) {
 		this.hentMottakerOgAdresseUrl = hentMottakerOgAdresseUrl;
+		this.stsRestConsumer = stsRestConsumer;
 		this.restTemplate = restTemplateBuilder
 				.setReadTimeout(Duration.ofSeconds(20))
 				.setConnectTimeout(Duration.ofSeconds(5))
 				.basicAuthentication(serviceuserAlias.getUsername(), serviceuserAlias.getPassword())
 				.build();
-		this.stsTokenRetriever = stsTokenRetriever;
 	}
 
 	@Override
 	@Monitor(value = "dok_consumer", extraTags = {"process", "treg002HentAdresse"}, histogram = true)
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
-		HttpEntity entity = createRequestWithHeader(request, retrieveSamlTokenAndCreateHeader());
+		HttpEntity entity = createRequestWithHeader(request, retrieveBearerTokenAndCreateHeader());
 		try {
 			return restTemplate.postForObject(this.hentMottakerOgAdresseUrl, entity, HentMottakerOgAdresseResponseTo.class)
 					.getAdresse();
@@ -82,18 +79,17 @@ public class RegoppslagRestConsumer implements Regoppslag {
 		}
 	}
 
-	private HttpHeaders retrieveSamlTokenAndCreateHeader() {
+	private HttpHeaders retrieveBearerTokenAndCreateHeader() {
 		try {
-			String samlAssertionToken = stsTokenRetriever.requestSecurityToken();
+			String bearerToken = stsRestConsumer.getBearerToken();
 			String callId = getCallId();
 			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.set(HttpHeaders.AUTHORIZATION, "SAML " + Base64.getEncoder()
-					.encodeToString(samlAssertionToken.getBytes(StandardCharsets.UTF_8)));
+			httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken);
 			httpHeaders.set(CALL_ID, callId);
 			httpHeaders.set(NAV_CALLID, callId);
 			return httpHeaders;
 		} catch (Exception e) {
-			throw new StsRetriveTokenException(String.format("Henting av samltoken fra STS feilet. Feilmelding=%s", e.getMessage()));
+			throw new StsRetriveTokenException(String.format("Henting av Bearer token fra REST-STS feilet. Feilmelding=%s", e.getMessage()));
 		}
 	}
 
