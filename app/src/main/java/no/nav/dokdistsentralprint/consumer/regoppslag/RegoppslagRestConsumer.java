@@ -1,10 +1,5 @@
 package no.nav.dokdistsentralprint.consumer.regoppslag;
 
-import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
-import static no.nav.dokdistsentralprint.constants.MdcConstants.NAV_CALLID;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
-
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
@@ -15,8 +10,8 @@ import no.nav.dokdistsentralprint.exception.functional.RegoppslagHentAdresseFunc
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseSecurityException;
 import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseTechnicalException;
-import no.nav.dokdistsentralprint.exception.technical.StsRetriveTokenException;
 import no.nav.dokdistsentralprint.metrics.Monitor;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -32,7 +27,10 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 import java.util.UUID;
 
-import org.slf4j.MDC;
+import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
+import static no.nav.dokdistsentralprint.constants.MdcConstants.NAV_CALLID;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 
 /**
  * @author Ugur Alpay Cenar, Visma Consulting.
@@ -80,22 +78,18 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	}
 
 	private HttpHeaders retrieveBearerTokenAndCreateHeader() {
-		try {
-			String bearerToken = stsRestConsumer.getBearerToken();
-			String callId = getCallId();
-			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken);
-			httpHeaders.set(CALL_ID, callId);
-			httpHeaders.set(NAV_CALLID, callId);
-			return httpHeaders;
-		} catch (Exception e) {
-			throw new StsRetriveTokenException(String.format("Henting av Bearer token fra REST-STS feilet. Feilmelding=%s", e.getMessage()));
-		}
+		String bearerToken = stsRestConsumer.getBearerToken();
+		String callId = getCallId();
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken);
+		httpHeaders.set(CALL_ID, callId);
+		httpHeaders.set(NAV_CALLID, callId);
+		return httpHeaders;
 	}
 
 	private String getCallId() {
 		String callId = MDC.get(CALL_ID);
-		if(callId == null) {
+		if (callId == null) {
 			return UUID.randomUUID().toString();
 		}
 		return callId;
