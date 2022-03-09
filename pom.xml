@@ -22,13 +22,11 @@
         <java.version>11</java.version>
         <camel.version>3.11.1</camel.version>
         <javax.inject.version>1</javax.inject.version>
-        <jakarta.xml.ws-api.version>2.3.3</jakarta.xml.ws-api.version>
         <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
         <resilience4j.version>1.7.1</resilience4j.version>
         <aws-java-sdk-s3.version>1.11.1034</aws-java-sdk-s3.version>
         <dokkat-api>11.0.6</dokkat-api>
         <wmq.version>9.2.2.0</wmq.version>
-        <cxf.version>3.4.4</cxf.version>
         <melding-virksomhet-dokdistfordeling.version>2.0.2</melding-virksomhet-dokdistfordeling.version>
         <jaxb2-basics-runtime.version>1.11.1</jaxb2-basics-runtime.version>
         <rxjava.version>2.2.20</rxjava.version>
@@ -55,11 +53,6 @@
                 <version>${javax.inject.version}</version>
             </dependency>
             <dependency>
-                <groupId>jakarta.xml.ws</groupId>
-                <artifactId>jakarta.xml.ws-api</artifactId>
-                <version>${jakarta.xml.ws-api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logstash-logback-encoder.version}</version>
@@ -78,11 +71,6 @@
                 <groupId>com.ibm.mq</groupId>
                 <artifactId>com.ibm.mq.allclient</artifactId>
                 <version>${wmq.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-ws-security</artifactId>
-                <version>${cxf.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.camel.springboot</groupId>
@@ -126,11 +114,6 @@
                 <groupId>io.github.resilience4j</groupId>
                 <artifactId>resilience4j-circuitbreaker</artifactId>
                 <version>${resilience4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-spring-boot-starter-jaxws</artifactId>
-                <version>${cxf.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.reactivex.rxjava2</groupId>

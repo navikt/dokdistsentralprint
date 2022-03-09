@@ -1,7 +1,7 @@
 package no.nav.dokdistsentralprint.consumer.reststs;
 
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
-import no.nav.dokdistsentralprint.exception.technical.StsRetriveTokenException;
+import no.nav.dokdistsentralprint.exception.technical.StsRetrieveTokenException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
@@ -37,14 +37,14 @@ public class StsRestConsumer {
 				.build();
 	}
 
-	@Retryable(include = StsRetriveTokenException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(include = StsRetrieveTokenException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	@Cacheable(REST_STS_CACHE)
 	public String getBearerToken() {
 		try {
 			return requireNonNull(restTemplate.getForObject(stsUrl + "?grant_type=client_credentials&scope=openid", StsResponse.class))
 					.getAccessToken();
 		} catch (HttpStatusCodeException e) {
-			throw new StsRetriveTokenException(String.format("Kall mot STS feilet med status=%s feilmelding=%s.", e.getStatusCode(), e
+			throw new StsRetrieveTokenException(String.format("Kall mot STS feilet med status=%s feilmelding=%s.", e.getStatusCode(), e
 					.getMessage()), e);
 		}
 	}
