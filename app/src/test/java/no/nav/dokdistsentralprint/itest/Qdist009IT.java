@@ -7,6 +7,7 @@ import no.nav.dokdistsentralprint.itest.config.ApplicationTestConfig;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
 import org.apache.activemq.command.ActiveMQTextMessage;
+import org.apache.http.entity.ContentType;
 import org.apache.sshd.server.SshServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -144,9 +145,7 @@ class Qdist009IT {
                 .willReturn(aResponse().withStatus(OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
                         .withBodyFile("regoppslag/treg002-happy.json")));
-        stubFor(post("/sts")
-                .willReturn(aResponse().withStatus(OK.value())
-                        .withBodyFile("sts/sts-happy.xml")));
+        stubRestSts();
 
         sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -190,9 +189,7 @@ class Qdist009IT {
                 .willReturn(aResponse().withStatus(OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
                         .withBodyFile("regoppslag/treg002-happy.json")));
-        stubFor(post("/sts")
-                .willReturn(aResponse().withStatus(OK.value())
-                        .withBodyFile("sts/sts-happy.xml")));
+        stubRestSts();
 
         sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -284,9 +281,7 @@ class Qdist009IT {
                 .willReturn(aResponse().withStatus(OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
                         .withBodyFile("regoppslag/treg002-happy.json")));
-        stubFor(post("/sts")
-                .willReturn(aResponse().withStatus(OK.value())
-                        .withBodyFile("sts/sts-happy.xml")));
+        stubRestSts();
 
         sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -444,9 +439,7 @@ class Qdist009IT {
                                 CALL_ID))));
         stubFor(post("/hentMottakerOgAdresse")
                 .willReturn(aResponse().withStatus(NOT_FOUND.value())));
-        stubFor(post("/sts")
-                .willReturn(aResponse().withStatus(OK.value())
-                        .withBodyFile("sts/sts-happy.xml")));
+        stubRestSts();
 
         sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -459,7 +452,6 @@ class Qdist009IT {
         verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
         verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
-        verify(1, postRequestedFor(urlEqualTo("/sts")));
     }
 
     @Test
@@ -475,9 +467,7 @@ class Qdist009IT {
                                 CALL_ID))));
         stubFor(post("/hentMottakerOgAdresse")
                 .willReturn(aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
-        stubFor(post("/sts")
-                .willReturn(aResponse().withStatus(OK.value())
-                        .withBodyFile("sts/sts-happy.xml")));
+        stubRestSts();
 
         sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -490,7 +480,6 @@ class Qdist009IT {
         verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddok")));
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
         verify(MAX_ATTEMPTS_SHORT, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
-        verify(MAX_ATTEMPTS_SHORT, postRequestedFor(urlEqualTo("/sts")));
     }
 
     @Test
@@ -510,9 +499,7 @@ class Qdist009IT {
                         .withBodyFile("regoppslag/treg002-happy.json")));
         stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
                 .willReturn(aResponse().withStatus(NOT_FOUND.value())));
-        stubFor(post("/sts")
-                .willReturn(aResponse().withStatus(OK.value())
-                        .withBodyFile("sts/sts-happy.xml")));
+        stubRestSts();
 
         sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -526,7 +513,6 @@ class Qdist009IT {
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
         verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
-        verify(1, postRequestedFor(urlEqualTo("/sts")));
     }
 
     @Test
@@ -546,9 +532,7 @@ class Qdist009IT {
                         .withBodyFile("regoppslag/treg002-happy.json")));
         stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
                 .willReturn(aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
-        stubFor(post("/sts")
-                .willReturn(aResponse().withStatus(OK.value())
-                        .withBodyFile("sts/sts-happy.xml")));
+        stubRestSts();
 
         sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -562,7 +546,6 @@ class Qdist009IT {
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
         verify(MAX_ATTEMPTS_SHORT, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
         verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
-        verify(1, postRequestedFor(urlEqualTo("/sts")));
     }
 
     @Test
@@ -582,9 +565,7 @@ class Qdist009IT {
                 .willReturn(aResponse().withStatus(OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
                         .withBodyFile("regoppslag/treg002-happy.json")));
-        stubFor(post("/sts")
-                .willReturn(aResponse().withStatus(OK.value())
-                        .withBodyFile("sts/sts-happy.xml")));
+        stubRestSts();
         stubFor(get("/administrerforsendelse/hentpostdestinasjon/TR")
                 .willReturn(aResponse().withStatus(OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -602,7 +583,6 @@ class Qdist009IT {
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
         verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
-        verify(1, postRequestedFor(urlEqualTo("/sts")));
     }
 
     @Test
@@ -656,9 +636,7 @@ class Qdist009IT {
                 .willReturn(aResponse().withStatus(OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
                         .withBodyFile("regoppslag/treg002-happy.json")));
-        stubFor(post("/sts")
-                .willReturn(aResponse().withStatus(OK.value())
-                        .withBodyFile("sts/sts-happy.xml")));
+        stubRestSts();
 
         sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -692,9 +670,7 @@ class Qdist009IT {
                 .willReturn(aResponse().withStatus(OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
                         .withBodyFile("regoppslag/treg002-happy.json")));
-        stubFor(post("/sts")
-                .willReturn(aResponse().withStatus(OK.value())
-                        .withBodyFile("sts/sts-happy.xml")));
+        stubRestSts();
 
         sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -709,7 +685,6 @@ class Qdist009IT {
                 putRequestedFor(urlEqualTo("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")));
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
         verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
-        verify(1, postRequestedFor(urlEqualTo("/sts")));
     }
 
     private void sendStringMessage(Queue queue, final String message) {
@@ -737,7 +712,13 @@ class Qdist009IT {
                 putRequestedFor(urlEqualTo("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")));
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
         verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
-        verify(1, postRequestedFor(urlEqualTo("/sts")));
+    }
+
+    private void stubRestSts() {
+        stubFor(get("/reststs/token?grant_type=client_credentials&scope=openid")
+                .willReturn(aResponse().withStatus(HttpStatus.OK.value())
+                .withHeader(org.apache.http.HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
+                .withBodyFile("reststs/rest_sts_happy.json")));
     }
 }
 
