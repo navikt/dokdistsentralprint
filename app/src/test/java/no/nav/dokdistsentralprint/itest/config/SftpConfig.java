@@ -6,11 +6,12 @@ import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.pubkey.AcceptAllPublickeyAuthenticator;
 import org.apache.sshd.server.auth.pubkey.UserAuthPublicKeyFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
-import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
+import org.apache.sshd.sftp.server.SftpSubsystemFactory;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.util.Collections;
+
+import static java.nio.file.Path.of;
+import static java.util.Collections.singletonList;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
@@ -21,10 +22,10 @@ public final class SftpConfig {
 		SshServer sshServer = SshServer.setUpDefaultServer();
 		sshServer.setPort(0); //random port
 		sshServer.setHost("localhost");
-		sshServer.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(new File("hostkey.ser")));
-		sshServer.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
+		sshServer.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(of("hostkey.ser")));
+		sshServer.setSubsystemFactories(singletonList(new SftpSubsystemFactory()));
 		sshServer.setPublickeyAuthenticator(AcceptAllPublickeyAuthenticator.INSTANCE);
-		sshServer.setUserAuthFactories(Collections.singletonList(new UserAuthPublicKeyFactory()));
+		sshServer.setUserAuthFactories(singletonList(new UserAuthPublicKeyFactory()));
 		sshServer.setFileSystemFactory(new VirtualFileSystemFactory(tempDir));
 		try {
 			sshServer.start();
