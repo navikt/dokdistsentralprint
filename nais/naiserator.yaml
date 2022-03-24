@@ -1,8 +1,8 @@
 kind: Application
 apiVersion: nais.io/v1alpha1
 metadata:
-  name: dokdistsentralprint
-  namespace: {{ NAMESPACE }}
+  name: {{ APPNAVN }}
+  namespace: teamdokumenthandtering
   labels:
     team: teamdokumenthandtering
 spec:
@@ -62,7 +62,5 @@ spec:
     paths:
       - kvPath: {{ SRVDOKDISTSENTRALPRINT }}
         mountPath: /var/run/secrets/nais.io/srvdokdistsentralprint
-      - kvPath: {{ VAULT }}
-        mountPath: /var/run/secrets/nais.io/vault
       - kvPath: {{ SFTP_PRIVATE_KEY }}
         mountPath: /var/run/secrets/nais.io/privateKey
