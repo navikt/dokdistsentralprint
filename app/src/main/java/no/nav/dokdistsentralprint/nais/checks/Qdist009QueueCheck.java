@@ -5,10 +5,10 @@ import no.nav.dokdistsentralprint.nais.selftest.AbstractDependencyCheck;
 import no.nav.dokdistsentralprint.nais.selftest.ApplicationNotReadyException;
 import no.nav.dokdistsentralprint.nais.selftest.DependencyType;
 import no.nav.dokdistsentralprint.nais.selftest.Importance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 
@@ -18,7 +18,7 @@ public class Qdist009QueueCheck extends AbstractDependencyCheck {
 	private final Queue qdist009;
 	private final JmsTemplate jmsTemplate;
 
-	@Inject
+	@Autowired
 	public Qdist009QueueCheck(MeterRegistry registry, Queue qdist009, JmsTemplate jmsTemplate) throws JMSException {
 		super(DependencyType.QUEUE, "Qdist009Queue", qdist009.getQueueName(), Importance.CRITICAL, registry);
 		this.qdist009 = qdist009;

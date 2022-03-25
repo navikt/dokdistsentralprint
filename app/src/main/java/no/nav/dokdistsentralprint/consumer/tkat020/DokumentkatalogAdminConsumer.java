@@ -1,10 +1,5 @@
 package no.nav.dokdistsentralprint.consumer.tkat020;
 
-import static java.lang.String.format;
-import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
-
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.exception.functional.Tkat020FunctionalException;
@@ -12,6 +7,7 @@ import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprin
 import no.nav.dokdistsentralprint.exception.technical.Tkat020TechnicalException;
 import no.nav.dokdistsentralprint.metrics.Monitor;
 import no.nav.dokkat.api.tkat020.v4.DokumentTypeInfoToV4;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,8 +18,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.inject.Inject;
 import java.time.Duration;
+
+import static java.lang.String.format;
+import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 
 /**
  * @author Sigurd Midttun, Visma Consulting AS
@@ -35,7 +35,7 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 	private final String dokumenttypeInfoV4Url;
 	private final RestTemplate restTemplate;
 
-	@Inject
+	@Autowired
 	public DokumentkatalogAdminConsumer(@Value("${DokumenttypeInfo_v4_url}") String dokumenttypeInfoV4Url,
 										RestTemplateBuilder restTemplateBuilder,
 										final ServiceuserAlias serviceuserAlias) {
