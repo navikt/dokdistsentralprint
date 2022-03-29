@@ -1,13 +1,5 @@
 package no.nav.dokdistsentralprint.qdist009;
 
-import static java.lang.String.format;
-import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_BESTILLINGS_ID;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.createBestillingEntities;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.getDokumenttypeIdHoveddokument;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.validateForsendelseStatus;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.marshalBestillingToXmlString;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.zipPrintbestillingToBytes;
-
 import com.amazonaws.SdkClientException;
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
@@ -29,11 +21,19 @@ import no.nav.dokdistsentralprint.storage.JsonSerializer;
 import no.nav.dokdistsentralprint.storage.Storage;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_BESTILLINGS_ID;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.createBestillingEntities;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.getDokumenttypeIdHoveddokument;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.validateForsendelseStatus;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.marshalBestillingToXmlString;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.zipPrintbestillingToBytes;
 
 
 /**
@@ -49,7 +49,7 @@ public class Qdist009Service {
 	private final MetricUpdater metricUpdater;
 	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
-	@Inject
+	@Autowired
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
 						   AdministrerForsendelse administrerForsendelse,
 						   Storage storage,

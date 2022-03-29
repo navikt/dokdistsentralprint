@@ -1,9 +1,5 @@
 package no.nav.dokdistsentralprint.consumer.rdist001;
 
-import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
-
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.exception.functional.Rdist001GetPostDestinasjonFunctionalException;
 import no.nav.dokdistsentralprint.exception.functional.Rdist001HentForsendelseFunctionalException;
@@ -14,6 +10,7 @@ import no.nav.dokdistsentralprint.exception.technical.Rdist001HentForsendelseTec
 import no.nav.dokdistsentralprint.exception.technical.Rdist001OppdaterForsendelseStatusTechnicalException;
 import no.nav.dokdistsentralprint.metrics.Monitor;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -28,8 +25,11 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.inject.Inject;
 import java.time.Duration;
+
+import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
@@ -40,7 +40,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	private final String administrerforsendelseV1Url;
 	private final RestTemplate restTemplate;
 
-	@Inject
+	@Autowired
 	public AdministrerForsendelseConsumer(@Value("${administrerforsendelse.v1.url}") String administrerforsendelseV1Url,
 										  RestTemplateBuilder restTemplateBuilder,
 										  final ServiceuserAlias serviceuserAlias) {

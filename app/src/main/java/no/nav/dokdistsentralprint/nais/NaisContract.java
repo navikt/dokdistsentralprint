@@ -9,6 +9,7 @@ import no.nav.dokdistsentralprint.nais.selftest.AbstractDependencyCheck;
 import no.nav.dokdistsentralprint.nais.selftest.DependencyCheckResult;
 import no.nav.dokdistsentralprint.nais.selftest.Result;
 import no.nav.dokdistsentralprint.nais.selftest.SelftestResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,7 +41,7 @@ public class NaisContract {
 
 	private AtomicInteger app_status = new AtomicInteger();
 
-	@Inject
+	@Autowired
 	public NaisContract(List<AbstractDependencyCheck> dependencyCheckList, MeterRegistry registry, @Value("${APP_NAME:dokdistsentralprint}") String appName, @Value("${APP_VERSION:0}") String version) {
 		this.dependencyCheckList = new ArrayList<>(dependencyCheckList);
 		Gauge.builder("dok_app_is_ready", app_status, AtomicInteger::get).register(registry);

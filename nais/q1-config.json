@@ -1,6 +1,6 @@
 {
   "SFTP_URL": "b31apvl048.oera-q.local",
-  "SFTP_PRIVATE_KEY": "/kv/preprod/fss/dokdistsentralprint/privateKey",
+  "SFTP_PRIVATE_KEY": "/kv/preprod/fss/dokdistsentralprint-q1/privateKey",
   "DOKUMENTTYPEINFO_V4_URL": "https://app-q1.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "ADMINISTRERFORSENDELSE_V1_URL": "https://app-q1.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.dev.adeo.no/rest/v1/sts/token",
@@ -11,8 +11,7 @@
   "DOKDISTSENTRALPRINT_QDIST009_FUNK_FEIL_QUEUENAME": "QA.Q1_DOKDISTSENTRALPRINT.QDIST009_FUNK_FEIL",
   "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.Q1_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
   "SRVDOKDISTSENTRALPRINT": "/serviceuser/data/dev/srvdokdistsentralprint",
-  "VAULT": "/kv/preprod/fss/dokdistsentralprint/q1",
-  "NAMESPACE": "q1",
+  "APPNAVN": "dokdistsentralprint-q1",
   "MIN_REPLICAS": "1",
   "MAX_REPLICAS": "2",
   "INGRESSES": [

@@ -7,9 +7,9 @@ import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.spring.SpringRouteBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -45,7 +45,7 @@ public class Qdist009Route extends SpringRouteBuilder {
     private final Queue qdist009FunksjonellFeil;
     private final Qdist009MetricsRoutePolicy qdist009MetricsRoutePolicy;
 
-    @Inject
+    @Autowired
     public Qdist009Route(Qdist009Service qdist009Service,
                          DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper,
                          DokdistStatusUpdater dokdistStatusUpdater,

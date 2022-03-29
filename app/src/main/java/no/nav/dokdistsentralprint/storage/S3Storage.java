@@ -1,25 +1,26 @@
 package no.nav.dokdistsentralprint.storage;
 
-import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
-import static no.nav.dokdistsentralprint.storage.S3Configuration.BUCKET_NAME;
-
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import no.nav.dokdistsentralprint.exception.functional.DocumentNotFoundInS3FunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.S3FailedToGetDocumentTechnicalException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
-import javax.inject.Inject;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
+import static no.nav.dokdistsentralprint.storage.S3Configuration.BUCKET_NAME;
 
 
 public class S3Storage implements Storage {
 
-	private AmazonS3 s3WithStrictEncryption;
+	private final AmazonS3 s3WithStrictEncryption;
 
-	@Inject
+	// Får 'Autowired members must be defined in valid Spring bean (@Component|@Service|...)'
+	// Blir uansett endret på i overgang fra S3 til Google Cloud Storage buckets
+	@Autowired
 	public S3Storage(AmazonS3 s3Encryption) {
 		this.s3WithStrictEncryption = s3Encryption;
 	}

@@ -5,10 +5,10 @@ import no.nav.dokdistsentralprint.nais.selftest.AbstractDependencyCheck;
 import no.nav.dokdistsentralprint.nais.selftest.ApplicationNotReadyException;
 import no.nav.dokdistsentralprint.nais.selftest.DependencyType;
 import no.nav.dokdistsentralprint.nais.selftest.Importance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 
@@ -18,7 +18,7 @@ public class Qdist009FunksjonellBOQCheck extends AbstractDependencyCheck {
 	private final Queue qdist009FunksjonellFeil;
 	private final JmsTemplate jmsTemplate;
 
-	@Inject
+	@Autowired
 	public Qdist009FunksjonellBOQCheck(MeterRegistry registry, Queue qdist009FunksjonellFeil, JmsTemplate jmsTemplate) throws JMSException {
 		super(DependencyType.QUEUE, "qdist009FunksjonellFeilQueue", qdist009FunksjonellFeil.getQueueName(), Importance.CRITICAL, registry);
 		this.qdist009FunksjonellFeil = qdist009FunksjonellFeil;

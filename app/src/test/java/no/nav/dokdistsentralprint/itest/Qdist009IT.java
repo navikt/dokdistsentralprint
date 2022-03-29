@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -24,7 +25,6 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
@@ -86,17 +86,17 @@ class Qdist009IT {
     static Path tempDir;
     private static String CALL_ID;
     private static SshServer sshServer;
-    @Inject
+    @Autowired
     public CacheManager cacheManager;
-    @Inject
+    @Autowired
     private JmsTemplate jmsTemplate;
-    @Inject
+    @Autowired
     private Queue qdist009;
-    @Inject
+    @Autowired
     private Queue qdist009FunksjonellFeil;
-    @Inject
+    @Autowired
     private Queue backoutQueue;
-    @Inject
+    @Autowired
     private AmazonS3 amazonS3;
 
     @BeforeAll
