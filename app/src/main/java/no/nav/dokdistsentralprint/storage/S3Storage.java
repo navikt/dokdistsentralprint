@@ -22,7 +22,7 @@ public class S3Storage implements Storage {
 	// Blir uansett endret på i overgang fra S3 til Google Cloud Storage buckets
 	@Autowired
 	public S3Storage(AmazonS3 s3Encryption) {
-		this.s3 dWithStrictEncryption = s3Encryption;
+		this.s3WithStrictEncryption = s3Encryption;
 	}
 
 	@Override
