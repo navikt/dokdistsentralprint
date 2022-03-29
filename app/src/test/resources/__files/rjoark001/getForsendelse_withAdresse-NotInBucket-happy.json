@@ -17,8 +17,8 @@
   "dokumenter": [
     {
       "tilknyttetSom": "HOVEDDOKUMENT",
-      "dokumentObjektReferanse": "dokumentObjektReferanseHoveddokNotInS3",
-      "dokumenttypeId": "dokumenttypeIdHoveddokNotInS3"
+      "dokumentObjektReferanse": "dokumentObjektReferanseHoveddokNotInBucket",
+      "dokumenttypeId": "dokumenttypeIdHoveddokNotInBucket"
     }
   ]
 }

@@ -23,3 +23,9 @@ then
     echo "Setting sftp_privateKeyPassphrase"
     export sftp_privateKeyPassphrase=$(cat /var/run/secrets/nais.io/privateKey/privateKeyPassphrase)
 fi
+
+if test -f /var/run/secrets/nais.io/vault/gcloud_serviceaccount
+then
+    echo "Setting GOOGLE_APPLICATION_CREDENTIALS"
+    export GOOGLE_APPLICATION_CREDENTIALS=/var/run/secrets/nais.io/vault/gcloud_serviceaccount
+fi

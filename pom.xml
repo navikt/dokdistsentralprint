@@ -24,7 +24,8 @@
         <camel.version>3.15.0</camel.version>
         <logstash-logback-encoder.version>7.0.1</logstash-logback-encoder.version>
         <resilience4j.version>1.7.1</resilience4j.version>
-        <aws-java-sdk-s3.version>1.12.184</aws-java-sdk-s3.version>
+        <google-cloud.version>25.0.0</google-cloud.version>
+        <google-tink.version>1.6.1</google-tink.version>
         <wmq.version>9.2.5.0</wmq.version>
 
         <dokkat-api>11.0.6</dokkat-api>
@@ -85,11 +86,22 @@
                 <version>${wmq.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-s3</artifactId>
-                <version>${aws-java-sdk-s3.version}</version>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>${google-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
-
+            <dependency>
+                <groupId>com.google.crypto.tink</groupId>
+                <artifactId>tink</artifactId>
+                <version>${google-tink.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.crypto.tink</groupId>
+                <artifactId>tink-gcpkms</artifactId>
+                <version>${google-tink.version}</version>
+            </dependency>
             <!--Selftest metrics-->
             <dependency>
                 <groupId>io.github.resilience4j</groupId>

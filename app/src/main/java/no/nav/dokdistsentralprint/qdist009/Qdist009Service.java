@@ -1,6 +1,5 @@
 package no.nav.dokdistsentralprint.qdist009;
 
-import com.amazonaws.SdkClientException;
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
@@ -9,16 +8,16 @@ import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
-import no.nav.dokdistsentralprint.exception.functional.KunneIkkeDeserialisereS3JsonPayloadFunctionalException;
-import no.nav.dokdistsentralprint.exception.technical.NoDocumentFromS3TechnicalException;
+import no.nav.dokdistsentralprint.exception.functional.KunneIkkeDeserialisereBucketJsonPayloadFunctionalException;
+import no.nav.dokdistsentralprint.exception.technical.NoDocumentFromBucketTechnicalException;
 import no.nav.dokdistsentralprint.metrics.MetricUpdater;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
 import no.nav.dokdistsentralprint.qdist009.domain.DistribuerForsendelseTilSentralPrintTo;
+import no.nav.dokdistsentralprint.storage.BucketStorage;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
-import no.nav.dokdistsentralprint.storage.Storage;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,20 +44,20 @@ public class Qdist009Service {
 	private final DokumentkatalogAdmin dokumentkatalogAdmin;
 	private final AdministrerForsendelse administrerForsendelse;
 	private final Regoppslag regoppslag;
-	private final Storage storage;
+	private final BucketStorage bucketStorage;
 	private final MetricUpdater metricUpdater;
 	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
 	@Autowired
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
 						   AdministrerForsendelse administrerForsendelse,
-						   Storage storage,
+						   BucketStorage bucketStorage,
 						   Regoppslag regoppslag,
 						   MetricUpdater metricUpdater) {
 		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
 		this.administrerForsendelse = administrerForsendelse;
 		this.regoppslag = regoppslag;
-		this.storage = storage;
+		this.bucketStorage = bucketStorage;
 		this.metricUpdater = metricUpdater;
 	}
 
@@ -72,7 +71,7 @@ public class Qdist009Service {
 		Adresse adresse = getAdresse(hentForsendelseResponseTo);
 		HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo = administrerForsendelse.hentPostDestinasjon(adresse.getLandkode());
 
-		List<DokdistDokument> dokdistDokumentList = getDocumentsFromS3(hentForsendelseResponseTo);
+		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(hentForsendelseResponseTo);
 
 		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse, hentPostDestinasjonResponseTo);
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
@@ -119,26 +118,26 @@ public class Qdist009Service {
 	 * Her er rekkefølgen viktig. HentForsendelseResponseTo.dokumenter består av en ordnet liste av dokumenter i rekkefølgen HOVEDDOK, VEDLEGG1, VEDLEGG2, ...
 	 * Denne rekkefølgen må bevares slik at bestillingen blir korrekt. Siden vi bruker List.java blir denne rekkefølgen ivaretatt
 	 **/
-	private List<DokdistDokument> getDocumentsFromS3(HentForsendelseResponseTo hentForsendelseResponseTo) {
+	private List<DokdistDokument> getDocumentsFromBucket(HentForsendelseResponseTo hentForsendelseResponseTo) {
 		return hentForsendelseResponseTo.getDokumenter().stream()
 				.map(dokumentTo -> {
-					String jsonPayload = storage.get(dokumentTo.getDokumentObjektReferanse());
-					return deserializeS3JsonPayloadToDokdistDokument(jsonPayload, dokumentTo.getDokumentObjektReferanse());
+					String jsonPayload = bucketStorage.downloadObject(dokumentTo.getDokumentObjektReferanse(), hentForsendelseResponseTo.getBestillingsId());
+					return deserializeBucketJsonPayloadToDokdistDokument(jsonPayload, dokumentTo.getDokumentObjektReferanse());
 				})
 				.collect(Collectors.toList());
 	}
 
-	private DokdistDokument deserializeS3JsonPayloadToDokdistDokument(String jsonPayload, String objektReferanse) {
+	private DokdistDokument deserializeBucketJsonPayloadToDokdistDokument(String jsonPayload, String objektReferanse) {
 		DokdistDokument dokdistDokument;
 		try {
 			dokdistDokument = JsonSerializer.deserialize(jsonPayload, DokdistDokument.class);
 			dokdistDokument.setDokumentObjektReferanse(objektReferanse);
-		} catch (SdkClientException e) {
-			throw new KunneIkkeDeserialisereS3JsonPayloadFunctionalException(format("Kunne ikke deserialisere jsonPayload fra s3 bucket for dokument med dokumentobjektreferanse=%s. Dokumentet er ikke persistert til s3 med korrekt format!", objektReferanse));
+		} catch (IllegalStateException e) {
+			throw new KunneIkkeDeserialisereBucketJsonPayloadFunctionalException(format("Kunne ikke deserialisere jsonPayload fra bucket for dokument med dokumentobjektreferanse=%s. Dokumentet er ikke persistert til bucket med korrekt format!", objektReferanse));
 		}
 
 		if (dokdistDokument.getPdf() == null) {
-			throw new NoDocumentFromS3TechnicalException(format("Det fantes et innslag i s3 på dokumentobjektreferanse=%s, men dette var ikke tilknyttet noe dokument.", objektReferanse));
+			throw new NoDocumentFromBucketTechnicalException(format("Det fantes et innslag i bucket på dokumentobjektreferanse=%s, men dette var ikke tilknyttet noe dokument.", objektReferanse));
 		}
 		return dokdistDokument;
 	}
