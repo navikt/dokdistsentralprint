@@ -27,6 +27,14 @@ spec:
       value: {{ DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME }}
     - name: SECURITY_TOKEN_SERVICE_TOKEN_URL
       value: {{ SECURITY_TOKEN_SERVICE_TOKEN_URL }}
+    - name: DOKDISTMELLOMLAGER_PROJECTID
+      value: {{ DOKDISTMELLOMLAGER_PROJECTID }}
+    - name: DOKDISTMELLOMLAGER_BUCKET
+      value: {{ DOKDISTMELLOMLAGER_BUCKET }}
+    - name: DOKDISTMELLOMLAGER_KEYRING
+      value: {{ DOKDISTMELLOMLAGER_KEYRING }}
+    - name: DOKDISTMELLOMLAGER_KEYID
+      value: {{ DOKDISTMELLOMLAGER_KEYID }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -64,3 +72,4 @@ spec:
         mountPath: /var/run/secrets/nais.io/srvdokdistsentralprint
       - kvPath: {{ SFTP_PRIVATE_KEY }}
         mountPath: /var/run/secrets/nais.io/privateKey
+  webproxy: true

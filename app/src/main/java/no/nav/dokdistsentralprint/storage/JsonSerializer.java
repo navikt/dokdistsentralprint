@@ -1,20 +1,41 @@
 package no.nav.dokdistsentralprint.storage;
 
-import com.amazonaws.util.json.Jackson;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
  * @author Ugur Alpay Cenar, Visma Consulting.
  */
 public class JsonSerializer {
 
-    private JsonSerializer() {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    static {
+        objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
+    private static final ObjectWriter writer = objectMapper.writer();
+
     public static String serialize(Object object) {
-        return Jackson.toJsonString(object);
+        try {
+            return writer.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public static <T> T deserialize(String jsonPayload, Class<T> tClass) {
-        return Jackson.fromJsonString(jsonPayload, tClass);
+        try {
+            if(jsonPayload == null) {
+                throw new IllegalStateException("jsonPayload er null.");
+            }
+            return objectMapper.readValue(jsonPayload, tClass);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

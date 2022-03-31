@@ -1,9 +1,9 @@
 package no.nav.dokdistsentralprint.itest;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.dokdistsentralprint.Application;
 import no.nav.dokdistsentralprint.itest.config.ApplicationTestConfig;
+import no.nav.dokdistsentralprint.storage.BucketStorage;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
 import org.apache.activemq.command.ActiveMQTextMessage;
@@ -48,7 +48,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
 import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
-import static no.nav.dokdistsentralprint.storage.S3Configuration.BUCKET_NAME;
 import static no.nav.dokdistsentralprint.testUtils.classpathToString;
 import static no.nav.dokdistsentralprint.testUtils.fileToString;
 import static no.nav.dokdistsentralprint.testUtils.unzipToDirectory;
@@ -58,6 +57,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -97,7 +97,7 @@ class Qdist009IT {
     @Autowired
     private Queue backoutQueue;
     @Autowired
-    private AmazonS3 amazonS3;
+    private BucketStorage bucketStorage;
 
     @BeforeAll
     public static void setupBeforeAll() throws IOException {
@@ -120,10 +120,10 @@ class Qdist009IT {
         WireMock.removeAllMappings();
 
         cacheManager.getCache(TKAT020_CACHE).clear();
-        reset(amazonS3);
-        when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK))).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
-        when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1))).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build()));
-        when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2))).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build()));
+        reset(bucketStorage);
+        when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
+        when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build()));
+        when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build()));
     }
 
     @Test
@@ -549,8 +549,8 @@ class Qdist009IT {
     }
 
     @Test
-    void shouldThrowKunneIkkeDeserialisereS3PayloadFunctionalException() throws Exception {
-        when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2))).thenReturn("notJsonSerializedString");
+    void shouldThrowKunneIkkeDeserialisereBucketPayloadFunctionalException() throws Exception {
+        when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString())).thenReturn("notJsonSerializedString");
 
         stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddok")).willReturn(aResponse().withStatus(OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
@@ -558,7 +558,7 @@ class Qdist009IT {
         stubFor(get("/administrerforsendelse/" + FORSENDELSE_ID)
                 .willReturn(aResponse().withStatus(OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(classpathToString("__files/rjoark001/getForsendelse_withAdresse-CorruptInS3-happy.json").replace(
+                        .withBody(classpathToString("__files/rjoark001/getForsendelse_withAdresse-CorruptInBucket-happy.json").replace(
                                 "insertCallIdHere",
                                 CALL_ID))));
         stubFor(post("/hentMottakerOgAdresse")
@@ -586,14 +586,14 @@ class Qdist009IT {
     }
 
     @Test
-    void shouldThrowDokumentIkkeFunnetIS3Exception() throws Exception {
-        stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddokNotInS3")).willReturn(aResponse().withStatus(OK.value())
+    void shouldThrowDokumentIkkeFunnetIBucketException() throws Exception {
+        stubFor(get(urlMatching("/dokkat/dokumenttypeIdHoveddokNotInBucket")).willReturn(aResponse().withStatus(OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
                 .withBodyFile("dokumentinfov4/tkat020-happy.json")));
         stubFor(get("/administrerforsendelse/" + FORSENDELSE_ID)
                 .willReturn(aResponse().withStatus(OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(classpathToString("__files/rjoark001/getForsendelse_withAdresse-NotInS3-happy.json").replace(
+                        .withBody(classpathToString("__files/rjoark001/getForsendelse_withAdresse-NotInBucket-happy.json").replace(
                                 "insertCallIdHere",
                                 CALL_ID))));
         stubFor(get("/administrerforsendelse/hentpostdestinasjon/NO")
@@ -610,7 +610,7 @@ class Qdist009IT {
             assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
         });
 
-        verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddokNotInS3")));
+        verify(1, getRequestedFor(urlEqualTo("/dokkat/dokumenttypeIdHoveddokNotInBucket")));
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
         verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/NO")));
     }

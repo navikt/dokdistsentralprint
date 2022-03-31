@@ -12,6 +12,10 @@
   "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.P_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
   "SRVDOKDISTSENTRALPRINT": "/serviceuser/data/prod/srvdokdistsentralprint",
   "APPNAVN": "dokdistsentralprint",
+  "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-prod-a63b",
+  "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-prod",
+  "DOKDISTMELLOMLAGER_KEYRING": "dokdistmellomlager-keyring",
+  "DOKDISTMELLOMLAGER_KEYID": "dokdistmellomlager-symmetric",
   "MIN_REPLICAS": "2",
   "MAX_REPLICAS": "6",
   "INGRESSES": [
