@@ -4,6 +4,7 @@
   "DOKUMENTTYPEINFO_V4_URL": "https://app-q1.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "ADMINISTRERFORSENDELSE_V1_URL": "https://app-q1.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.dev.adeo.no/rest/v1/sts/token",
+  "REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL": "https://regoppslag-q1.dev.intern.nav.no/rest/hentMottakerOgAdresse",
   "DOKDISTSENTRALPRINT_CHANNEL_NAME": "Q1_DOKDISTSENTPRINT",
   "MQGATEWAY01_HOSTNAME": "b27apvl219.preprod.local",
   "MQGATEWAY01_PORT": "1413",
