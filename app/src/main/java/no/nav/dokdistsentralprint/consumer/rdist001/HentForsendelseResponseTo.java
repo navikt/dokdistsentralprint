@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class HentForsendelseResponseTo {
 	private final String bestillingsId;
+	private final String originalBestillingsId;
 	private final String forsendelseStatus;
 	private final String modus;
 	private final String tema;

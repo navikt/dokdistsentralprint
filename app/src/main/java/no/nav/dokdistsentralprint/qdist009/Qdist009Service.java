@@ -1,5 +1,6 @@
 package no.nav.dokdistsentralprint.qdist009;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
@@ -33,11 +34,13 @@ import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.g
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.validateForsendelseStatus;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.marshalBestillingToXmlString;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.zipPrintbestillingToBytes;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
  */
+@Slf4j
 @Service
 public class Qdist009Service {
 
@@ -63,9 +66,11 @@ public class Qdist009Service {
 
 	@Handler
 	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo, Exchange exchange) {
-		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(distribuerForsendelseTilSentralPrintTo
-				.getForsendelseId());
-		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponseTo.getBestillingsId());
+		final String forsendelseId = distribuerForsendelseTilSentralPrintTo.getForsendelseId();
+		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(forsendelseId);
+		final String bestillingsId = hentForsendelseResponseTo.getBestillingsId();
+		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingsId);
+		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", forsendelseId, bestillingsId);
 		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
 		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));
 		Adresse adresse = getAdresse(hentForsendelseResponseTo);
@@ -75,7 +80,7 @@ public class Qdist009Service {
 
 		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse, hentPostDestinasjonResponseTo);
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
-		List<BestillingEntity> bestillingEntities = createBestillingEntities(hentForsendelseResponseTo.getBestillingsId(), bestillingXmlString, dokdistDokumentList);
+		List<BestillingEntity> bestillingEntities = createBestillingEntities(bestillingsId, bestillingXmlString, dokdistDokumentList);
 
 		metricUpdater.updateQdist009Metrics(hentPostDestinasjonResponseTo.getPostDestinasjon(), adresse.getLandkode());
 
@@ -121,10 +126,18 @@ public class Qdist009Service {
 	private List<DokdistDokument> getDocumentsFromBucket(HentForsendelseResponseTo hentForsendelseResponseTo) {
 		return hentForsendelseResponseTo.getDokumenter().stream()
 				.map(dokumentTo -> {
-					String jsonPayload = bucketStorage.downloadObject(dokumentTo.getDokumentObjektReferanse(), hentForsendelseResponseTo.getBestillingsId());
-					return deserializeBucketJsonPayloadToDokdistDokument(jsonPayload, dokumentTo.getDokumentObjektReferanse());
+					if (isBlank(hentForsendelseResponseTo.getOriginalBestillingsId())) {
+						return getDokdistDokument(dokumentTo, hentForsendelseResponseTo.getBestillingsId());
+					} else {
+						return getDokdistDokument(dokumentTo, hentForsendelseResponseTo.getOriginalBestillingsId());
+					}
 				})
 				.collect(Collectors.toList());
+	}
+
+	private DokdistDokument getDokdistDokument(HentForsendelseResponseTo.DokumentTo dokumentTo, String bestillingsId) {
+		String jsonPayload = bucketStorage.downloadObject(dokumentTo.getDokumentObjektReferanse(), bestillingsId);
+		return deserializeBucketJsonPayloadToDokdistDokument(jsonPayload, dokumentTo.getDokumentObjektReferanse());
 	}
 
 	private DokdistDokument deserializeBucketJsonPayloadToDokdistDokument(String jsonPayload, String objektReferanse) {
