@@ -44,7 +44,7 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	private final StsRestConsumer stsRestConsumer;
 
 	public RegoppslagRestConsumer(RestTemplateBuilder restTemplateBuilder,
-								  @Value("${hentMottakerOgAdresse_url}") String hentMottakerOgAdresseUrl,
+								  @Value("${regoppslag.hentmottakerogadresse.url}") String hentMottakerOgAdresseUrl,
 								  final ServiceuserAlias serviceuserAlias,
 								  StsRestConsumer stsRestConsumer) {
 		this.hentMottakerOgAdresseUrl = hentMottakerOgAdresseUrl;
