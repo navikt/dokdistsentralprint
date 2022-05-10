@@ -34,6 +34,7 @@ public class BestillingMapper {
 	private static final String MOTTAKERTYPE_PERSON = "PERSON";
 	private static final String MOTTAKERTYPE_ORGANISASJON = "ORGANISASJON";
 	private static final String KONVOLUTT_MED_VINDU = "X";
+	private static final String NAV_STANDARD = "NAV_STANDARD";
 
 	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse, HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo) {
 		return new Bestilling()
@@ -63,14 +64,14 @@ public class BestillingMapper {
 				.map(dokumentTo ->
 						isMottakerSkattyter(hentForsendelseResponseTo.getMottaker().getMottakerType()) ?
 								new Dokument()
-										.withDokumentType(dokumenttypeInfoTo.getSentralPrintDokumentType())
+										.withDokumentType(mapDokumentType(dokumenttypeInfoTo.getSentralPrintDokumentType()))
 										.withDokumentId(dokumentTo.getDokumentObjektReferanse())
 										.withSkattyternummer(hentForsendelseResponseTo.getMottaker().getMottakerId())
 										.withNavn(addCDataToString(hentForsendelseResponseTo.getMottaker().getMottakerNavn()))
 										.withLandkode(getLandkode(adresse))
 										.withPostnummer(getPostnummer(adresse)) :
 								new Dokument()
-										.withDokumentType(dokumenttypeInfoTo.getSentralPrintDokumentType())
+										.withDokumentType(mapDokumentType(dokumenttypeInfoTo.getSentralPrintDokumentType()))
 										.withDokumentId(dokumentTo.getDokumentObjektReferanse())
 										.withNavn(addCDataToString(hentForsendelseResponseTo.getMottaker().getMottakerNavn()))
 										.withLandkode(getLandkode(adresse))
@@ -147,6 +148,10 @@ public class BestillingMapper {
 
 	private String mapKonvoluttvinduType(DokumenttypeInfoTo dokumenttypeInfoTo) {
 		return isBlank(dokumenttypeInfoTo.getKonvoluttvinduType()) ? KONVOLUTT_MED_VINDU : dokumenttypeInfoTo.getKonvoluttvinduType();
+	}
+
+	private String mapDokumentType(String sentralPrintDokumentType) {
+		return isBlank(sentralPrintDokumentType) ? NAV_STANDARD : sentralPrintDokumentType;
 	}
 
 	private String getPlex(boolean tosidigPrint) {

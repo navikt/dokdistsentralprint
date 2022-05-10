@@ -1,13 +1,5 @@
 package no.nav.dokdistsentralprint.qdist009.map;
 
-import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.KUNDE_ID_NAV_IKT;
-import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.PRINT;
-import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.USORTERT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
@@ -19,6 +11,14 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+
+import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.KUNDE_ID_NAV_IKT;
+import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.PRINT;
+import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.USORTERT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
@@ -57,6 +57,7 @@ class BestillingMapperTest {
 	private static final String MOTTAKERTYPE_ORGANISASJON = "ORGANISASJON";
 	private static final String MOTTAKERTYPE_UKJENT = "UKJENT";
 	private static final String CDATA_MOTTAKER_NAVN = "<![CDATA[" + MOTTAKER_NAVN + "]]>";
+	private static final String NAV_STANDARD = "NAV_STANDARD";
 
 	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
@@ -120,13 +121,71 @@ class BestillingMapperTest {
 	}
 
 	@Test
+	void shouldMapDefaultValueWhenSentralPrintDokumentTypeIkkeSettPåDokumenttypeInfo() {
+
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
+				createDokumenttypeInfoToUtenSentralPrintDokumentType(TOSIDIG_PRINT_TRUE),
+				createAdresse(LAND_NO),
+				createHentPostDestinasjonresponseTo());
+
+
+		assertEquals(MODUS, bestilling.getBestillingsInfo().getModus());
+		assertEquals(KUNDE_ID_NAV_IKT, bestilling.getBestillingsInfo().getKundeId());
+		assertEquals(BESTILLINGS_ID, bestilling.getBestillingsInfo().getBestillingsId());
+		assertEquals(LocalDate.now().toString(), bestilling.getBestillingsInfo().getKundeOpprettet());
+
+		assertEquals(USORTERT, bestilling.getBestillingsInfo().getDokumentInfo().getSorteringsfelt());
+		assertEquals(POST_DESTINASJON_INNLAND, bestilling.getBestillingsInfo().getDokumentInfo().getDestinasjon());
+		assertEquals(PRINT, bestilling.getBestillingsInfo().getKanal().getType());
+		assertEquals(PORTOKLASSE + "_" + KONVOLUTTVINDU_TYPE + "_D", bestilling.getBestillingsInfo().getKanal().getBehandling());
+
+		assertEquals(BESTILLINGS_ID, bestilling.getMailpiece().getMailpieceId());
+		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
+						ADRESSELINJE_1 + "\r" +
+						ADRESSELINJE_2 + "\r" +
+						ADRESSELINJE_3 + "\r" +
+						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+				bestilling.getMailpiece().getRessurs().getAdresse());
+
+		assertNull(bestilling.getMailpiece().getLandkode());
+		assertEquals(POSTNUMMER, bestilling.getMailpiece().getPostnummer());
+
+		Dokument hovedDokument = bestilling.getMailpiece().getDokument().get(0);
+
+		assertEquals(NAV_STANDARD, hovedDokument.getDokumentType());
+		assertEquals(CDATA_MOTTAKER_NAVN, hovedDokument.getNavn());
+		assertEquals(OBJEKT_REFERANSE_HOVEDDOK, hovedDokument.getDokumentId());
+		assertEquals(MOTTAKER_ID, hovedDokument.getSkattyternummer());
+		assertNull(hovedDokument.getLandkode());
+		assertEquals(POSTNUMMER, hovedDokument.getPostnummer());
+
+		Dokument vedlegg1 = bestilling.getMailpiece().getDokument().get(1);
+
+		assertEquals(NAV_STANDARD, vedlegg1.getDokumentType());
+		assertEquals(CDATA_MOTTAKER_NAVN, vedlegg1.getNavn());
+		assertEquals(OBJEKT_REFERANSE_VEDLEGG1, vedlegg1.getDokumentId());
+		assertEquals(MOTTAKER_ID, vedlegg1.getSkattyternummer());
+		assertNull(vedlegg1.getLandkode());
+		assertEquals(POSTNUMMER, vedlegg1.getPostnummer());
+
+		Dokument vedlegg2 = bestilling.getMailpiece().getDokument().get(2);
+
+		assertEquals(NAV_STANDARD, vedlegg2.getDokumentType());
+		assertEquals(CDATA_MOTTAKER_NAVN, vedlegg2.getNavn());
+		assertEquals(OBJEKT_REFERANSE_VEDLEGG2, vedlegg2.getDokumentId());
+		assertEquals(MOTTAKER_ID, vedlegg2.getSkattyternummer());
+		assertNull(vedlegg2.getLandkode());
+		assertEquals(POSTNUMMER, vedlegg2.getPostnummer());
+	}
+
+	@Test
 	void shouldMapKonvoluttTypeToXWhenKonvoluttvinduTypeIkkeSettPåDokumenttypeInfo() {
 
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoUtenKonvoluttvinduType(TOSIDIG_PRINT_TRUE),
 				createAdresse(LAND_NO),
 				createHentPostDestinasjonresponseTo());
-		
+
 		assertEquals(MODUS, bestilling.getBestillingsInfo().getModus());
 		assertEquals(KUNDE_ID_NAV_IKT, bestilling.getBestillingsInfo().getKundeId());
 		assertEquals(BESTILLINGS_ID, bestilling.getBestillingsInfo().getBestillingsId());
@@ -344,6 +403,14 @@ class BestillingMapperTest {
 		return DokumenttypeInfoTo.builder()
 				.portoklasse(PORTOKLASSE)
 				.sentralPrintDokumentType(SENTRALPRINT_DOKTYPE)
+				.tosidigprint(tosidigPrint)
+				.build();
+	}
+
+	private DokumenttypeInfoTo createDokumenttypeInfoToUtenSentralPrintDokumentType(boolean tosidigPrint) {
+		return DokumenttypeInfoTo.builder()
+				.konvoluttvinduType(KONVOLUTTVINDU_TYPE)
+				.portoklasse(PORTOKLASSE)
 				.tosidigprint(tosidigPrint)
 				.build();
 	}
