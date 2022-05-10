@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
@@ -32,6 +33,7 @@ public class BestillingMapper {
 	private static final String LANDKODE_NO = "NO";
 	private static final String MOTTAKERTYPE_PERSON = "PERSON";
 	private static final String MOTTAKERTYPE_ORGANISASJON = "ORGANISASJON";
+	private static final String KONVOLUTT_MED_VINDU = "X";
 
 	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse, HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo) {
 		return new Bestilling()
@@ -139,8 +141,12 @@ public class BestillingMapper {
 	}
 
 	private String getBehandling(DokumenttypeInfoTo dokumenttypeInfoTo) {
-		return format("%s_%s_%s", dokumenttypeInfoTo.getPortoklasse(), dokumenttypeInfoTo.getKonvoluttvinduType(), getPlex(dokumenttypeInfoTo
+		return format("%s_%s_%s", dokumenttypeInfoTo.getPortoklasse(), mapKonvoluttvinduType(dokumenttypeInfoTo), getPlex(dokumenttypeInfoTo
 				.isTosidigprint()));
+	}
+
+	private String mapKonvoluttvinduType(DokumenttypeInfoTo dokumenttypeInfoTo) {
+		return isBlank(dokumenttypeInfoTo.getKonvoluttvinduType()) ? KONVOLUTT_MED_VINDU : dokumenttypeInfoTo.getKonvoluttvinduType();
 	}
 
 	private String getPlex(boolean tosidigPrint) {
