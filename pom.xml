@@ -21,7 +21,7 @@
     <properties>
         <java.version>17</java.version>
 
-        <camel.version>3.17.0</camel.version>
+        <camel.version>3.16.0</camel.version>
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
         <resilience4j.version>1.7.1</resilience4j.version>
         <google-cloud.version>25.4.0</google-cloud.version>
