@@ -79,6 +79,8 @@ public class Qdist009Service {
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(hentForsendelseResponseTo);
 
 		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse, hentPostDestinasjonResponseTo);
+		String kanalbehandling = bestilling.getBestillingsInfo().getKanal().getBehandling();
+		log.info("qdist009 lager bestilling til print med kanalbehandling={} for bestillingsId={}", kanalbehandling, bestillingsId);
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
 		List<BestillingEntity> bestillingEntities = createBestillingEntities(bestillingsId, bestillingXmlString, dokdistDokumentList);
 
