@@ -29,8 +29,7 @@ public final class Qdist009FunctionalUtils {
 	public static String getDokumenttypeIdHoveddokument(HentForsendelseResponseTo hentForsendelseResponseTo) {
 		return hentForsendelseResponseTo.getDokumenter().stream()
 				.filter(dokumentTo -> HOVEDDOKUMENT.equals(dokumentTo.getTilknyttetSom()))
-				.map(HentForsendelseResponseTo.DokumentTo::getDokumenttypeId)
-				.collect(Collectors.toList())
+				.map(HentForsendelseResponseTo.DokumentTo::getDokumenttypeId).toList()
 				.get(0);
 	}
 
