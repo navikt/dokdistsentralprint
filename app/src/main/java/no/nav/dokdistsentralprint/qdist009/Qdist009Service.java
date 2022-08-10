@@ -72,7 +72,8 @@ public class Qdist009Service {
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingsId);
 		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", forsendelseId, bestillingsId);
 		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
-		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(getDokumenttypeIdHoveddokument(hentForsendelseResponseTo));
+		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(hentForsendelseResponseTo);
+		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(dokumenttypeIdHoveddokument);
 		Adresse adresse = getAdresse(hentForsendelseResponseTo);
 		HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo = administrerForsendelse.hentPostDestinasjon(adresse.getLandkode());
 
@@ -80,7 +81,8 @@ public class Qdist009Service {
 
 		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse, hentPostDestinasjonResponseTo);
 		String kanalbehandling = bestilling.getBestillingsInfo().getKanal().getBehandling();
-		log.info("qdist009 lager bestilling til print med kanalbehandling={} for bestillingsId={}", kanalbehandling, bestillingsId);
+		log.info("qdist009 lager bestilling til print med kanalbehandling={} for bestillingsId={}, dokumenttypeId={}",
+				kanalbehandling, bestillingsId, dokumenttypeIdHoveddokument);
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
 		List<BestillingEntity> bestillingEntities = createBestillingEntities(bestillingsId, bestillingXmlString, dokdistDokumentList);
 
