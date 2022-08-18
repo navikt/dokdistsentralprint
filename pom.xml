@@ -26,7 +26,7 @@
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
         <resilience4j.version>1.7.1</resilience4j.version>
         <google-cloud.version>25.4.0</google-cloud.version>
-        <google-tink.version>1.6.1</google-tink.version>
+        <google-tink.version>1.7.0</google-tink.version>
         <wmq.version>9.2.5.0</wmq.version>
 
         <dokkat-api>11.0.6</dokkat-api>
