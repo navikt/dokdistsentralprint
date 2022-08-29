@@ -44,6 +44,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Service
 public class Qdist009Service {
 
+	private static final String UKJENT_LANDKODE = "???";
+	private static final String XU_LANDKODE = "XU";
 	private final DokumentkatalogAdmin dokumentkatalogAdmin;
 	private final AdministrerForsendelse administrerForsendelse;
 	private final Regoppslag regoppslag;
@@ -99,7 +101,7 @@ public class Qdist009Service {
 					.adresselinje1(adresseRegoppslag.getAdresselinje1())
 					.adresselinje2(adresseRegoppslag.getAdresselinje2())
 					.adresselinje3(adresseRegoppslag.getAdresselinje3())
-					.landkode(adresseRegoppslag.getLandkode())
+					.landkode(mapLandkode(adresseRegoppslag.getLandkode()))
 					.postnummer(adresseRegoppslag.getPostnummer())
 					.poststed(adresseRegoppslag.getPoststed())
 					.build();
@@ -108,11 +110,15 @@ public class Qdist009Service {
 					.adresselinje1(adresseDokdist.getAdresselinje1())
 					.adresselinje2(adresseDokdist.getAdresselinje2())
 					.adresselinje3(adresseDokdist.getAdresselinje3())
-					.landkode(adresseDokdist.getLandkode())
+					.landkode(mapLandkode(adresseDokdist.getLandkode()))
 					.postnummer(adresseDokdist.getPostnummer())
 					.poststed(adresseDokdist.getPoststed())
 					.build();
 		}
+	}
+
+	private String mapLandkode(String landkode) {
+		return isBlank(landkode) || UKJENT_LANDKODE.equals(landkode) ? XU_LANDKODE : landkode;
 	}
 
 	private AdresseTo getAdresseFromRegoppslag(HentForsendelseResponseTo hentForsendelseResponseTo) {
