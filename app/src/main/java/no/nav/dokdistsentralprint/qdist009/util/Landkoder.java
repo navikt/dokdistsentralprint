@@ -254,7 +254,7 @@ public enum Landkoder {
 	AT("AT", "ØSTERRIKE"),
 	TL("TL", "ØST-TIMOR"),
 	AX("AX", "ÅLAND"),
-	XU("XU", "UKJENT");
+	XX("XX", "UKJENT");
 
 	private final String landkode;
 	private final String landnavn;

@@ -45,7 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class Qdist009Service {
 
 	private static final String UKJENT_LANDKODE = "???";
-	private static final String XU_LANDKODE = "XU";
+	private static final String XX_LANDKODE = "XX";
 	private final DokumentkatalogAdmin dokumentkatalogAdmin;
 	private final AdministrerForsendelse administrerForsendelse;
 	private final Regoppslag regoppslag;
@@ -118,7 +118,7 @@ public class Qdist009Service {
 	}
 
 	private String mapLandkode(String landkode) {
-		return isBlank(landkode) || UKJENT_LANDKODE.equals(landkode) ? XU_LANDKODE : landkode;
+		return isBlank(landkode) || UKJENT_LANDKODE.equals(landkode) ? XX_LANDKODE : landkode;
 	}
 
 	private AdresseTo getAdresseFromRegoppslag(HentForsendelseResponseTo hentForsendelseResponseTo) {

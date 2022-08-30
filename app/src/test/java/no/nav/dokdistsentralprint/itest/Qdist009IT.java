@@ -83,7 +83,7 @@ class Qdist009IT {
 	private static final String VEDLEGG1_TEST_CONTENT = "VEDLEGG1_TEST_CONTENT";
 	private static final String VEDLEGG2_TEST_CONTENT = "VEDLEGG2_TEST_CONTENT";
 	private static final String LANDKODE_TR = "TR";
-	private static final String LANDKODE_XU = "XU";
+	private static final String LANDKODE_XX = "XX";
 
 	@TempDir
 	static Path tempDir;
@@ -184,7 +184,7 @@ class Qdist009IT {
 						.withBody(classpathToString("__files/rjoark001/getForsendelse_noAdresse-happy.json").replace("insertCallIdHere", CALL_ID))));
 		stubFor(put("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")
 				.willReturn(aResponse().withStatus(OK.value())));
-		stubFor(get("/administrerforsendelse/hentpostdestinasjon/XU")
+		stubFor(get("/administrerforsendelse/hentpostdestinasjon/XX")
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("rjoark001/getPostDestinasjon-happy.json")));
@@ -214,7 +214,7 @@ class Qdist009IT {
 		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
 		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
 
-		verifyAllStubs(LANDKODE_XU);
+		verifyAllStubs(LANDKODE_XX);
 	}
 
 	@Test
