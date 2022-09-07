@@ -24,7 +24,6 @@
         <!-- camel 3.17+ er ikke kompatibel med sftp serveren. Relatert til https://issues.apache.org/jira/browse/CAMEL-17835 -->
         <camel.version>3.16.0</camel.version>
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
-        <resilience4j.version>1.7.1</resilience4j.version>
         <google-cloud.version>25.4.0</google-cloud.version>
         <google-tink.version>1.7.0</google-tink.version>
         <wmq.version>9.2.5.0</wmq.version>
@@ -102,12 +101,6 @@
                 <groupId>com.google.crypto.tink</groupId>
                 <artifactId>tink-gcpkms</artifactId>
                 <version>${google-tink.version}</version>
-            </dependency>
-            <!--Selftest metrics-->
-            <dependency>
-                <groupId>io.github.resilience4j</groupId>
-                <artifactId>resilience4j-spring-boot2</artifactId>
-                <version>${resilience4j.version}</version>
             </dependency>
 
             <!-- Test -->
