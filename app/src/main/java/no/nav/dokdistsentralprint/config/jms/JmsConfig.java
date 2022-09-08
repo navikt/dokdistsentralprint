@@ -16,14 +16,13 @@ import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.ibm.mq.constants.CMQC.MQENC_NATIVE;
 import static com.ibm.msg.client.jms.JmsConstants.JMS_IBM_CHARACTER_SET;
 import static com.ibm.msg.client.jms.JmsConstants.JMS_IBM_ENCODING;
 import static com.ibm.msg.client.wmq.common.CommonConstants.WMQ_CM_CLIENT;
 
-/**
- * @author Sigurd Midttun, Visma Consulting AS
- */
 @Configuration
 @Profile("nais")
 public class JmsConfig {
@@ -70,7 +69,8 @@ public class JmsConfig {
         pooledFactory.setConnectionFactory(adapter);
         pooledFactory.setMaxConnections(10);
         pooledFactory.setMaximumActiveSessionPerConnection(10);
-
+        pooledFactory.setReconnectOnException(true);
+        pooledFactory.setExpiryTimeout(TimeUnit.HOURS.toMillis(24));
         return pooledFactory;
     }
 }

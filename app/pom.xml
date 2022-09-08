@@ -105,11 +105,6 @@
             <groupId>no.nav.meldinger.virksomhet</groupId>
             <artifactId>melding-virksomhet-dokdistfordeling</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>io.github.resilience4j</groupId>
-            <artifactId>resilience4j-spring-boot2</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
@@ -117,10 +112,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-oxm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.reactivex.rxjava2</groupId>
-            <artifactId>rxjava</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
