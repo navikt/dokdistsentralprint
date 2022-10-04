@@ -15,14 +15,18 @@ spec:
       value: {{ ADMINISTRERFORSENDELSE_V1_URL }}
     - name: REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL
       value: {{ REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL }}
-    - name: DOKDISTSENTRALPRINT_CHANNEL_NAME
-      value: {{ DOKDISTSENTRALPRINT_CHANNEL_NAME }}
+    - name: MQGATEWAY01_CHANNEL_NAME
+      value: {{ MQGATEWAY01_CHANNEL_NAME }}
     - name: MQGATEWAY01_HOSTNAME
       value: {{ MQGATEWAY01_HOSTNAME }}
     - name: MQGATEWAY01_PORT
       value: "{{ MQGATEWAY01_PORT }}"
     - name: MQGATEWAY01_NAME
       value: {{ MQGATEWAY01_NAME }}
+    - name: MQGATEWAY01_CHANNEL_SECURENAME
+      value: {{ MQGATEWAY01_CHANNEL_SECURENAME }}
+    - name: MQGATEWAY01_CHANNEL_ENABLETLS
+      value: "{{ MQGATEWAY01_CHANNEL_ENABLETLS }}"
     - name: DOKDISTSENTRALPRINT_QDIST009_FUNK_FEIL_QUEUENAME
       value: {{ DOKDISTSENTRALPRINT_QDIST009_FUNK_FEIL_QUEUENAME }}
     - name: DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME
@@ -74,4 +78,6 @@ spec:
         mountPath: /var/run/secrets/nais.io/srvdokdistsentralprint
       - kvPath: {{ SFTP_PRIVATE_KEY }}
         mountPath: /var/run/secrets/nais.io/privateKey
+      - kvPath: {{ DOKDISTSENTRALPRINTCERT }}
+        mountPath: /var/run/secrets/nais.io/certificate
   webproxy: true

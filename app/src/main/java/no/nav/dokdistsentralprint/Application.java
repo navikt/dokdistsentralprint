@@ -8,6 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.retry.annotation.EnableRetry;
 
+import static java.lang.System.getenv;
+import static java.lang.System.setProperty;
+
 @SpringBootApplication
 @EnableRetry
 @EnableConfigurationProperties({
@@ -16,6 +19,7 @@ import org.springframework.retry.annotation.EnableRetry;
 		DokdistmellomlagerProperties.class})
 public class Application {
 	public static void main(String[] args) {
+		setProperty("javax.net.ssl.keyStorePassword", getenv("DOKDISTSENTRALPRINTCERT_PASSWORD"));
 		SpringApplication.run(Application.class, args);
 	}
 }
