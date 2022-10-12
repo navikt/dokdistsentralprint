@@ -80,4 +80,6 @@ spec:
         mountPath: /var/run/secrets/nais.io/privateKey
       - kvPath: {{ DOKDISTSENTRALPRINTCERT }}
         mountPath: /var/run/secrets/nais.io/certificate
+      - kvPath: {{ APPDYNAMICS }}
+        mountPath: /var/run/secrets/nais.io/appdynamics
   webproxy: true

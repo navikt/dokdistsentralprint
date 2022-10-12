@@ -16,6 +16,7 @@
   "SRVDOKDISTSENTRALPRINT": "/serviceuser/data/prod/srvdokdistsentralprint",
   "DOKDISTSENTRALPRINTCERT":"/kv/prod/fss/dokdistsentralprint/certificate",
   "APPNAVN": "dokdistsentralprint",
+  "APPDYNAMICS": "/apikey/appdynamics/prod",
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-prod-a63b",
   "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-prod",
   "DOKDISTMELLOMLAGER_KEYRING": "dokdistmellomlager-keyring",
