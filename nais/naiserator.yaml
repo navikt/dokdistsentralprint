@@ -41,6 +41,8 @@ spec:
       value: {{ DOKDISTMELLOMLAGER_KEYRING }}
     - name: DOKDISTMELLOMLAGER_KEYID
       value: {{ DOKDISTMELLOMLAGER_KEYID }}
+    - name: APPD_NAME
+      value: {{ APPD_NAME }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
