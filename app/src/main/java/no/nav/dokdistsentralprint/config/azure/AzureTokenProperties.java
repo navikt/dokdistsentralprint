@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 @Validated
 @ConfigurationProperties(prefix = "azure.app")
 public record AzureTokenProperties(
-		@NotEmpty String tokenUrl,
+		@NotEmpty String azureOpenidConfigTokenEndpoint,
 		@NotEmpty String clientId,
 		@NotEmpty String clientSecret,
 		@NotEmpty String tenantId,
