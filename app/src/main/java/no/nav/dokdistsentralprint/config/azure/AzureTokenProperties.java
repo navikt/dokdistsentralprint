@@ -7,13 +7,11 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.constraints.NotEmpty;
 
 @Validated
-@ConfigurationProperties(prefix = "azure.app")
+@ConfigurationProperties(prefix = "azure")
 public record AzureTokenProperties(
-		@NotEmpty String azureOpenidConfigTokenEndpoint,
-		@NotEmpty String clientId,
-		@NotEmpty String clientSecret,
-		@NotEmpty String tenantId,
-		@NotEmpty String wellKnownUrl
+		@NotEmpty String openidConfigTokenEndpoint,
+		@NotEmpty String appClientId,
+		@NotEmpty String appClientSecret
 ) {
 	public static final String SPRING_DEFAULT_PRINCIPAL = "anonymousUser";
 	public static final String CLIENT_REGISTRATION_ID = "azure";
