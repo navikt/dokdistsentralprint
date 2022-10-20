@@ -43,6 +43,8 @@ spec:
       value: {{ DOKDISTMELLOMLAGER_KEYRING }}
     - name: DOKDISTMELLOMLAGER_KEYID
       value: {{ DOKDISTMELLOMLAGER_KEYID }}
+    - name: APPD_NAME
+      value: {{ APPD_NAME }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -69,10 +71,10 @@ spec:
   resources:
     limits:
       cpu: 3000m
-      memory: 1280Mi
+      memory: 1536Mi
     requests:
       cpu: 100m
-      memory: 768Mi
+      memory: 1024Mi
   vault:
     enabled: true
     paths:
@@ -82,6 +84,8 @@ spec:
         mountPath: /var/run/secrets/nais.io/privateKey
       - kvPath: {{ DOKDISTSENTRALPRINTCERT }}
         mountPath: /var/run/secrets/nais.io/certificate
+      - kvPath: {{ APPDYNAMICS }}
+        mountPath: /var/run/secrets/nais.io/appdynamics
   webproxy: true
   azure:
     application:
