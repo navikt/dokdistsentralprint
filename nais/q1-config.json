@@ -1,5 +1,5 @@
 {
-  "SFTP_URL": "b31apvl048.oera-q.local",
+  "SFTP_URL": "b31apvl072.oera-q.local",
   "SFTP_PRIVATE_KEY": "/kv/preprod/fss/dokdistsentralprint-q1/privateKey",
   "DOKUMENTTYPEINFO_V4_URL": "https://app-q1.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "ADMINISTRERFORSENDELSE_V1_URL": "https://app-q1.adeo.no/dokdist/rest/v1/administrerforsendelse",
