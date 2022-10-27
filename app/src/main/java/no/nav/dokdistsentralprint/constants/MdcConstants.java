@@ -9,5 +9,4 @@ public final class MdcConstants {
 	}
 
 	public static final String CALL_ID = "callId"; // Dette er en gammel headernøkkel som er i ferd med å utfases.
-	public static final String NAV_CALLID = "Nav-Callid";
-	public static final String USER_ID = "userId";}
+}

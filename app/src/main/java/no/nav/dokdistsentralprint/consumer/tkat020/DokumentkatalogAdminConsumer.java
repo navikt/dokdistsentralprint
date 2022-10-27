@@ -32,6 +32,7 @@ import java.util.function.Consumer;
 import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
+import static no.nav.dokdistsentralprint.constants.NavConstants.NAV_CALLID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 
@@ -115,7 +116,7 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 
 	private void createHeaders(HttpHeaders headers) {
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set(CALL_ID, MDC.get(CALL_ID));
+		headers.set(NAV_CALLID, MDC.get(CALL_ID));
 	}
 
 }
