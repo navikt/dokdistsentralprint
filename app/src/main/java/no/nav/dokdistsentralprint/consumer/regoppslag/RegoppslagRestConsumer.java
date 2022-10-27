@@ -28,7 +28,7 @@ import java.time.Duration;
 import java.util.UUID;
 
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
-import static no.nav.dokdistsentralprint.constants.MdcConstants.NAV_CALLID;
+import static no.nav.dokdistsentralprint.constants.NavConstants.NAV_CALLID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 
