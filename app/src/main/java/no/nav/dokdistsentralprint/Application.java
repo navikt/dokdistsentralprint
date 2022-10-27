@@ -6,13 +6,15 @@ import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.config.azure.AzureTokenProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import static java.lang.System.getenv;
 import static java.lang.System.setProperty;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @EnableRetry
 @EnableConfigurationProperties({
 		ServiceuserAlias.class,
