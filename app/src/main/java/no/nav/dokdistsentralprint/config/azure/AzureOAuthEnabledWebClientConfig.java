@@ -78,7 +78,7 @@ public class AzureOAuthEnabledWebClientConfig {
 	}
 
 	@Bean
-	ClientRegistration clientRegistration(@Value("{dokmet_scope}") String dokmetScope, AzureTokenProperties azureTokenProperties) {
+	ClientRegistration clientRegistration(@Value("${dokmet_scope}") String dokmetScope, AzureTokenProperties azureTokenProperties) {
 		return ClientRegistration.withRegistrationId(AzureTokenProperties.CLIENT_REGISTRATION_ID)
 				.tokenUri(azureTokenProperties.openidConfigTokenEndpoint())
 				.clientId(azureTokenProperties.appClientId())
