@@ -11,6 +11,8 @@ spec:
       value: {{ SFTP_URL }}
     - name: DOKUMENTTYPEINFO_V4_URL
       value: {{ DOKUMENTTYPEINFO_V4_URL }}
+    - name: DOKMET_SCOPE
+      value: {{ DOKMET_SCOPE }}
     - name: ADMINISTRERFORSENDELSE_V1_URL
       value: {{ ADMINISTRERFORSENDELSE_V1_URL }}
     - name: REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL
@@ -83,3 +85,6 @@ spec:
       - kvPath: {{ APPDYNAMICS }}
         mountPath: /var/run/secrets/nais.io/appdynamics
   webproxy: true
+  azure:
+    application:
+      enabled: true
