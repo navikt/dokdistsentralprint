@@ -78,8 +78,6 @@ spec:
     paths:
       - kvPath: {{ SRVDOKDISTSENTRALPRINT }}
         mountPath: /var/run/secrets/nais.io/srvdokdistsentralprint
-      - kvPath: {{ SFTP_PRIVATE_KEY }}
-        mountPath: /var/run/secrets/nais.io/privateKey
       - kvPath: {{ DOKDISTSENTRALPRINTCERT }}
         mountPath: /var/run/secrets/nais.io/certificate
       - kvPath: {{ APPDYNAMICS }}

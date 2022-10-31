@@ -1,6 +1,5 @@
 {
   "SFTP_URL": "b31apvl072.oera-q.local",
-  "SFTP_PRIVATE_KEY": "/kv/preprod/fss/dokdistsentralprint/privateKey",
   "DOKUMENTTYPEINFO_V4_URL": "https://app-q2.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "ADMINISTRERFORSENDELSE_V1_URL": "https://app-q2.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.dev.adeo.no/rest/v1/sts/token",
