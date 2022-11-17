@@ -16,10 +16,6 @@ import javax.xml.bind.JAXBException;
 
 import static org.apache.camel.LoggingLevel.ERROR;
 
-
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 @Component
 public class Qdist009Route extends SpringRouteBuilder {
 

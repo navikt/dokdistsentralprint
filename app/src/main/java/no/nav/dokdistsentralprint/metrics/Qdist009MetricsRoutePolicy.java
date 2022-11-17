@@ -16,9 +16,6 @@ import static no.nav.dokdistsentralprint.metrics.MetricLabels.TYPE_FUNCTIONAL_EX
 import static no.nav.dokdistsentralprint.metrics.MetricLabels.TYPE_TECHNICAL_EXCEPTION;
 import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.SERVICE_ID;
 
-/**
- * @author Ugur Alpay Cenar, Visma Consulting.
- */
 @Component
 public class Qdist009MetricsRoutePolicy extends RoutePolicySupport {
 

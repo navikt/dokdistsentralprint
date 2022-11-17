@@ -36,9 +36,6 @@ import static no.nav.dokdistsentralprint.constants.NavConstants.NAV_CALLID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 
-/**
- * @author Sigurd Midttun, Visma Consulting AS
- */
 @Slf4j
 @Component
 class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {

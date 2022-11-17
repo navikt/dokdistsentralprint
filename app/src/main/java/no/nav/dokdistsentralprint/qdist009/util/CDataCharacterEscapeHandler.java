@@ -6,9 +6,6 @@ import com.sun.xml.bind.marshaller.MinimumEscapeHandler;
 import java.io.IOException;
 import java.io.Writer;
 
-/**
- * @author Olav Røstvold Thorsen, Visma Consulting.
- */
 public class CDataCharacterEscapeHandler implements CharacterEscapeHandler {
 
 	private static final char[] cdataPrefix = "<![CDATA[".toCharArray();

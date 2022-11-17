@@ -37,9 +37,6 @@ import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.zi
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 @Slf4j
 @Service
 public class Qdist009Service {
