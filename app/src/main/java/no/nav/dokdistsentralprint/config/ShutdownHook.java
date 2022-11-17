@@ -2,7 +2,6 @@ package no.nav.dokdistsentralprint.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.jms.pool.PooledConnectionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -15,8 +14,11 @@ import javax.jms.ConnectionFactory;
 @Component
 public class ShutdownHook {
 
-	@Autowired
-	private ConnectionFactory wmqConnectionFactory;
+	private final ConnectionFactory wmqConnectionFactory;
+
+	public ShutdownHook(ConnectionFactory wmqConnectionFactory) {
+		this.wmqConnectionFactory = wmqConnectionFactory;
+	}
 
 	@PreDestroy
 	public void destroy() {

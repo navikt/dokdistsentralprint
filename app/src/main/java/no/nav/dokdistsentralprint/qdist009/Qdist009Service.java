@@ -21,7 +21,6 @@ import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,7 +49,6 @@ public class Qdist009Service {
 	private final MetricUpdater metricUpdater;
 	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
-	@Autowired
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
 						   AdministrerForsendelse administrerForsendelse,
 						   BucketStorage bucketStorage,

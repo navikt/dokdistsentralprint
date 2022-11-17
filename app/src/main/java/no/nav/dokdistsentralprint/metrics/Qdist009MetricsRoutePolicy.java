@@ -6,7 +6,6 @@ import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralpri
 import org.apache.camel.Exchange;
 import org.apache.camel.Route;
 import org.apache.camel.support.RoutePolicySupport;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.dokdistsentralprint.metrics.MetricLabels.LABEL_ERROR_TYPE;
@@ -26,7 +25,6 @@ public class Qdist009MetricsRoutePolicy extends RoutePolicySupport {
 	private static final String QDIST009_PROCESS_TIMER_DESCRIPTION = "prosesseringstid for kall inn til qdist009";
 	private static final String QDIST009_EXCEPTION = "request_exception_total";
 
-	@Autowired
 	public Qdist009MetricsRoutePolicy(MeterRegistry registry) {
 		this.registry = registry;
 	}

@@ -37,7 +37,6 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	private final String administrerforsendelseV1Url;
 	private final RestTemplate restTemplate;
 
-	@Autowired
 	public AdministrerForsendelseConsumer(@Value("${administrerforsendelse.v1.url}") String administrerforsendelseV1Url,
 										  RestTemplateBuilder restTemplateBuilder,
 										  final ServiceuserAlias serviceuserAlias) {
