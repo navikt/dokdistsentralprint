@@ -8,9 +8,6 @@ import org.springframework.context.annotation.Profile;
 
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 @Configuration
 @Profile("itest")
 @Import(JmsItestConfig.class)

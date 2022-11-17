@@ -16,9 +16,6 @@ import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 public final class testUtils {
 	private testUtils() {
 	}

@@ -13,9 +13,6 @@ import java.nio.file.Path;
 import static java.nio.file.Path.of;
 import static java.util.Collections.singletonList;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 public final class SftpConfig {
 
 	public static SshServer startSshServer(Path tempDir) {

@@ -1,8 +1,5 @@
 package no.nav.dokdistsentralprint.exception.functional;
 
-/**
- * @author Jarl Øystein Samseth, Visma Consulting
- */
 public class ValidationException extends AbstractDokdistsentralprintFunctionalException {
 
 	public ValidationException(String message) {

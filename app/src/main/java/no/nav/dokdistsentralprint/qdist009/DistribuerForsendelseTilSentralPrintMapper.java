@@ -5,9 +5,6 @@ import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKa
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 @Component
 public class DistribuerForsendelseTilSentralPrintMapper {
 

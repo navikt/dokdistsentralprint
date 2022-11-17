@@ -6,9 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.StringWriter;
 
-/**
- * @author Olav Røstvold Thorsen, Visma Consulting.
- */
 class CDataEscapeHandlerTest {
 
 	CDataCharacterEscapeHandler cDataCharacterEscapeHandler = new CDataCharacterEscapeHandler();

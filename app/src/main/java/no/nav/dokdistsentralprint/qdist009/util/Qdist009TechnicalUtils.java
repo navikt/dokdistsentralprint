@@ -20,10 +20,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
-
 public final class Qdist009TechnicalUtils {
 
 	private Qdist009TechnicalUtils() {

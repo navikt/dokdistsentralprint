@@ -6,9 +6,6 @@ import lombok.Value;
 
 import java.util.List;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 @Data
 @Builder
 public class HentForsendelseResponseTo {

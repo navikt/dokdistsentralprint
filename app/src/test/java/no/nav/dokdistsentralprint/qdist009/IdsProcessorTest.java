@@ -16,9 +16,6 @@ import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_FORSENDELSE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 class IdsProcessorTest {
     private static final Object FORSENDELSE_ID = "33333";
     public static final String CALL_ID_VALUE = "mycallid";

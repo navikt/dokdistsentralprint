@@ -1,8 +1,5 @@
 package no.nav.dokdistsentralprint.constants;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 public class DomainConstants {
 
 	private DomainConstants() {
