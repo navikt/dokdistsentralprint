@@ -1,7 +1,6 @@
 package no.nav.dokdistsentralprint.consumer.tkat020;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.config.azure.AzureTokenProperties;
 import no.nav.dokdistsentralprint.exception.functional.Tkat020FunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
@@ -9,7 +8,6 @@ import no.nav.dokdistsentralprint.exception.technical.Tkat020TechnicalException;
 import no.nav.dokdistsentralprint.metrics.Monitor;
 import no.nav.dokkat.api.tkat020.v4.DokumentTypeInfoToV4;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
@@ -20,8 +18,6 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -36,9 +32,6 @@ import static no.nav.dokdistsentralprint.constants.NavConstants.NAV_CALLID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 
-/**
- * @author Sigurd Midttun, Visma Consulting AS
- */
 @Slf4j
 @Component
 class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
@@ -48,7 +41,6 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 	private final ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
 
-	@Autowired
 	public DokumentkatalogAdminConsumer(@Value("${DokumenttypeInfo_v4_url}") String dokumenttypeInfoV4Url,
 										WebClient webClient,
 										ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) {

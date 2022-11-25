@@ -14,9 +14,6 @@ import org.springframework.context.annotation.Profile;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 @Configuration
 @Profile("itest")
 public class JmsItestConfig {

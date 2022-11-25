@@ -9,9 +9,6 @@ import org.slf4j.MDC;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_FORSENDELSE_ID;
 
-/**
- * @author Olav Røstvold Thorsen, Visma Consulting.
- */
 public class IdsProcessor implements Processor {
 
     @Override

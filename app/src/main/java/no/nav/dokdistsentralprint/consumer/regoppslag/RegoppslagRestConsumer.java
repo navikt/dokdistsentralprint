@@ -32,9 +32,6 @@ import static no.nav.dokdistsentralprint.constants.NavConstants.NAV_CALLID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 
-/**
- * @author Ugur Alpay Cenar, Visma Consulting.
- */
 @Slf4j
 @Component
 public class RegoppslagRestConsumer implements Regoppslag {

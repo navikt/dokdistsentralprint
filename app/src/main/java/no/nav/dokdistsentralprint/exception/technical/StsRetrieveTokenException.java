@@ -1,9 +1,6 @@
 package no.nav.dokdistsentralprint.exception.technical;
 
 
-/**
- * @author Ugur Alpay Cenar, Visma Consulting.
- */
 public class StsRetrieveTokenException extends AbstractDokdistsentralprintTechnicalException {
 
 	public StsRetrieveTokenException(String message) {

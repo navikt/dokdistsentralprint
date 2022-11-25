@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 public final class Qdist009FunctionalUtils {
 	private Qdist009FunctionalUtils() {
 	}

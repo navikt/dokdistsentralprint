@@ -3,15 +3,12 @@ package no.nav.dokdistsentralprint.consumer.tkat020;
 import lombok.Builder;
 import lombok.Value;
 
-/**
- * @author Sigurd Midttun, Visma Consulting AS
- */
 @Value
 @Builder
 public class DokumenttypeInfoTo {
 
-	private final String portoklasse;
-	private final String konvoluttvinduType;
-	private final String sentralPrintDokumentType;
-	private final boolean tosidigprint;
+	String portoklasse;
+	String konvoluttvinduType;
+	String sentralPrintDokumentType;
+	boolean tosidigprint;
 }

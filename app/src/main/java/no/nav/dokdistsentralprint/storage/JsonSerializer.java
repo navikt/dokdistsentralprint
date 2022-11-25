@@ -6,9 +6,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-/**
- * @author Ugur Alpay Cenar, Visma Consulting.
- */
 public class JsonSerializer {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();

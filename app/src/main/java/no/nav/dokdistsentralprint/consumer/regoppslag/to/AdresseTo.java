@@ -3,18 +3,14 @@ package no.nav.dokdistsentralprint.consumer.regoppslag.to;
 import lombok.Builder;
 import lombok.Value;
 
-/**
- * @author Ugur Alpay Cenar, Visma Consulting.
- */
-
 @Value
 @Builder
 public class AdresseTo {
 
-	private final String adresselinje1;
-	private final String adresselinje2;
-	private final String adresselinje3;
-	private final String postnummer;
-	private final String poststed;
-	private final String landkode;
+	String adresselinje1;
+	String adresselinje2;
+	String adresselinje3;
+	String postnummer;
+	String poststed;
+	String landkode;
 }

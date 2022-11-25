@@ -1,4 +1,10 @@
 {
+  "APPNAVN": "dokdistsentralprint",
+  "MIN_REPLICAS": "1",
+  "MAX_REPLICAS": "2",
+  "INGRESSES": [
+    "https://dokdistsentralprint.dev.intern.nav.no"
+  ],
   "SFTP_URL": "b31apvl072.oera-q.local",
   "DOKUMENTTYPEINFO_V4_URL": "https://dokmet.dev.intern.nav.no/rest/dokumenttypeinfo",
   "DOKMET_SCOPE": "api://dev-fss.teamdokumenthandtering.dokmet/.default",
@@ -15,16 +21,10 @@
   "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.Q2_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
   "SRVDOKDISTSENTRALPRINT": "/serviceuser/data/dev/srvdokdistsentralprint",
   "DOKDISTSENTRALPRINTCERT":"/kv/preprod/fss/dokdistsentralprint/certificate",
-  "APPNAVN": "dokdistsentralprint",
   "APPD_NAME": "dokdistsentralprint",
   "APPDYNAMICS": "/apikey/appdynamics/dev",
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-dev-2c5a",
   "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-dev",
   "DOKDISTMELLOMLAGER_KEYRING": "dokdistmellomlager-keyring-dev",
-  "DOKDISTMELLOMLAGER_KEYID": "dokdistmellomlager-symmetric-dev",
-  "MIN_REPLICAS": "1",
-  "MAX_REPLICAS": "2",
-  "INGRESSES": [
-    "https://dokdistsentralprint.dev.intern.nav.no"
-  ]
+  "DOKDISTMELLOMLAGER_KEYID": "dokdistmellomlager-symmetric-dev"
 }
