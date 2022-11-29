@@ -5,8 +5,7 @@
   "INGRESSES": [
     "https://dokdistsentralprint.dev.intern.nav.no"
   ],
-  "SFTP_URL": "b31apvl048.oera-q.local",
-  "SFTP_PRIVATE_KEY": "/kv/preprod/fss/dokdistsentralprint/privateKey",
+  "SFTP_URL": "b31apvl072.oera-q.local",
   "DOKUMENTTYPEINFO_V4_URL": "https://dokmet.dev.intern.nav.no/rest/dokumenttypeinfo",
   "DOKMET_SCOPE": "api://dev-fss.teamdokumenthandtering.dokmet/.default",
   "ADMINISTRERFORSENDELSE_V1_URL": "https://app-q2.adeo.no/dokdist/rest/v1/administrerforsendelse",
