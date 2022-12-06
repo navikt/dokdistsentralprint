@@ -1,4 +1,4 @@
-package no.nav.dokdistsentralprint.consumer.reststs;
+package no.nav.dokdistsentralprint.qdist009.reststs;
 
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.exception.technical.StsRetrieveTokenException;

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
+import no.nav.dokdistsentralprint.consumer.rdist001.OppdaterPostadresseRequest;
 import no.nav.dokdistsentralprint.consumer.regoppslag.Regoppslag;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
@@ -71,7 +72,7 @@ public class Qdist009Service {
 		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
 		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(hentForsendelseResponseTo);
 		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(dokumenttypeIdHoveddokument);
-		Adresse adresse = getAdresse(hentForsendelseResponseTo);
+		Adresse adresse = getAdresse(hentForsendelseResponseTo, forsendelseId);
 		HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo = administrerForsendelse.hentPostDestinasjon(adresse.getLandkode());
 
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(hentForsendelseResponseTo);
@@ -88,18 +89,12 @@ public class Qdist009Service {
 		return zipPrintbestillingToBytes(bestillingEntities);
 	}
 
-	private Adresse getAdresse(HentForsendelseResponseTo hentForsendelseResponseTo) {
+	private Adresse getAdresse(HentForsendelseResponseTo hentForsendelseResponseTo, String forsendelseId) {
 		final HentForsendelseResponseTo.PostadresseTo adresseDokdist = hentForsendelseResponseTo.getPostadresse();
 		if (adresseDokdist == null) {
-			final AdresseTo adresseRegoppslag = getAdresseFromRegoppslag(hentForsendelseResponseTo);
-			return Adresse.builder()
-					.adresselinje1(adresseRegoppslag.getAdresselinje1())
-					.adresselinje2(adresseRegoppslag.getAdresselinje2())
-					.adresselinje3(adresseRegoppslag.getAdresselinje3())
-					.landkode(mapLandkode(adresseRegoppslag.getLandkode()))
-					.postnummer(adresseRegoppslag.getPostnummer())
-					.poststed(adresseRegoppslag.getPoststed())
-					.build();
+			Adresse postadresse = getAdresseFromRegoppslag(hentForsendelseResponseTo);
+			administrerForsendelse.oppdaterPostadresse(mapOppdaterPostadresse(forsendelseId, postadresse));
+			return postadresse;
 		} else {
 			return Adresse.builder()
 					.adresselinje1(adresseDokdist.getAdresselinje1())
@@ -116,12 +111,21 @@ public class Qdist009Service {
 		return isBlank(landkode) || UKJENT_LANDKODE.equals(landkode) ? XX_LANDKODE : landkode;
 	}
 
-	private AdresseTo getAdresseFromRegoppslag(HentForsendelseResponseTo hentForsendelseResponseTo) {
-		return regoppslag.treg002HentAdresse(HentAdresseRequestTo.builder()
+	private Adresse getAdresseFromRegoppslag(HentForsendelseResponseTo hentForsendelseResponseTo) {
+		AdresseTo adresseTo = regoppslag.treg002HentAdresse(HentAdresseRequestTo.builder()
 				.identifikator(hentForsendelseResponseTo.getMottaker().getMottakerId())
 				.type(hentForsendelseResponseTo.getMottaker().getMottakerType())
 				.tema(hentForsendelseResponseTo.getTema())
 				.build());
+
+		return Adresse.builder()
+				.adresselinje1(adresseTo.getAdresselinje1())
+				.adresselinje2(adresseTo.getAdresselinje2())
+				.adresselinje3(adresseTo.getAdresselinje3())
+				.landkode(mapLandkode(adresseTo.getLandkode()))
+				.postnummer(adresseTo.getPostnummer())
+				.poststed(adresseTo.getPoststed())
+				.build();
 	}
 
 	/**
@@ -160,5 +164,16 @@ public class Qdist009Service {
 		return dokdistDokument;
 	}
 
+	private OppdaterPostadresseRequest mapOppdaterPostadresse(String forsendelseId, Adresse adresse) {
+		return OppdaterPostadresseRequest.builder()
+				.forsendelseId(forsendelseId)
+				.adresselinje1(adresse.getAdresselinje1())
+				.adresselinje2(adresse.getAdresselinje2())
+				.adresselinje3(adresse.getAdresselinje3())
+				.postnummer(adresse.getPostnummer())
+				.poststed(adresse.getPoststed())
+				.landkode(adresse.getLandkode())
+				.build();
+	}
 
 }
