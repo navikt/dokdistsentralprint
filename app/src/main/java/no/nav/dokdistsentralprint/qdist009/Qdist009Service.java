@@ -166,7 +166,7 @@ public class Qdist009Service {
 
 	private OppdaterPostadresseRequest mapOppdaterPostadresse(String forsendelseId, Adresse adresse) {
 		return OppdaterPostadresseRequest.builder()
-				.forsendelseId(forsendelseId)
+				.forsendelseId(Long.valueOf(forsendelseId))
 				.adresselinje1(adresse.getAdresselinje1())
 				.adresselinje2(adresse.getAdresselinje2())
 				.adresselinje3(adresse.getAdresselinje3())

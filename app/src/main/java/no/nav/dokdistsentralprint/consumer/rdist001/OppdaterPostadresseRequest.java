@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class OppdaterPostadresseRequest {
-	private String forsendelseId;
+	private Long forsendelseId;
 	private String adresselinje1;
 	private String adresselinje2;
 	private String adresselinje3;
