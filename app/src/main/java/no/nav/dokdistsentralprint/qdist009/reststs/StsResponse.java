@@ -1,4 +1,4 @@
-package no.nav.dokdistsentralprint.consumer.reststs;
+package no.nav.dokdistsentralprint.qdist009.reststs;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

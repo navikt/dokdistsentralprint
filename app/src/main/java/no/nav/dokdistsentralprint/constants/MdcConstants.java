@@ -5,5 +5,6 @@ public final class MdcConstants {
 	private MdcConstants() {
 	}
 
-	public static final String CALL_ID = "callId"; // Dette er en gammel headernøkkel som er i ferd med å utfases.
+	public static final String CALL_ID = "callId";
+	public static final String NAV_CALLID = "Nav-Callid";
 }

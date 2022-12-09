@@ -10,7 +10,6 @@ import no.nav.dokdistsentralprint.exception.technical.Rdist001HentForsendelseTec
 import no.nav.dokdistsentralprint.exception.technical.Rdist001OppdaterForsendelseStatusTechnicalException;
 import no.nav.dokdistsentralprint.metrics.Monitor;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -30,6 +29,7 @@ import java.time.Duration;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
+import static org.springframework.http.HttpMethod.PUT;
 
 @Component
 public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
@@ -98,6 +98,22 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 					.getStatusCode(), e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
 			throw new Rdist001GetPostDestinasjonTechnicalException(String.format("Kall mot rdist001 - GetPostDestinasjon feilet teknisk med statusKode=%s, feilmelding=%s", e
+					.getStatusCode(), e.getMessage()), e);
+		}
+	}
+
+	@Override
+	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Monitor(value = "dok_consumer", extraTags = {"process", "oppdaterPostadresse"}, histogram = true)
+	public void oppdaterPostadresse(OppdaterPostadresseRequest postadresse) {
+		try {
+			HttpEntity<?> entity = new HttpEntity<>(postadresse, createHeaders());
+			restTemplate.exchange(administrerforsendelseV1Url + "/oppdaterpostadresse", PUT, entity, String.class);
+		} catch (HttpClientErrorException e) {
+			throw new Rdist001GetPostDestinasjonFunctionalException(String.format("Kall mot rdist001 - oppdaterPostadresse feilet funksjonelt med statusKode=%s, feilmelding=%s", e
+					.getStatusCode(), e.getMessage()), e);
+		} catch (HttpServerErrorException e) {
+			throw new Rdist001GetPostDestinasjonTechnicalException(String.format("Kall mot rdist001 - oppdaterPostadresse feilet teknisk med statusKode=%s, feilmelding=%s", e
 					.getStatusCode(), e.getMessage()), e);
 		}
 	}
