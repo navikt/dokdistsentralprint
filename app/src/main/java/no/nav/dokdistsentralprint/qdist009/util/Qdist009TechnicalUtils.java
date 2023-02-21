@@ -1,14 +1,10 @@
 package no.nav.dokdistsentralprint.qdist009.util;
 
-import static java.lang.String.format;
-
 import com.sun.xml.bind.marshaller.CharacterEscapeHandler;
 import no.nav.dokdistsentralprint.exception.technical.KunneIkkeMarshalleBestillingTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.KunneIkkeZippeBestillingTechnicalException;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
-import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -19,6 +15,8 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static java.lang.String.format;
 
 public final class Qdist009TechnicalUtils {
 
