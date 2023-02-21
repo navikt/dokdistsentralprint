@@ -9,5 +9,4 @@ Distribusjon av tjenesten er gjort av Jenkins:
 Push/merge til masterbranch vil teste, bygge og deploye til produksjonsmiljø og testmiljø.
 
 ### Henvendelser
-Spørsmål om koden eller prosjektet kan rettes til [Slack-kanalen for \#Team Dokumentløsninger](https://nav-it.slack.com/archives/C6W9E5GPJ)
-
+Spørsmål om koden eller prosjektet kan rettes til [Slack-kanalen for \#Team Dokumentløsninger](https://nav-it.slack.com/archives/C6W9E5GPJ).
