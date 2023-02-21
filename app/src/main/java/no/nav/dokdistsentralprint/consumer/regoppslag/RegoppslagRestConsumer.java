@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -30,6 +29,7 @@ import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.NAV_CALLID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Slf4j
 @Component
@@ -59,7 +59,7 @@ public class RegoppslagRestConsumer implements Regoppslag {
 			return restTemplate.postForObject(this.hentMottakerOgAdresseUrl, entity, HentMottakerOgAdresseResponseTo.class)
 					.getAdresse();
 		} catch (HttpClientErrorException e) {
-			if (e.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+			if (e.getStatusCode().equals(UNAUTHORIZED)) {
 				throw new RegoppslagHentAdresseSecurityException(String.format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e
 						.getMessage()));
 			}
@@ -72,10 +72,9 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	}
 
 	private HttpHeaders retrieveBearerTokenAndCreateHeader() {
-		String bearerToken = stsRestConsumer.getBearerToken();
 		String callId = getCallId();
 		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken);
+		httpHeaders.setBearerAuth(stsRestConsumer.getBearerToken());
 		httpHeaders.set(CALL_ID, callId);
 		httpHeaders.set(NAV_CALLID, callId);
 		return httpHeaders;

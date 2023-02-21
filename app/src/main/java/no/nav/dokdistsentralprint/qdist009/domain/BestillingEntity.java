@@ -1,13 +1,14 @@
 package no.nav.dokdistsentralprint.qdist009.domain;
 
-import static java.lang.String.format;
-
 import lombok.Builder;
 import lombok.Value;
+
+import static java.lang.String.format;
 
 @Value
 @Builder
 public class BestillingEntity {
+
 	String fileName;
 	byte[] entity;
 
