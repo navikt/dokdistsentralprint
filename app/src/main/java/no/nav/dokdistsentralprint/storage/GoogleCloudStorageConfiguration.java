@@ -41,6 +41,7 @@ public class GoogleCloudStorageConfiguration {
 		KeysetHandle handle = KeysetHandle.generateNew(keyTemplate);
 		Aead aead = handle.getPrimitive(Aead.class);
 		log.info("dokdistsentralprint oppstart. Henter aead kryptering nøkkel. primaryKeyId={}", handle.getKeysetInfo().getPrimaryKeyId());
+
 		Storage storage = StorageOptions.newBuilder()
 				.setProjectId(dokdistmellomlagerProperties.getProjectid())
 				.setTransportOptions(StorageOptions.getDefaultHttpTransportOptions().toBuilder()
@@ -49,6 +50,7 @@ public class GoogleCloudStorageConfiguration {
 						.setHttpTransportFactory(ApacheHttpTransport::new)
 						.build())
 				.build().getService();
+
 		return new GoogleCloudBucketStorage(storage, dokdistmellomlagerProperties.getBucket(), aead);
 	}
 }

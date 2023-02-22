@@ -7,8 +7,8 @@ import lombok.Value;
 @Builder
 public class HentAdresseRequestTo {
 
-	private final String identifikator;
-	private final String type;
-	private final String tema;
+	String identifikator;
+	String type;
+	String tema;
 
 }

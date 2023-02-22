@@ -7,7 +7,7 @@ import lombok.Value;
 @Builder
 public class HentPostDestinasjonResponseTo {
 
-	private final String postDestinasjon;
+	String postDestinasjon;
 
 }
 

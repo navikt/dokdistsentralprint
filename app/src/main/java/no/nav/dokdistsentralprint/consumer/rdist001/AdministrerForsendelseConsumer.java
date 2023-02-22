@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -29,7 +27,9 @@ import java.time.Duration;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PUT;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Component
 public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
@@ -54,7 +54,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	public HentForsendelseResponseTo hentForsendelse(final String forsendelseId) {
 		try {
 			HttpEntity entity = new HttpEntity<>(createHeaders());
-			return restTemplate.exchange(this.administrerforsendelseV1Url + "/" + forsendelseId, HttpMethod.GET, entity, HentForsendelseResponseTo.class)
+			return restTemplate.exchange(this.administrerforsendelseV1Url + "/" + forsendelseId, GET, entity, HentForsendelseResponseTo.class)
 					.getBody();
 		} catch (HttpClientErrorException e) {
 			throw new Rdist001HentForsendelseFunctionalException(String.format("Kall mot rdist001 - hentForsendelse feilet funksjonelt med statusKode=%s, feilmelding=%s", e
@@ -75,7 +75,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 					.queryParam("forsendelseId", forsendelseId)
 					.queryParam("forsendelseStatus", forsendelseStatus)
 					.toUriString();
-			restTemplate.exchange(uri, HttpMethod.PUT, entity, Object.class);
+			restTemplate.exchange(uri, PUT, entity, Object.class);
 		} catch (HttpClientErrorException e) {
 			throw new Rdist001OppdaterForsendelseStatusFunctionalException(String.format("Kall mot rdist001 - oppdaterForsendelseStatus feilet funksjonelt med statusKode=%s, feilmelding=%s", e
 					.getStatusCode(), e.getMessage()), e);
@@ -91,7 +91,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	public HentPostDestinasjonResponseTo hentPostDestinasjon(String landkode) {
 		try {
 			HttpEntity entity = new HttpEntity<>(createHeaders());
-			return restTemplate.exchange(administrerforsendelseV1Url + "/hentpostdestinasjon/" + landkode, HttpMethod.GET, entity, HentPostDestinasjonResponseTo.class)
+			return restTemplate.exchange(administrerforsendelseV1Url + "/hentpostdestinasjon/" + landkode, GET, entity, HentPostDestinasjonResponseTo.class)
 					.getBody();
 		} catch (HttpClientErrorException e) {
 			throw new Rdist001GetPostDestinasjonFunctionalException(String.format("Kall mot rdist001 - GetPostDestinasjon feilet funksjonelt med statusKode=%s, feilmelding=%s", e
@@ -120,7 +120,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setContentType(APPLICATION_JSON);
 		headers.set(CALL_ID, MDC.get(CALL_ID));
 		return headers;
 	}

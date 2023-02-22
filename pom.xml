@@ -8,20 +8,22 @@
     <artifactId>dokdistsentralprint</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+
     <modules>
         <module>app</module>
         <module>schemas</module>
     </modules>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.6</version>
+        <version>2.7.8</version>
     </parent>
 
     <properties>
         <java.version>17</java.version>
 
-        <camel.version>3.19.0</camel.version>
+        <camel.version>3.20.2</camel.version>
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
         <google-cloud.version>25.4.0</google-cloud.version>
         <google-tink.version>1.7.0</google-tink.version>

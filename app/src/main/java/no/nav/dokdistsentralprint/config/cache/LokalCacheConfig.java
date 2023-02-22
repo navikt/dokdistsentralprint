@@ -11,7 +11,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Configuration
 @EnableCaching
@@ -27,10 +29,10 @@ public class LokalCacheConfig {
 		SimpleCacheManager manager = new SimpleCacheManager();
 		manager.setCaches(Arrays.asList(
 				new CaffeineCache(TKAT020_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(1, TimeUnit.DAYS)
+						.expireAfterWrite(1, DAYS)
 						.build()),
 				new CaffeineCache(REST_STS_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(50, TimeUnit.MINUTES)
+						.expireAfterWrite(50, MINUTES)
 						.build())
 		));
 		return manager;

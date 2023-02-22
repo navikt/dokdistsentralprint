@@ -5,8 +5,4 @@ public class InvalidForsendelseStatusException extends AbstractDokdistsentralpri
 	public InvalidForsendelseStatusException(String message) {
 		super(message);
 	}
-
-	public InvalidForsendelseStatusException(String message, Throwable cause) {
-		super(message, cause);
-	}
 }
