@@ -21,7 +21,6 @@
   "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.Q1_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
   "SRVDOKDISTSENTRALPRINT": "/serviceuser/data/dev/srvdokdistsentralprint",
   "DOKDISTSENTRALPRINTCERT":"/kv/preprod/fss/dokdistsentralprint-q1/certificate",
-  "APPD_NAME": "dokdistsentralprint-q1",
   "APPDYNAMICS": "/apikey/appdynamics/dev",
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-dev-2c5a",
   "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-dev",
