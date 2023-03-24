@@ -66,12 +66,16 @@ public class Qdist009Service {
 	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo, Exchange exchange) {
 		final String forsendelseId = distribuerForsendelseTilSentralPrintTo.getForsendelseId();
 		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(forsendelseId);
+
 		final String bestillingsId = hentForsendelseResponseTo.getBestillingsId();
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingsId);
+
 		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", forsendelseId, bestillingsId);
 		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
+
 		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(hentForsendelseResponseTo);
 		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(dokumenttypeIdHoveddokument);
+
 		Adresse adresse = getAdresse(hentForsendelseResponseTo, forsendelseId);
 		HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo = administrerForsendelse.hentPostDestinasjon(adresse.getLandkode());
 

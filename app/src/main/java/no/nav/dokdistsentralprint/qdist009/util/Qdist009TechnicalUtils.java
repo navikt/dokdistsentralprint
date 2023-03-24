@@ -17,6 +17,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.lang.String.format;
+import static javax.xml.bind.Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION;
 
 public final class Qdist009TechnicalUtils {
 
@@ -37,7 +38,7 @@ public final class Qdist009TechnicalUtils {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(Bestilling.class);
 			Marshaller marshaller = jaxbContext.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION, "printoppdrag-2_2.xsd");
+			marshaller.setProperty(JAXB_NO_NAMESPACE_SCHEMA_LOCATION, "printoppdrag-2_2.xsd");
 			marshaller.setProperty(CharacterEscapeHandler.class.getName(), new CDataCharacterEscapeHandler());
 			StringWriter sw = new StringWriter();
 			marshaller.marshal(bestilling, sw);

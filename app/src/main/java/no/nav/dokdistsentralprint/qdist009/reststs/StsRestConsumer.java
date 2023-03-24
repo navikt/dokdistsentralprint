@@ -40,7 +40,7 @@ public class StsRestConsumer {
 	public String getBearerToken() {
 		try {
 			return requireNonNull(restTemplate.getForObject(stsUrl + "?grant_type=client_credentials&scope=openid", StsResponse.class))
-					.getAccessToken();
+					.accessToken();
 		} catch (HttpStatusCodeException e) {
 			throw new StsRetrieveTokenException(String.format("Kall mot STS feilet med status=%s feilmelding=%s.", e.getStatusCode(), e
 					.getMessage()), e);
