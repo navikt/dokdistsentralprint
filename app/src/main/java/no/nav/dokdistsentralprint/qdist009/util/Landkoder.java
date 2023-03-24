@@ -254,6 +254,9 @@ public enum Landkoder {
 	AT("AT", "ØSTERRIKE"),
 	TL("TL", "ØST-TIMOR"),
 	AX("AX", "ÅLAND"),
+	// Midlertidige landkoder som ikke ligger i ISO-3166-1
+	XK("XK", "REPUBLIKKEN KOSOVO"),
+	// Fallback ved ukjent landkode
 	XX("XX", "UKJENT");
 
 	private final String landkode;
