@@ -128,7 +128,8 @@ public class BestillingMapper {
 			try {
 				return Landkoder.valueOf(landkode).getLandnavn();
 			} catch (IllegalArgumentException e) {
-				log.error("Country code {} is either wrong or not registered.", landkode, e);
+				log.error("Mapping av landkode={} til landnavn feilet, da landkoden ikke ligger i Landkoder-enumen. " +
+						"Hør med teamet om landkoden bør legges inn.", landkode, e);
 				return landkode;
 			}
 		}
