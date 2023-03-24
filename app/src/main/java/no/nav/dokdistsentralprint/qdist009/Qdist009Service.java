@@ -12,7 +12,6 @@ import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
 import no.nav.dokdistsentralprint.exception.functional.KunneIkkeDeserialisereBucketJsonPayloadFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.NoDocumentFromBucketTechnicalException;
-import no.nav.dokdistsentralprint.metrics.MetricUpdater;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
@@ -47,19 +46,16 @@ public class Qdist009Service {
 	private final AdministrerForsendelse administrerForsendelse;
 	private final Regoppslag regoppslag;
 	private final BucketStorage bucketStorage;
-	private final MetricUpdater metricUpdater;
 	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
 						   AdministrerForsendelse administrerForsendelse,
 						   BucketStorage bucketStorage,
-						   Regoppslag regoppslag,
-						   MetricUpdater metricUpdater) {
+						   Regoppslag regoppslag) {
 		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
 		this.administrerForsendelse = administrerForsendelse;
 		this.regoppslag = regoppslag;
 		this.bucketStorage = bucketStorage;
-		this.metricUpdater = metricUpdater;
 	}
 
 	@Handler
@@ -87,8 +83,6 @@ public class Qdist009Service {
 				kanalbehandling, dokdistDokumentList.size(), bestillingsId, dokumenttypeIdHoveddokument);
 		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
 		List<BestillingEntity> bestillingEntities = createBestillingEntities(bestillingsId, bestillingXmlString, dokdistDokumentList);
-
-		metricUpdater.updateQdist009Metrics(hentPostDestinasjonResponseTo.getPostDestinasjon(), adresse.getLandkode());
 
 		return zipPrintbestillingToBytes(bestillingEntities);
 	}

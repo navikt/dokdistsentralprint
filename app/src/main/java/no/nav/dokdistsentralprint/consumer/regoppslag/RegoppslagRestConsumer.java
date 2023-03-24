@@ -8,7 +8,6 @@ import no.nav.dokdistsentralprint.exception.functional.RegoppslagHentAdresseFunc
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseSecurityException;
 import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseTechnicalException;
-import no.nav.dokdistsentralprint.metrics.Monitor;
 import no.nav.dokdistsentralprint.qdist009.reststs.StsRestConsumer;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +50,6 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	}
 
 	@Override
-	@Monitor(value = "dok_consumer", extraTags = {"process", "treg002HentAdresse"}, histogram = true)
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
 		HttpEntity<?> entity = new HttpEntity<>(request, retrieveBearerTokenAndCreateHeader());
