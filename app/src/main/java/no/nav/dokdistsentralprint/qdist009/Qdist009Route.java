@@ -1,7 +1,6 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
-import no.nav.dokdistsentralprint.metrics.Qdist009MetricsRoutePolicy;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -39,20 +38,17 @@ public class Qdist009Route extends SpringRouteBuilder {
     private final DokdistStatusUpdater dokdistStatusUpdater;
     private final Queue qdist009;
     private final Queue qdist009FunksjonellFeil;
-    private final Qdist009MetricsRoutePolicy qdist009MetricsRoutePolicy;
 
     public Qdist009Route(Qdist009Service qdist009Service,
                          DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper,
                          DokdistStatusUpdater dokdistStatusUpdater,
                          Queue qdist009,
-                         Queue qdist009FunksjonellFeil,
-                         Qdist009MetricsRoutePolicy qdist009MetricsRoutePolicy) {
+                         Queue qdist009FunksjonellFeil) {
         this.qdist009Service = qdist009Service;
         this.distribuerForsendelseTilSentralPrintMapper = distribuerForsendelseTilSentralPrintMapper;
         this.dokdistStatusUpdater = dokdistStatusUpdater;
         this.qdist009 = qdist009;
         this.qdist009FunksjonellFeil = qdist009FunksjonellFeil;
-        this.qdist009MetricsRoutePolicy = qdist009MetricsRoutePolicy;
     }
 
     @Override
@@ -72,7 +68,6 @@ public class Qdist009Route extends SpringRouteBuilder {
 
         from("jms:" + qdist009.getQueueName() + "?transacted=true&concurrentConsumers=2")
                 .routeId(SERVICE_ID)
-                .routePolicy(qdist009MetricsRoutePolicy)
                 .setExchangePattern(ExchangePattern.InOnly)
                 .process(new IdsProcessor())
                 .to("validator:no/nav/meldinger/virksomhet/dokdistfordeling/xsd/qdist008/out/distribuertilkanal.xsd")

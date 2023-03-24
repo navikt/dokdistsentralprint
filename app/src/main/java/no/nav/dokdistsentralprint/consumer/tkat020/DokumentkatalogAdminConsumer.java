@@ -5,7 +5,6 @@ import no.nav.dokdistsentralprint.config.azure.AzureTokenProperties;
 import no.nav.dokdistsentralprint.exception.functional.Tkat020FunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.Tkat020TechnicalException;
-import no.nav.dokdistsentralprint.metrics.Monitor;
 import no.nav.dokkat.api.tkat020.v4.DokumentTypeInfoToV4;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +51,6 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 	@Override
 	@Cacheable(TKAT020_CACHE)
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	@Monitor(value = "dok_consumer", extraTags = {"process", "getDokumenttypeInfo"}, histogram = true)
 	public DokumenttypeInfoTo getDokumenttypeInfo(final String dokumenttypeId) {
 		DokumentTypeInfoToV4 result = webClient.get()
 					.uri(dokumenttypeInfoV4Url + "/" + dokumenttypeId)
