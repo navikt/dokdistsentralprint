@@ -1,9 +1,9 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
+import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
-import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
+import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.BestillingsInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Dokument;
@@ -33,44 +33,44 @@ public class BestillingMapper {
 	private static final String KONVOLUTT_MED_VINDU = "X";
 	private static final String NAV_STANDARD = "NAV_STANDARD";
 
-	public Bestilling createBestilling(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse, HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo) {
+	public Bestilling createBestilling(HentForsendelseResponse hentForsendelseResponse, DokumenttypeInfo dokumenttypeInfo, Adresse adresse, HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo) {
 		return new Bestilling()
 				.withBestillingsInfo(new BestillingsInfo()
-						.withModus(hentForsendelseResponseTo.getModus())
+						.withModus(hentForsendelseResponse.getModus())
 						.withKundeId(KUNDE_ID_NAV_IKT)
-						.withBestillingsId(hentForsendelseResponseTo.getBestillingsId())
+						.withBestillingsId(hentForsendelseResponse.getBestillingsId())
 						.withKundeOpprettet(LocalDate.now().toString())
 						.withDokumentInfo(new DokumentInfo()
 								.withSorteringsfelt(USORTERT)
 								.withDestinasjon(hentPostDestinasjonResponseTo.getPostDestinasjon()))
 						.withKanal(new Kanal()
 								.withType(PRINT)
-								.withBehandling(getBehandling(dokumenttypeInfoTo))))
+								.withBehandling(getBehandling(dokumenttypeInfo))))
 				.withMailpiece(new Mailpiece()
-						.withMailpieceId(hentForsendelseResponseTo.getBestillingsId())
+						.withMailpieceId(hentForsendelseResponse.getBestillingsId())
 						.withRessurs(new Ressurs()
-								.withAdresse(addCDataToString(getAdresse(adresse, hentForsendelseResponseTo.getMottaker()
+								.withAdresse(addCDataToString(getAdresse(adresse, hentForsendelseResponse.getMottaker()
 										.getMottakerNavn()))))
 						.withLandkode(getLandkode(adresse))
 						.withPostnummer(getPostnummer(adresse))
-						.withDokument(mapDokumenter(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse)));
+						.withDokument(mapDokumenter(hentForsendelseResponse, dokumenttypeInfo, adresse)));
 	}
 
-	private List<Dokument> mapDokumenter(HentForsendelseResponseTo hentForsendelseResponseTo, DokumenttypeInfoTo dokumenttypeInfoTo, Adresse adresse) {
-		return hentForsendelseResponseTo.getDokumenter().stream()
+	private List<Dokument> mapDokumenter(HentForsendelseResponse hentForsendelseResponse, DokumenttypeInfo dokumenttypeInfo, Adresse adresse) {
+		return hentForsendelseResponse.getDokumenter().stream()
 				.map(dokumentTo ->
-						isMottakerSkattyter(hentForsendelseResponseTo.getMottaker().getMottakerType()) ?
+						isMottakerSkattyter(hentForsendelseResponse.getMottaker().getMottakerType()) ?
 								new Dokument()
-										.withDokumentType(mapDokumentType(dokumenttypeInfoTo.getSentralPrintDokumentType()))
+										.withDokumentType(mapDokumentType(dokumenttypeInfo.getSentralPrintDokumentType()))
 										.withDokumentId(dokumentTo.getDokumentObjektReferanse())
-										.withSkattyternummer(hentForsendelseResponseTo.getMottaker().getMottakerId())
-										.withNavn(addCDataToString(hentForsendelseResponseTo.getMottaker().getMottakerNavn()))
+										.withSkattyternummer(hentForsendelseResponse.getMottaker().getMottakerId())
+										.withNavn(addCDataToString(hentForsendelseResponse.getMottaker().getMottakerNavn()))
 										.withLandkode(getLandkode(adresse))
 										.withPostnummer(getPostnummer(adresse)) :
 								new Dokument()
-										.withDokumentType(mapDokumentType(dokumenttypeInfoTo.getSentralPrintDokumentType()))
+										.withDokumentType(mapDokumentType(dokumenttypeInfo.getSentralPrintDokumentType()))
 										.withDokumentId(dokumentTo.getDokumentObjektReferanse())
-										.withNavn(addCDataToString(hentForsendelseResponseTo.getMottaker().getMottakerNavn()))
+										.withNavn(addCDataToString(hentForsendelseResponse.getMottaker().getMottakerNavn()))
 										.withLandkode(getLandkode(adresse))
 										.withPostnummer(getPostnummer(adresse)))
 				.collect(Collectors.toList());
@@ -139,13 +139,13 @@ public class BestillingMapper {
 		return format("<![CDATA[%s]]>", s);
 	}
 
-	private String getBehandling(DokumenttypeInfoTo dokumenttypeInfoTo) {
-		return format("%s_%s_%s", dokumenttypeInfoTo.getPortoklasse(), mapKonvoluttvinduType(dokumenttypeInfoTo), getPlex(dokumenttypeInfoTo
+	private String getBehandling(DokumenttypeInfo dokumenttypeInfo) {
+		return format("%s_%s_%s", dokumenttypeInfo.getPortoklasse(), mapKonvoluttvinduType(dokumenttypeInfo), getPlex(dokumenttypeInfo
 				.isTosidigprint()));
 	}
 
-	private String mapKonvoluttvinduType(DokumenttypeInfoTo dokumenttypeInfoTo) {
-		return isBlank(dokumenttypeInfoTo.getKonvoluttvinduType()) ? KONVOLUTT_MED_VINDU : dokumenttypeInfoTo.getKonvoluttvinduType();
+	private String mapKonvoluttvinduType(DokumenttypeInfo dokumenttypeInfo) {
+		return isBlank(dokumenttypeInfo.getKonvoluttvinduType()) ? KONVOLUTT_MED_VINDU : dokumenttypeInfo.getKonvoluttvinduType();
 	}
 
 	private String mapDokumentType(String sentralPrintDokumentType) {

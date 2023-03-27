@@ -2,13 +2,11 @@ package no.nav.dokdistsentralprint.consumer.tkat020;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
-import no.nav.dokdistsentralprint.config.azure.AzureTokenProperties;
 import no.nav.dokdistsentralprint.exception.functional.Tkat020FunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.Tkat020TechnicalException;
 import no.nav.dokkat.api.tkat020.v4.DokumentTypeInfoToV4;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.retry.annotation.Backoff;
@@ -43,8 +41,8 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 	private final ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
 	public DokumentkatalogAdminConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
-										WebClient webClient,
-										ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) {
+										ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
+										WebClient webClient) {
 		this.dokumenttypeInfoV4Url = dokdistsentralprintProperties.getEndpoints().getDokmet().getUrl();
 		this.webClient = webClient;
 		this.oAuth2AuthorizedClientManager = oAuth2AuthorizedClientManager;
@@ -53,29 +51,31 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 	@Override
 	@Cacheable(TKAT020_CACHE)
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	public DokumenttypeInfoTo getDokumenttypeInfo(final String dokumenttypeId) {
+	public DokumenttypeInfo getDokumenttypeInfo(final String dokumenttypeId) {
+
 		DokumentTypeInfoToV4 result = webClient.get()
-					.uri(dokumenttypeInfoV4Url + "/" + dokumenttypeId)
-					.attributes(getOauth2AuthorizedClient())
-					.headers(this::createHeaders)
-					.retrieve()
-					.bodyToMono(DokumentTypeInfoToV4.class)
-					.doOnError(handleError(dokumenttypeId))
-					.block();
+				.uri(dokumenttypeInfoV4Url + "/" + dokumenttypeId)
+				.attributes(getOauth2AuthorizedClient())
+				.headers(this::createHeaders)
+				.retrieve()
+				.bodyToMono(DokumentTypeInfoToV4.class)
+				.doOnError(handleError(dokumenttypeId))
+				.block();
 
 		return mapResponse(result);
 	}
 
-	private DokumenttypeInfoTo mapResponse(final DokumentTypeInfoToV4 response) {
-		if (response == null){
+	private DokumenttypeInfo mapResponse(final DokumentTypeInfoToV4 response) {
+		if (response == null) {
 			throw new Tkat020FunctionalException("dokkat. respons fra DokumenttypeInfo er null");
 		}
-		if (response.getDokumentProduksjonsInfo() == null || response.getDokumentProduksjonsInfo()
-				.getDistribusjonInfo() == null) {
+
+		if (response.getDokumentProduksjonsInfo() == null || response.getDokumentProduksjonsInfo().getDistribusjonInfo() == null) {
 			throw new Tkat020FunctionalException(format("dokkat.DokumentProduksjonsInfo eller dokkat.DokumentProduksjonsInfo.DistribusjonInfo er null på dokument med dokumenttypeId=%s. Ikke et utgående dokument? dokumentType=%s", response
 					.getDokumenttypeId(), response.getDokumentType()));
 		}
-		return DokumenttypeInfoTo.builder()
+
+		return DokumenttypeInfo.builder()
 				.konvoluttvinduType(response.getDokumentProduksjonsInfo().getDistribusjonInfo().getKonvoluttvinduType())
 				.sentralPrintDokumentType(response.getDokumentProduksjonsInfo().getDistribusjonInfo()
 						.getSentralPrintDokumentType())

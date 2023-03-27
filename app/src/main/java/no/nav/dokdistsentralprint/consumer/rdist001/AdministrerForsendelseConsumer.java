@@ -76,7 +76,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	public HentForsendelseResponseTo hentForsendelse(final String forsendelseId) {
+	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
 
 		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
 
@@ -86,7 +86,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 						.build(forsendelseId))
 				.attributes(getOAuth2AuthorizedClient())
 				.retrieve()
-				.bodyToMono(HentForsendelseResponseTo.class)
+				.bodyToMono(HentForsendelseResponse.class)
 				.doOnError(this::handleError)
 				.block();
 

@@ -8,20 +8,20 @@ import java.util.List;
 
 @Data
 @Builder
-public class HentForsendelseResponseTo {
+public class HentForsendelseResponse {
 	private final String bestillingsId;
 	private final String originalBestillingsId;
 	private final String forsendelseStatus;
 	private final String modus;
 	private final String tema;
-	private final MottakerTo mottaker;
-	private final PostadresseTo postadresse;
-	private final List<DokumentTo> dokumenter;
+	private final Mottaker mottaker;
+	private final Postadresse postadresse;
+	private final List<Dokument> dokumenter;
 
 
 	@Data
 	@Builder
-	public static class MottakerTo {
+	public static class Mottaker {
 		private final String mottakerId;
 		private final String mottakerNavn;
 		private final String mottakerType;
@@ -29,7 +29,7 @@ public class HentForsendelseResponseTo {
 
 	@Value
 	@Builder
-	public static class PostadresseTo {
+	public static class Postadresse {
 		String adresselinje1;
 		String adresselinje2;
 		String adresselinje3;
@@ -40,7 +40,7 @@ public class HentForsendelseResponseTo {
 
 	@Data
 	@Builder
-	public static class DokumentTo {
+	public static class Dokument {
 		private final String tilknyttetSom;
 		private final String dokumentObjektReferanse;
 		private final String dokumenttypeId;

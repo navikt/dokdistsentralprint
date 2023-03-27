@@ -4,7 +4,7 @@ import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.constants.DomainConstants.FORSENDELSE_STATUS_KLAR_FOR_DIST;
 import static no.nav.dokdistsentralprint.constants.DomainConstants.HOVEDDOKUMENT;
 
-import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
+import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.exception.functional.InvalidForsendelseStatusException;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
@@ -23,10 +23,10 @@ public final class Qdist009FunctionalUtils {
 		}
 	}
 
-	public static String getDokumenttypeIdHoveddokument(HentForsendelseResponseTo hentForsendelseResponseTo) {
-		return hentForsendelseResponseTo.getDokumenter().stream()
-				.filter(dokumentTo -> HOVEDDOKUMENT.equals(dokumentTo.getTilknyttetSom()))
-				.map(HentForsendelseResponseTo.DokumentTo::getDokumenttypeId).toList()
+	public static String getDokumenttypeIdHoveddokument(HentForsendelseResponse hentForsendelseResponse) {
+		return hentForsendelseResponse.getDokumenter().stream()
+				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
+				.map(HentForsendelseResponse.Dokument::getDokumenttypeId).toList()
 				.get(0);
 	}
 
