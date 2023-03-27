@@ -1,6 +1,7 @@
 package no.nav.dokdistsentralprint.consumer.tkat020;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
 import no.nav.dokdistsentralprint.config.azure.AzureTokenProperties;
 import no.nav.dokdistsentralprint.exception.functional.Tkat020FunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
@@ -41,11 +42,10 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 	private final WebClient webClient;
 	private final ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
-
-	public DokumentkatalogAdminConsumer(@Value("${DokumenttypeInfo_v4_url}") String dokumenttypeInfoV4Url,
+	public DokumentkatalogAdminConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
 										WebClient webClient,
 										ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) {
-		this.dokumenttypeInfoV4Url = dokumenttypeInfoV4Url;
+		this.dokumenttypeInfoV4Url = dokdistsentralprintProperties.getEndpoints().getDokmet().getUrl();
 		this.webClient = webClient;
 		this.oAuth2AuthorizedClientManager = oAuth2AuthorizedClientManager;
 	}

@@ -17,6 +17,9 @@ public class DokdistsentralprintProperties {
 	@Data
 	public static class Endpoints {
 		@NotNull
+		private AzureEndpoint dokmet;
+
+		@NotNull
 		private AzureEndpoint dokdistadmin;
 	}
 

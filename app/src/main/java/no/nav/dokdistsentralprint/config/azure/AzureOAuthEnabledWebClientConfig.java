@@ -83,7 +83,6 @@ public class AzureOAuthEnabledWebClientConfig {
 
 	@Bean
 	List<ClientRegistration> clientRegistration(
-			@Value("${dokmet_scope}") String dokmetScope,
 			DokdistsentralprintProperties dokdistsentralprintProperties,
 			AzureTokenProperties azureTokenProperties) {
 		return List.of(
@@ -93,7 +92,7 @@ public class AzureOAuthEnabledWebClientConfig {
 						.clientSecret(azureTokenProperties.appClientSecret())
 						.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
 						.authorizationGrantType(CLIENT_CREDENTIALS)
-						.scope(dokmetScope)
+						.scope(dokdistsentralprintProperties.getEndpoints().getDokmet().getScope())
 						.build(),
 				ClientRegistration.withRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN)
 						.tokenUri(azureTokenProperties.openidConfigTokenEndpoint())
