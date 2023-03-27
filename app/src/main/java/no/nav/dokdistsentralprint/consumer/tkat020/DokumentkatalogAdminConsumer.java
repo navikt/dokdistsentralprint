@@ -24,9 +24,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
+import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKMET;
+import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.getOAuth2AuthorizeRequestForAzure;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
-import static no.nav.dokdistsentralprint.constants.MdcConstants.NAV_CALLID;
+import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_CALLID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -100,7 +102,7 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 	}
 
 	private Consumer<Map<String, Object>> getOauth2AuthorizedClient() {
-		Mono<OAuth2AuthorizedClient> clientMono = oAuth2AuthorizedClientManager.authorize(AzureTokenProperties.getOAuth2AuthorizeRequestForAzure());
+		Mono<OAuth2AuthorizedClient> clientMono = oAuth2AuthorizedClientManager.authorize(getOAuth2AuthorizeRequestForAzure(CLIENT_REGISTRATION_DOKMET));
 		return ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(clientMono.block());
 	}
 

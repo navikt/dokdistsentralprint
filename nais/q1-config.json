@@ -9,6 +9,8 @@
   "DOKUMENTTYPEINFO_V4_URL": "https://dokmet-q1.dev.intern.nav.no/rest/dokumenttypeinfo",
   "DOKMET_SCOPE": "api://dev-fss.teamdokumenthandtering.dokmet-q1/.default",
   "ADMINISTRERFORSENDELSE_V1_URL": "https://app-q1.adeo.no/dokdist/rest/v1/administrerforsendelse",
+  "DOKDISTSENTRALPRINT_ENDPOINTS_DOKDISTADMIN_URL": "https://dokdistadmin-q1.dev.intern.nav.no/rest/v1/administrerforsendelse",
+  "DOKDISTSENTRALPRINT_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://dev-fss.teamdokumenthandtering.dokdistadmin-q1/.default",
   "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.dev.adeo.no/rest/v1/sts/token",
   "REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL": "https://regoppslag-q1.dev.intern.nav.no/rest/hentMottakerOgAdresse",
   "MQGATEWAY01_CHANNEL_NAME": "Q1_DOKDISTSENTPRINT",
