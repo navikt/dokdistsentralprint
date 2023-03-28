@@ -71,7 +71,7 @@ public class Qdist009Service {
 		validateForsendelseStatus(hentForsendelseResponse.getForsendelseStatus());
 
 		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(hentForsendelseResponse);
-		DokumenttypeInfo dokumenttypeInfo = dokumentkatalogAdmin.getDokumenttypeInfo(dokumenttypeIdHoveddokument);
+		DokumenttypeInfo dokumenttypeInfo = dokumentkatalogAdmin.hentDokumenttypeInfo(dokumenttypeIdHoveddokument);
 
 		Adresse adresse = getAdresse(hentForsendelseResponse, forsendelseId);
 		HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo = administrerForsendelse.hentPostDestinasjon(adresse.getLandkode());

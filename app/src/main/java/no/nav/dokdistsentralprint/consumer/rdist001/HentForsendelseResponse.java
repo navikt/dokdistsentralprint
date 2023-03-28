@@ -1,30 +1,28 @@
 package no.nav.dokdistsentralprint.consumer.rdist001;
 
 import lombok.Builder;
-import lombok.Data;
 import lombok.Value;
 
 import java.util.List;
 
-@Data
+@Value
 @Builder
 public class HentForsendelseResponse {
-	private final String bestillingsId;
-	private final String originalBestillingsId;
-	private final String forsendelseStatus;
-	private final String modus;
-	private final String tema;
-	private final Mottaker mottaker;
-	private final Postadresse postadresse;
-	private final List<Dokument> dokumenter;
+	String bestillingsId;
+	String originalBestillingsId;
+	String forsendelseStatus;
+	String modus;
+	String tema;
+	Mottaker mottaker;
+	Postadresse postadresse;
+	List<Dokument> dokumenter;
 
-
-	@Data
+	@Value
 	@Builder
 	public static class Mottaker {
-		private final String mottakerId;
-		private final String mottakerNavn;
-		private final String mottakerType;
+		String mottakerId;
+		String mottakerNavn;
+		String mottakerType;
 	}
 
 	@Value
@@ -38,12 +36,12 @@ public class HentForsendelseResponse {
 		String landkode;
 	}
 
-	@Data
+	@Value
 	@Builder
 	public static class Dokument {
-		private final String tilknyttetSom;
-		private final String dokumentObjektReferanse;
-		private final String dokumenttypeId;
+		String tilknyttetSom;
+		String dokumentObjektReferanse;
+		String dokumenttypeId;
 	}
 }
 
