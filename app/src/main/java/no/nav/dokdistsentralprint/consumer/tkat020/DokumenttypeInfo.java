@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @Builder
-public class DokumenttypeInfoTo {
+public class DokumenttypeInfo {
 
 	String portoklasse;
 	String konvoluttvinduType;

@@ -1,5 +1,6 @@
 package no.nav.dokdistsentralprint.config.azure;
 
+import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +19,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
+import java.util.List;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKDISTADMIN;
+import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKMET;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.CLIENT_CREDENTIALS;
 import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
 
@@ -33,7 +37,7 @@ public class AzureOAuthEnabledWebClientConfig {
 		ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2exchangeFilterFunction = new ServerOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
 
 		var nettyHttpClient = HttpClient.create()
-				.responseTimeout(Duration.of(20, ChronoUnit.SECONDS));
+				.responseTimeout(Duration.of(20, SECONDS));
 		var clientHttpConnector = new ReactorClientHttpConnector(nettyHttpClient);
 
 		return WebClient.builder()
@@ -50,10 +54,10 @@ public class AzureOAuthEnabledWebClientConfig {
 		ClientCredentialsReactiveOAuth2AuthorizedClientProvider authorizedClientProvider = new ClientCredentialsReactiveOAuth2AuthorizedClientProvider();
 		var nettyHttpClient = HttpClient.create()
 				.proxyWithSystemProperties()
-				.responseTimeout(Duration.of(20, ChronoUnit.SECONDS));
+				.responseTimeout(Duration.of(20, SECONDS));
 		var clientHttpConnector = new ReactorClientHttpConnector(nettyHttpClient);
 
-		WebClient webClientWithProxy =  WebClient.builder()
+		WebClient webClientWithProxy = WebClient.builder()
 				.clientConnector(clientHttpConnector)
 				.build();
 
@@ -73,19 +77,31 @@ public class AzureOAuthEnabledWebClientConfig {
 	}
 
 	@Bean
-	ReactiveClientRegistrationRepository clientRegistrationRepository(ClientRegistration clientRegistration) {
+	ReactiveClientRegistrationRepository clientRegistrationRepository(List<ClientRegistration> clientRegistration) {
 		return new InMemoryReactiveClientRegistrationRepository(clientRegistration);
 	}
 
 	@Bean
-	ClientRegistration clientRegistration(@Value("${dokmet_scope}") String dokmetScope, AzureTokenProperties azureTokenProperties) {
-		return ClientRegistration.withRegistrationId(AzureTokenProperties.CLIENT_REGISTRATION_ID)
-				.tokenUri(azureTokenProperties.openidConfigTokenEndpoint())
-				.clientId(azureTokenProperties.appClientId())
-				.clientSecret(azureTokenProperties.appClientSecret())
-				.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
-				.authorizationGrantType(CLIENT_CREDENTIALS)
-				.scope(dokmetScope)
-				.build();
+	List<ClientRegistration> clientRegistration(
+			DokdistsentralprintProperties dokdistsentralprintProperties,
+			AzureTokenProperties azureTokenProperties) {
+		return List.of(
+				ClientRegistration.withRegistrationId(CLIENT_REGISTRATION_DOKMET)
+						.tokenUri(azureTokenProperties.openidConfigTokenEndpoint())
+						.clientId(azureTokenProperties.appClientId())
+						.clientSecret(azureTokenProperties.appClientSecret())
+						.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
+						.authorizationGrantType(CLIENT_CREDENTIALS)
+						.scope(dokdistsentralprintProperties.getEndpoints().getDokmet().getScope())
+						.build(),
+				ClientRegistration.withRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN)
+						.tokenUri(azureTokenProperties.openidConfigTokenEndpoint())
+						.clientId(azureTokenProperties.appClientId())
+						.clientSecret(azureTokenProperties.appClientSecret())
+						.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
+						.authorizationGrantType(CLIENT_CREDENTIALS)
+						.scope(dokdistsentralprintProperties.getEndpoints().getDokdistadmin().getScope())
+						.build()
+		);
 	}
 }

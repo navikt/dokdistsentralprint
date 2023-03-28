@@ -2,14 +2,15 @@ package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
-import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
+import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
+import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse.Dokument;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
 import no.nav.dokdistsentralprint.consumer.rdist001.OppdaterPostadresseRequest;
 import no.nav.dokdistsentralprint.consumer.regoppslag.Regoppslag;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
-import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
+import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.exception.functional.KunneIkkeDeserialisereBucketJsonPayloadFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.NoDocumentFromBucketTechnicalException;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
@@ -61,23 +62,23 @@ public class Qdist009Service {
 	@Handler
 	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo, Exchange exchange) {
 		final String forsendelseId = distribuerForsendelseTilSentralPrintTo.getForsendelseId();
-		HentForsendelseResponseTo hentForsendelseResponseTo = administrerForsendelse.hentForsendelse(forsendelseId);
+		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(forsendelseId);
 
-		final String bestillingsId = hentForsendelseResponseTo.getBestillingsId();
+		final String bestillingsId = hentForsendelseResponse.getBestillingsId();
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingsId);
 
 		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", forsendelseId, bestillingsId);
-		validateForsendelseStatus(hentForsendelseResponseTo.getForsendelseStatus());
+		validateForsendelseStatus(hentForsendelseResponse.getForsendelseStatus());
 
-		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(hentForsendelseResponseTo);
-		DokumenttypeInfoTo dokumenttypeInfoTo = dokumentkatalogAdmin.getDokumenttypeInfo(dokumenttypeIdHoveddokument);
+		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(hentForsendelseResponse);
+		DokumenttypeInfo dokumenttypeInfo = dokumentkatalogAdmin.hentDokumenttypeInfo(dokumenttypeIdHoveddokument);
 
-		Adresse adresse = getAdresse(hentForsendelseResponseTo, forsendelseId);
+		Adresse adresse = getAdresse(hentForsendelseResponse, forsendelseId);
 		HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo = administrerForsendelse.hentPostDestinasjon(adresse.getLandkode());
 
-		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(hentForsendelseResponseTo);
+		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(hentForsendelseResponse);
 
-		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseTo, dokumenttypeInfoTo, adresse, hentPostDestinasjonResponseTo);
+		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponse, dokumenttypeInfo, adresse, hentPostDestinasjonResponseTo);
 		String kanalbehandling = bestilling.getBestillingsInfo().getKanal().getBehandling();
 		log.info("qdist009 lager bestilling til print med kanalbehandling={}, antall_dokumenter={} for bestillingsId={}, dokumenttypeId={}",
 				kanalbehandling, dokdistDokumentList.size(), bestillingsId, dokumenttypeIdHoveddokument);
@@ -87,10 +88,10 @@ public class Qdist009Service {
 		return zipPrintbestillingToBytes(bestillingEntities);
 	}
 
-	private Adresse getAdresse(HentForsendelseResponseTo hentForsendelseResponseTo, String forsendelseId) {
-		final HentForsendelseResponseTo.PostadresseTo adresseDokdist = hentForsendelseResponseTo.getPostadresse();
+	private Adresse getAdresse(HentForsendelseResponse hentForsendelseResponse, String forsendelseId) {
+		final HentForsendelseResponse.Postadresse adresseDokdist = hentForsendelseResponse.getPostadresse();
 		if (adresseDokdist == null) {
-			Adresse postadresse = getAdresseFromRegoppslag(hentForsendelseResponseTo);
+			Adresse postadresse = getAdresseFromRegoppslag(hentForsendelseResponse);
 			administrerForsendelse.oppdaterPostadresse(mapOppdaterPostadresse(forsendelseId, postadresse));
 			return postadresse;
 		} else {
@@ -109,11 +110,11 @@ public class Qdist009Service {
 		return isBlank(landkode) || UKJENT_LANDKODE.equals(landkode) ? XX_LANDKODE : landkode;
 	}
 
-	private Adresse getAdresseFromRegoppslag(HentForsendelseResponseTo hentForsendelseResponseTo) {
+	private Adresse getAdresseFromRegoppslag(HentForsendelseResponse hentForsendelseResponse) {
 		AdresseTo adresseTo = regoppslag.treg002HentAdresse(HentAdresseRequestTo.builder()
-				.identifikator(hentForsendelseResponseTo.getMottaker().getMottakerId())
-				.type(hentForsendelseResponseTo.getMottaker().getMottakerType())
-				.tema(hentForsendelseResponseTo.getTema())
+				.identifikator(hentForsendelseResponse.getMottaker().getMottakerId())
+				.type(hentForsendelseResponse.getMottaker().getMottakerType())
+				.tema(hentForsendelseResponse.getTema())
 				.build());
 
 		return Adresse.builder()
@@ -130,21 +131,21 @@ public class Qdist009Service {
 	 * Her er rekkefølgen viktig. HentForsendelseResponseTo.dokumenter består av en ordnet liste av dokumenter i rekkefølgen HOVEDDOK, VEDLEGG1, VEDLEGG2, ...
 	 * Denne rekkefølgen må bevares slik at bestillingen blir korrekt. Siden vi bruker List.java blir denne rekkefølgen ivaretatt
 	 **/
-	private List<DokdistDokument> getDocumentsFromBucket(HentForsendelseResponseTo hentForsendelseResponseTo) {
-		return hentForsendelseResponseTo.getDokumenter().stream()
-				.map(dokumentTo -> {
-					if (isBlank(hentForsendelseResponseTo.getOriginalBestillingsId())) {
-						return getDokdistDokument(dokumentTo, hentForsendelseResponseTo.getBestillingsId());
+	private List<DokdistDokument> getDocumentsFromBucket(HentForsendelseResponse hentForsendelseResponse) {
+		return hentForsendelseResponse.getDokumenter().stream()
+				.map(dokument -> {
+					if (isBlank(hentForsendelseResponse.getOriginalBestillingsId())) {
+						return getDokdistDokument(dokument, hentForsendelseResponse.getBestillingsId());
 					} else {
-						return getDokdistDokument(dokumentTo, hentForsendelseResponseTo.getOriginalBestillingsId());
+						return getDokdistDokument(dokument, hentForsendelseResponse.getOriginalBestillingsId());
 					}
 				})
 				.collect(Collectors.toList());
 	}
 
-	private DokdistDokument getDokdistDokument(HentForsendelseResponseTo.DokumentTo dokumentTo, String bestillingsId) {
-		String jsonPayload = bucketStorage.downloadObject(dokumentTo.getDokumentObjektReferanse(), bestillingsId);
-		return deserializeBucketJsonPayloadToDokdistDokument(jsonPayload, dokumentTo.getDokumentObjektReferanse());
+	private DokdistDokument getDokdistDokument(Dokument dokument, String bestillingsId) {
+		String jsonPayload = bucketStorage.downloadObject(dokument.getDokumentObjektReferanse(), bestillingsId);
+		return deserializeBucketJsonPayloadToDokdistDokument(jsonPayload, dokument.getDokumentObjektReferanse());
 	}
 
 	private DokdistDokument deserializeBucketJsonPayloadToDokdistDokument(String jsonPayload, String objektReferanse) {

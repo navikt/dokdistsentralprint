@@ -14,11 +14,12 @@ public record AzureTokenProperties(
 		@NotEmpty String appClientSecret
 ) {
 	public static final String SPRING_DEFAULT_PRINCIPAL = "anonymousUser";
-	public static final String CLIENT_REGISTRATION_ID = "azure";
+	public static final String CLIENT_REGISTRATION_DOKMET = "azure-dokmet";
+	public static final String CLIENT_REGISTRATION_DOKDISTADMIN = "azure-dokdistadmin";
 
-	public static OAuth2AuthorizeRequest getOAuth2AuthorizeRequestForAzure() {
+	public static OAuth2AuthorizeRequest getOAuth2AuthorizeRequestForAzure(String clientRegistrationId) {
 		return OAuth2AuthorizeRequest
-				.withClientRegistrationId(CLIENT_REGISTRATION_ID)
+				.withClientRegistrationId(clientRegistrationId)
 				.principal(SPRING_DEFAULT_PRINCIPAL)
 				.build();
 	}

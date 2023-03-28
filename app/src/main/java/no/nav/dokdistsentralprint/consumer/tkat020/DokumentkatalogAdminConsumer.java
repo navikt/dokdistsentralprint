@@ -1,15 +1,13 @@
 package no.nav.dokdistsentralprint.consumer.tkat020;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistsentralprint.config.azure.AzureTokenProperties;
+import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
+import no.nav.dokdistsentralprint.constants.NavHeadersFilter;
 import no.nav.dokdistsentralprint.exception.functional.Tkat020FunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.Tkat020TechnicalException;
 import no.nav.dokkat.api.tkat020.v4.DokumentTypeInfoToV4;
-import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -24,56 +22,65 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
+import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKMET;
+import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.getOAuth2AuthorizeRequestForAzure;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
-import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
-import static no.nav.dokdistsentralprint.constants.MdcConstants.NAV_CALLID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @Component
 class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 
-	private final String dokumenttypeInfoV4Url;
 	private final WebClient webClient;
 	private final ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
-
-	public DokumentkatalogAdminConsumer(@Value("${DokumenttypeInfo_v4_url}") String dokumenttypeInfoV4Url,
-										WebClient webClient,
-										ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) {
-		this.dokumenttypeInfoV4Url = dokumenttypeInfoV4Url;
-		this.webClient = webClient;
+	public DokumentkatalogAdminConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
+										ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
+										WebClient webClient) {
 		this.oAuth2AuthorizedClientManager = oAuth2AuthorizedClientManager;
+		this.webClient = webClient.mutate()
+				.baseUrl(dokdistsentralprintProperties.getEndpoints().getDokmet().getUrl())
+				.filter(new NavHeadersFilter())
+				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+				.build();
 	}
 
 	@Override
 	@Cacheable(TKAT020_CACHE)
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	public DokumenttypeInfoTo getDokumenttypeInfo(final String dokumenttypeId) {
+	public DokumenttypeInfo hentDokumenttypeInfo(final String dokumenttypeId) {
+
+		log.info("hentDokumenttypeInfo henter dokumenttypeinfo med dokumenttypeId={}", dokumenttypeId);
+
 		DokumentTypeInfoToV4 result = webClient.get()
-					.uri(dokumenttypeInfoV4Url + "/" + dokumenttypeId)
-					.attributes(getOauth2AuthorizedClient())
-					.headers(this::createHeaders)
-					.retrieve()
-					.bodyToMono(DokumentTypeInfoToV4.class)
-					.doOnError(handleError(dokumenttypeId))
-					.block();
+				.uri(uriBuilder -> uriBuilder
+						.path("/{dokumenttypeId}")
+						.build(dokumenttypeId))
+				.attributes(getOauth2AuthorizedClient())
+				.retrieve()
+				.bodyToMono(DokumentTypeInfoToV4.class)
+				.doOnError(handleError(dokumenttypeId))
+				.block();
+
+		log.info("hentDokumenttypeInfo har hentet dokumenttypeinfo med dokumenttypeId={}", dokumenttypeId);
 
 		return mapResponse(result);
 	}
 
-	private DokumenttypeInfoTo mapResponse(final DokumentTypeInfoToV4 response) {
-		if (response == null){
+	private DokumenttypeInfo mapResponse(final DokumentTypeInfoToV4 response) {
+		if (response == null) {
 			throw new Tkat020FunctionalException("dokkat. respons fra DokumenttypeInfo er null");
 		}
-		if (response.getDokumentProduksjonsInfo() == null || response.getDokumentProduksjonsInfo()
-				.getDistribusjonInfo() == null) {
+
+		if (response.getDokumentProduksjonsInfo() == null || response.getDokumentProduksjonsInfo().getDistribusjonInfo() == null) {
 			throw new Tkat020FunctionalException(format("dokkat.DokumentProduksjonsInfo eller dokkat.DokumentProduksjonsInfo.DistribusjonInfo er null på dokument med dokumenttypeId=%s. Ikke et utgående dokument? dokumentType=%s", response
 					.getDokumenttypeId(), response.getDokumentType()));
 		}
-		return DokumenttypeInfoTo.builder()
+
+		return DokumenttypeInfo.builder()
 				.konvoluttvinduType(response.getDokumentProduksjonsInfo().getDistribusjonInfo().getKonvoluttvinduType())
 				.sentralPrintDokumentType(response.getDokumentProduksjonsInfo().getDistribusjonInfo()
 						.getSentralPrintDokumentType())
@@ -100,13 +107,7 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 	}
 
 	private Consumer<Map<String, Object>> getOauth2AuthorizedClient() {
-		Mono<OAuth2AuthorizedClient> clientMono = oAuth2AuthorizedClientManager.authorize(AzureTokenProperties.getOAuth2AuthorizeRequestForAzure());
+		Mono<OAuth2AuthorizedClient> clientMono = oAuth2AuthorizedClientManager.authorize(getOAuth2AuthorizeRequestForAzure(CLIENT_REGISTRATION_DOKMET));
 		return ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(clientMono.block());
 	}
-
-	private void createHeaders(HttpHeaders headers) {
-		headers.setContentType(APPLICATION_JSON);
-		headers.set(NAV_CALLID, MDC.get(CALL_ID));
-	}
-
 }

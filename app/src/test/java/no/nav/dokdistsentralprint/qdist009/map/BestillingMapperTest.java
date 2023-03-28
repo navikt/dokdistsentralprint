@@ -1,8 +1,8 @@
 package no.nav.dokdistsentralprint.qdist009.map;
 
-import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponseTo;
+import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
-import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfoTo;
+import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.Dokument;
 import no.nav.dokdistsentralprint.qdist009.BestillingMapper;
@@ -348,26 +348,26 @@ class BestillingMapperTest {
 				bestilling.getMailpiece().getRessurs().getAdresse());
 	}
 
-	private HentForsendelseResponseTo createHentForsendelseResponseTo(String mottakerType) {
-		return HentForsendelseResponseTo.builder()
+	private HentForsendelseResponse createHentForsendelseResponseTo(String mottakerType) {
+		return HentForsendelseResponse.builder()
 				.bestillingsId(BESTILLINGS_ID)
 				.modus(MODUS)
-				.mottaker(HentForsendelseResponseTo.MottakerTo.builder()
+				.mottaker(HentForsendelseResponse.Mottaker.builder()
 						.mottakerId(MOTTAKER_ID)
 						.mottakerNavn(MOTTAKER_NAVN)
 						.mottakerType(mottakerType)
 						.build())
-				.dokumenter(Arrays.asList(HentForsendelseResponseTo.DokumentTo.builder()
+				.dokumenter(Arrays.asList(HentForsendelseResponse.Dokument.builder()
 								.dokumentObjektReferanse(OBJEKT_REFERANSE_HOVEDDOK)
 								.dokumenttypeId(DOKUMENTTYPE_ID_HOVEDDOK)
 								.tilknyttetSom(TILKNYTTET_SOM_HOVEDDOK)
 								.build(),
-						HentForsendelseResponseTo.DokumentTo.builder()
+						HentForsendelseResponse.Dokument.builder()
 								.dokumentObjektReferanse(OBJEKT_REFERANSE_VEDLEGG1)
 								.dokumenttypeId(DOKUMENTTYPE_ID_VEDLEGG1)
 								.tilknyttetSom(TILKNYTTET_SOM_VEDLEGG)
 								.build(),
-						HentForsendelseResponseTo.DokumentTo.builder()
+						HentForsendelseResponse.Dokument.builder()
 								.dokumentObjektReferanse(OBJEKT_REFERANSE_VEDLEGG2)
 								.dokumenttypeId(DOKUMENTTYPE_ID_VEDLEGG2)
 								.tilknyttetSom(TILKNYTTET_SOM_VEDLEGG)
@@ -387,8 +387,8 @@ class BestillingMapperTest {
 		assertFalse(bestillingMapper.isMottakerSkattyter(null));
 	}
 
-	private DokumenttypeInfoTo createDokumenttypeInfoTo(boolean tosidigPrint) {
-		return DokumenttypeInfoTo.builder()
+	private DokumenttypeInfo createDokumenttypeInfoTo(boolean tosidigPrint) {
+		return DokumenttypeInfo.builder()
 				.konvoluttvinduType(KONVOLUTTVINDU_TYPE)
 				.portoklasse(PORTOKLASSE)
 				.sentralPrintDokumentType(SENTRALPRINT_DOKTYPE)
@@ -396,16 +396,16 @@ class BestillingMapperTest {
 				.build();
 	}
 
-	private DokumenttypeInfoTo createDokumenttypeInfoUtenKonvoluttvinduType(boolean tosidigPrint) {
-		return DokumenttypeInfoTo.builder()
+	private DokumenttypeInfo createDokumenttypeInfoUtenKonvoluttvinduType(boolean tosidigPrint) {
+		return DokumenttypeInfo.builder()
 				.portoklasse(PORTOKLASSE)
 				.sentralPrintDokumentType(SENTRALPRINT_DOKTYPE)
 				.tosidigprint(tosidigPrint)
 				.build();
 	}
 
-	private DokumenttypeInfoTo createDokumenttypeInfoToUtenSentralPrintDokumentType(boolean tosidigPrint) {
-		return DokumenttypeInfoTo.builder()
+	private DokumenttypeInfo createDokumenttypeInfoToUtenSentralPrintDokumentType(boolean tosidigPrint) {
+		return DokumenttypeInfo.builder()
 				.konvoluttvinduType(KONVOLUTTVINDU_TYPE)
 				.portoklasse(PORTOKLASSE)
 				.tosidigprint(tosidigPrint)
