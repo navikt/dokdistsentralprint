@@ -5,11 +5,11 @@ import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.constants.NavHeadersFilter;
 import no.nav.dokdistsentralprint.exception.functional.Rdist001GetPostDestinasjonFunctionalException;
-import no.nav.dokdistsentralprint.exception.functional.Rdist001HentForsendelseFunctionalException;
+import no.nav.dokdistsentralprint.exception.functional.DokdistsentralprintFunctionalException;
 import no.nav.dokdistsentralprint.exception.functional.Rdist001OppdaterForsendelseStatusFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.Rdist001GetPostDestinasjonTechnicalException;
-import no.nav.dokdistsentralprint.exception.technical.Rdist001HentForsendelseTechnicalException;
+import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.Rdist001OppdaterForsendelseStatusTechnicalException;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,7 +75,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	}
 
 	@Override
-	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(include = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
 
 		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
@@ -154,13 +154,13 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	private void handleError(Throwable error) {
 		if (error instanceof WebClientResponseException response && ((WebClientResponseException) error).getStatusCode().is4xxClientError()) {
-			throw new Rdist001HentForsendelseFunctionalException(
+			throw new DokdistsentralprintFunctionalException(
 					String.format("Kall mot rdist001 feilet funksjonelt med status=%s, feilmelding=%s",
 							response.getRawStatusCode(),
 							response.getMessage()),
 					error);
 		} else {
-			throw new Rdist001HentForsendelseTechnicalException(
+			throw new DokdistsentralprintTechnicalException(
 					String.format("Kall mot rdist001 feilet teknisk med feilmelding=%s", error.getMessage()),
 					error);
 		}
