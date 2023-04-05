@@ -17,19 +17,19 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.9</version>
+        <version>2.7.10</version>
     </parent>
 
     <properties>
         <java.version>17</java.version>
 
-        <camel.version>3.20.2</camel.version>
+        <camel.version>3.20.3</camel.version>
         <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
         <google-cloud.version>26.10.0</google-cloud.version>
         <google-tink.version>1.8.0</google-tink.version>
         <wmq.version>9.3.2.0</wmq.version>
 
-        <dokkat-api>11.0.6</dokkat-api>
+        <dokmet-api.version>13-5459a4f</dokmet-api.version>
         <melding-virksomhet-dokdistfordeling.version>5-7ff79fc</melding-virksomhet-dokdistfordeling.version>
 
         <!-- Test -->
@@ -57,18 +57,16 @@
                 <artifactId>schemas</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>no.nav.meldinger.virksomhet</groupId>
                 <artifactId>melding-virksomhet-dokdistfordeling</artifactId>
                 <version>${melding-virksomhet-dokdistfordeling.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.dokkat</groupId>
-                <artifactId>dokkat-api</artifactId>
-                <version>${dokkat-api}</version>
+                <groupId>no.nav.dokmet</groupId>
+                <artifactId>api</artifactId>
+                <version>${dokmet-api.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.camel.springboot</groupId>
                 <artifactId>camel-spring-boot-bom</artifactId>
@@ -76,7 +74,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
