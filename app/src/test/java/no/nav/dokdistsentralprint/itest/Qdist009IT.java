@@ -262,7 +262,7 @@ class Qdist009IT {
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1,
-				putRequestedFor(urlEqualTo("/rest/v1/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")));
+				putRequestedFor(urlEqualTo("/rest/v1/administrerforsendelse/oppdaterforsendelse")));
 		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/NO")));
 	}
 
@@ -575,7 +575,7 @@ class Qdist009IT {
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(MAX_ATTEMPTS_SHORT,
-				putRequestedFor(urlEqualTo("/rest/v1/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")));
+				putRequestedFor(urlEqualTo("/rest/v1/administrerforsendelse/oppdaterforsendelse")));
 		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
@@ -602,7 +602,7 @@ class Qdist009IT {
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1,
-				putRequestedFor(urlEqualTo("/rest/v1/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")));
+				putRequestedFor(urlEqualTo("/rest/v1/administrerforsendelse/oppdaterforsendelse")));
 		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/" + landkode)));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
@@ -616,7 +616,7 @@ class Qdist009IT {
 	}
 
 	private void stubPutOppdaterForsendelse(int status) {
-		stubFor(put("/rest/v1/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT")
+		stubFor(put("/rest/v1/administrerforsendelse/oppdaterforsendelse")
 				.willReturn(aResponse().withStatus(status)));
 	}
 

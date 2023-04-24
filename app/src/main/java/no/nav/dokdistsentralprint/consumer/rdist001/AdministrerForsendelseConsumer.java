@@ -94,13 +94,12 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	public void oppdaterForsendelseStatus(String forsendelseId, String forsendelseStatus) {
+	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
 
-		webClient.put().uri(uriBuilder -> uriBuilder
-						.queryParam("forsendelseId", forsendelseId)
-						.queryParam("forsendelseStatus", forsendelseStatus)
-						.build())
+		webClient.put()
+				.uri("/oppdaterforsendelse")
 				.attributes(getOAuth2AuthorizedClient())
+				.bodyValue(oppdaterForsendelseRequest)
 				.retrieve()
 				.toBodilessEntity()
 				.doOnError(this::handleError)
