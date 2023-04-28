@@ -4,13 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.constants.NavHeadersFilter;
-import no.nav.dokdistsentralprint.exception.functional.Rdist001GetPostDestinasjonFunctionalException;
 import no.nav.dokdistsentralprint.exception.functional.DokdistsentralprintFunctionalException;
-import no.nav.dokdistsentralprint.exception.functional.Rdist001OppdaterForsendelseStatusFunctionalException;
+import no.nav.dokdistsentralprint.exception.functional.Rdist001GetPostDestinasjonFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
-import no.nav.dokdistsentralprint.exception.technical.Rdist001GetPostDestinasjonTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnicalException;
-import no.nav.dokdistsentralprint.exception.technical.Rdist001OppdaterForsendelseStatusTechnicalException;
+import no.nav.dokdistsentralprint.exception.technical.Rdist001GetPostDestinasjonTechnicalException;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -27,7 +25,6 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -97,21 +94,16 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	public void oppdaterForsendelseStatus(String forsendelseId, String forsendelseStatus) {
-		try {
-			HttpEntity entity = new HttpEntity<>(createHeaders());
-			String uri = UriComponentsBuilder.fromHttpUrl(administrerforsendelseV1Url)
-					.queryParam("forsendelseId", forsendelseId)
-					.queryParam("forsendelseStatus", forsendelseStatus)
-					.toUriString();
-			restTemplate.exchange(uri, PUT, entity, Object.class);
-		} catch (HttpClientErrorException e) {
-			throw new Rdist001OppdaterForsendelseStatusFunctionalException(String.format("Kall mot rdist001 - oppdaterForsendelseStatus feilet funksjonelt med statusKode=%s, feilmelding=%s", e
-					.getStatusCode(), e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			throw new Rdist001OppdaterForsendelseStatusTechnicalException(String.format("Kall mot rdist001 - oppdaterForsendelseStatus feilet teknisk med statusKode=%s, feilmelding=%s", e
-					.getStatusCode(), e.getMessage()), e);
-		}
+	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
+
+		webClient.put()
+				.uri("/oppdaterforsendelse")
+				.attributes(getOAuth2AuthorizedClient())
+				.bodyValue(oppdaterForsendelseRequest)
+				.retrieve()
+				.toBodilessEntity()
+				.doOnError(this::handleError)
+				.block();
 	}
 
 	@Override
