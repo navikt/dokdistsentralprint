@@ -1,11 +1,8 @@
 package no.nav.dokdistsentralprint.consumer.rdist001;
 
-import lombok.Builder;
-import lombok.Data;
+public record OppdaterForsendelseRequest (
+	Long forsendelseId,
+	String forsendelseStatus
+) {
 
-@Data
-@Builder
-public class OppdaterForsendelseRequest {
-	private Long forsendelseId;
-	private String forsendelseStatus;
 }

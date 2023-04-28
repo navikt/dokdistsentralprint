@@ -81,6 +81,7 @@ class Qdist009IT {
 
 	private static final String HENTFORSENDELSE_URL = String.format("/rest/v1/administrerforsendelse/%s", FORSENDELSE_ID);
 	private static final String DOKMET_URL = "/rest/dokumenttypeinfo/dokumenttypeIdHoveddok";
+	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 
 	@TempDir
 	static Path tempDir;
@@ -211,7 +212,7 @@ class Qdist009IT {
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
 		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
-		await().atMost(100, SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
 		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
 
 		String bestillingXmlPath = tempDir.toString() + "/" + CALL_ID + ".xml";
@@ -262,7 +263,7 @@ class Qdist009IT {
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1,
-				putRequestedFor(urlEqualTo("/rest/v1/administrerforsendelse/oppdaterforsendelse")));
+				putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/NO")));
 	}
 
@@ -567,7 +568,7 @@ class Qdist009IT {
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
-		await().atMost(100, SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String resultOnQdist009BackoutQueue = receive(backoutQueue);
 			assertNotNull(resultOnQdist009BackoutQueue);
 			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
@@ -575,7 +576,7 @@ class Qdist009IT {
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(MAX_ATTEMPTS_SHORT,
-				putRequestedFor(urlEqualTo("/rest/v1/administrerforsendelse/oppdaterforsendelse")));
+				putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
@@ -602,7 +603,7 @@ class Qdist009IT {
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1,
-				putRequestedFor(urlEqualTo("/rest/v1/administrerforsendelse/oppdaterforsendelse")));
+				putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/" + landkode)));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
@@ -616,7 +617,7 @@ class Qdist009IT {
 	}
 
 	private void stubPutOppdaterForsendelse(int status) {
-		stubFor(put("/rest/v1/administrerforsendelse/oppdaterforsendelse")
+		stubFor(put(OPPDATERFORSENDELSE_URL)
 				.willReturn(aResponse().withStatus(status)));
 	}
 
