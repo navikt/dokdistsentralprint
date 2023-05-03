@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse.Dokument;
-import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
 import no.nav.dokdistsentralprint.consumer.rdist001.OppdaterPostadresseRequest;
 import no.nav.dokdistsentralprint.consumer.regoppslag.Regoppslag;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
@@ -74,11 +73,11 @@ public class Qdist009Service {
 		DokumenttypeInfo dokumenttypeInfo = dokumentkatalogAdmin.hentDokumenttypeInfo(dokumenttypeIdHoveddokument);
 
 		Adresse adresse = getAdresse(hentForsendelseResponse, forsendelseId);
-		HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo = administrerForsendelse.hentPostDestinasjon(adresse.getLandkode());
+		String postdestinasjon = administrerForsendelse.hentPostdestinasjon(adresse.getLandkode());
 
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(hentForsendelseResponse);
 
-		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponse, dokumenttypeInfo, adresse, hentPostDestinasjonResponseTo);
+		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponse, dokumenttypeInfo, adresse, postdestinasjon);
 		String kanalbehandling = bestilling.getBestillingsInfo().getKanal().getBehandling();
 		log.info("qdist009 lager bestilling til print med kanalbehandling={}, antall_dokumenter={} for bestillingsId={}, dokumenttypeId={}",
 				kanalbehandling, dokdistDokumentList.size(), bestillingsId, dokumenttypeIdHoveddokument);

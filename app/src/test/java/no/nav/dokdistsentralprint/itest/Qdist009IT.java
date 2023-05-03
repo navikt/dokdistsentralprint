@@ -82,6 +82,7 @@ class Qdist009IT {
 	private static final String HENTFORSENDELSE_URL = String.format("/rest/v1/administrerforsendelse/%s", FORSENDELSE_ID);
 	private static final String DOKMET_URL = "/rest/dokumenttypeinfo/dokumenttypeIdHoveddok";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
+	private static final String HENTPOSTDESTINASJON_URL = "/rest/v1/administrerforsendelse/hentpostdestinasjon/";
 
 	@TempDir
 	static Path tempDir;
@@ -138,7 +139,7 @@ class Qdist009IT {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPutOppdaterForsendelse(OK.value());
-		stubGetPostDestinasjon("TR", "rdist001/getPostDestinasjon-happy.json", OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
 		stubPutPostadresse(OK.value());
 		stubRestSts();
@@ -171,7 +172,7 @@ class Qdist009IT {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPutOppdaterForsendelse(OK.value());
-		stubGetPostDestinasjon("XX", "rdist001/getPostDestinasjon-happy.json", OK.value());
+		stubGetPostdestinasjon("XX", "rdist001/hentPostdestinasjon-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy-landkode-ukjent.json", OK.value());
 		stubPutPostadresse(OK.value());
 		stubRestSts();
@@ -204,7 +205,7 @@ class Qdist009IT {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/forsendelse_med_tema.json", OK.value());
 		stubPutOppdaterForsendelse(OK.value());
-		stubGetPostDestinasjon("TR", "rdist001/getPostDestinasjon-happy.json", OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
 		stubPutPostadresse(OK.value());
 		stubRestSts();
@@ -237,7 +238,7 @@ class Qdist009IT {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_withAdresse-happy.json", OK.value());
 		stubPutOppdaterForsendelse(OK.value());
-		stubGetPostDestinasjon("NO", "rdist001/getPostDestinasjon-happy.json", OK.value());
+		stubGetPostdestinasjon("NO", "rdist001/hentPostdestinasjon-happy.json", OK.value());
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -262,9 +263,8 @@ class Qdist009IT {
 
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(1,
-				putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
-		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/NO")));
+		verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "NO")));
 	}
 
 	@Test
@@ -272,7 +272,7 @@ class Qdist009IT {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_withUkjent_motakertype-happy.json", OK.value());
 		stubPutOppdaterForsendelse(OK.value());
-		stubGetPostDestinasjon("TR", "rdist001/getPostDestinasjon-happy.json", OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
 		stubPutPostadresse(OK.value());
 		stubRestSts();
@@ -451,7 +451,7 @@ class Qdist009IT {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
-		stubGetPostDestinasjon("TR", null, NOT_FOUND.value());
+		stubGetPostdestinasjon("TR", null, NOT_FOUND.value());
 		stubPutPostadresse(OK.value());
 
 		stubRestSts();
@@ -466,7 +466,7 @@ class Qdist009IT {
 
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
 
@@ -476,7 +476,7 @@ class Qdist009IT {
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
 		stubPutPostadresse(OK.value());
-		stubGetPostDestinasjon("TR", null, INTERNAL_SERVER_ERROR.value());
+		stubGetPostdestinasjon("TR", null, INTERNAL_SERVER_ERROR.value());
 		stubRestSts();
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
@@ -489,7 +489,7 @@ class Qdist009IT {
 
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(MAX_ATTEMPTS_SHORT, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
+		verify(MAX_ATTEMPTS_SHORT, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
 
@@ -501,7 +501,7 @@ class Qdist009IT {
 		stubGetForsendelse("__files/rdist001/getForsendelse_withAdresse-CorruptInBucket-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
 		stubPutPostadresse(OK.value());
-		stubGetPostDestinasjon("TR", "rdist001/getPostDestinasjon-happy.json", OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
 		stubRestSts();
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
@@ -514,7 +514,7 @@ class Qdist009IT {
 
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
 
@@ -522,7 +522,7 @@ class Qdist009IT {
 	void shouldThrowDokumentIkkeFunnetIBucketException() throws Exception {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_withAdresse-NotInBucket-happy.json", OK.value());
-		stubGetPostDestinasjon("NO", "rdist001/getPostDestinasjon-happy.json", NOT_FOUND.value());
+		stubGetPostdestinasjon("NO", "rdist001/hentPostdestinasjon-happy.json", NOT_FOUND.value());
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
@@ -540,7 +540,7 @@ class Qdist009IT {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPutOppdaterForsendelse(NOT_FOUND.value());
-		stubGetPostDestinasjon("TR", "rdist001/getPostDestinasjon-happy.json", OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
 		stubPutPostadresse(OK.value());
 		stubRestSts();
@@ -561,7 +561,7 @@ class Qdist009IT {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPutOppdaterForsendelse(INTERNAL_SERVER_ERROR.value());
-		stubGetPostDestinasjon("TR", "rdist001/getPostDestinasjon-happy.json", OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
 		stubPutPostadresse(OK.value());
 		stubRestSts();
@@ -577,7 +577,7 @@ class Qdist009IT {
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(MAX_ATTEMPTS_SHORT,
 				putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
-		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/TR")));
+		verify(1, getRequestedFor(urlEqualTo( HENTPOSTDESTINASJON_URL + "TR")));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
 
@@ -604,7 +604,7 @@ class Qdist009IT {
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1,
 				putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
-		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/hentpostdestinasjon/" + landkode)));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + landkode)));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
 
@@ -618,7 +618,8 @@ class Qdist009IT {
 
 	private void stubPutOppdaterForsendelse(int status) {
 		stubFor(put(OPPDATERFORSENDELSE_URL)
-				.willReturn(aResponse().withStatus(status)));
+				.willReturn(aResponse()
+						.withStatus(status)));
 	}
 
 	private void stubGetForsendelse(String path, int status) throws IOException {
@@ -638,8 +639,8 @@ class Qdist009IT {
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
 	}
 
-	private void stubGetPostDestinasjon(String landkode, String path, int status) {
-		stubFor(get("/administrerforsendelse/hentpostdestinasjon/" + landkode)
+	private void stubGetPostdestinasjon(String landkode, String path, int status) {
+		stubFor(get(HENTPOSTDESTINASJON_URL + landkode)
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)

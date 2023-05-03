@@ -6,7 +6,7 @@ public interface AdministrerForsendelse {
 
 	void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest);
 
-	HentPostDestinasjonResponseTo hentPostDestinasjon(final String landkode);
+	String hentPostdestinasjon(final String landkode);
 
 	void oppdaterPostadresse(OppdaterPostadresseRequest postadresse);
 }
