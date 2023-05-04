@@ -1,7 +1,7 @@
 package no.nav.dokdistsentralprint.qdist009.map;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
-import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
+import no.nav.dokdistsentralprint.consumer.rdist001.HentPostdestinasjonResponse;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.Dokument;
@@ -65,7 +65,7 @@ class BestillingMapperTest {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
 				createAdresse(LAND_NO),
-				createHentPostDestinasjonresponseTo());
+				createHentPostdestinasjon());
 
 
 		assertEquals(MODUS, bestilling.getBestillingsInfo().getModus());
@@ -123,7 +123,7 @@ class BestillingMapperTest {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoToUtenSentralPrintDokumentType(TOSIDIG_PRINT_TRUE),
 				createAdresse(LAND_NO),
-				createHentPostDestinasjonresponseTo());
+				createHentPostdestinasjon());
 
 
 		assertEquals(MODUS, bestilling.getBestillingsInfo().getModus());
@@ -181,7 +181,7 @@ class BestillingMapperTest {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoUtenKonvoluttvinduType(TOSIDIG_PRINT_TRUE),
 				createAdresse(LAND_NO),
-				createHentPostDestinasjonresponseTo());
+				createHentPostdestinasjon());
 
 		assertEquals(MODUS, bestilling.getBestillingsInfo().getModus());
 		assertEquals(KUNDE_ID_NAV_IKT, bestilling.getBestillingsInfo().getKundeId());
@@ -237,7 +237,7 @@ class BestillingMapperTest {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_ORGANISASJON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createAdresse(LAND_NO),
-				createHentPostDestinasjonresponseTo());
+				createHentPostdestinasjon());
 
 		assertEquals(PORTOKLASSE + "_" + KONVOLUTTVINDU_TYPE + "_S", bestilling.getBestillingsInfo().getKanal().getBehandling());
 	}
@@ -248,7 +248,7 @@ class BestillingMapperTest {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_ORGANISASJON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createAdresse(LAND_SE),
-				createHentPostDestinasjonresponseTo());
+				createHentPostdestinasjon());
 
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
@@ -294,7 +294,7 @@ class BestillingMapperTest {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_UKJENT),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createAdresse(LAND_SE),
-				createHentPostDestinasjonresponseTo());
+				createHentPostdestinasjon());
 
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
@@ -340,7 +340,7 @@ class BestillingMapperTest {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
 				createAdresseWithSingleAdress(),
-				createHentPostDestinasjonresponseTo());
+				createHentPostdestinasjon());
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
 						ADRESSELINJE_1 + "\r" +
@@ -432,7 +432,7 @@ class BestillingMapperTest {
 				.build();
 	}
 
-	private HentPostDestinasjonResponseTo createHentPostDestinasjonresponseTo() {
-		return HentPostDestinasjonResponseTo.builder().postDestinasjon(POST_DESTINASJON_INNLAND).build();
+	private String createHentPostdestinasjon() {
+		return new HentPostdestinasjonResponse(POST_DESTINASJON_INNLAND).postdestinasjon();
 	}
 }

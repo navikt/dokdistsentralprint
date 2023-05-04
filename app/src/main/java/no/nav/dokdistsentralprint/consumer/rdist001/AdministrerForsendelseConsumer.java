@@ -37,7 +37,6 @@ import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -108,18 +107,24 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	@Override
 	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	public HentPostDestinasjonResponseTo hentPostDestinasjon(String landkode) {
-		try {
-			HttpEntity entity = new HttpEntity<>(createHeaders());
-			return restTemplate.exchange(administrerforsendelseV1Url + "/hentpostdestinasjon/" + landkode, GET, entity, HentPostDestinasjonResponseTo.class)
-					.getBody();
-		} catch (HttpClientErrorException e) {
-			throw new Rdist001GetPostDestinasjonFunctionalException(String.format("Kall mot rdist001 - GetPostDestinasjon feilet funksjonelt med statusKode=%s, feilmelding=%s", e
-					.getStatusCode(), e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			throw new Rdist001GetPostDestinasjonTechnicalException(String.format("Kall mot rdist001 - GetPostDestinasjon feilet teknisk med statusKode=%s, feilmelding=%s", e
-					.getStatusCode(), e.getMessage()), e);
-		}
+	public String hentPostdestinasjon(String landkode) {
+
+		log.info("hentPostdestinasjon henter postdestinasjon for landkode={}", landkode);
+
+		var postdestinasjon = webClient.get()
+				.uri(uriBuilder -> uriBuilder
+						.path("/hentpostdestinasjon/{landkode}")
+						.build(landkode))
+				.attributes(getOAuth2AuthorizedClient())
+				.retrieve()
+				.bodyToMono(HentPostdestinasjonResponse.class)
+				.map(HentPostdestinasjonResponse::postdestinasjon)
+				.doOnError(this::handleError)
+				.block();
+
+		log.info("hentPostdestinasjon har hentet postdestinasjon={} for landkode={}", postdestinasjon, landkode);
+
+		return postdestinasjon;
 	}
 
 	@Override

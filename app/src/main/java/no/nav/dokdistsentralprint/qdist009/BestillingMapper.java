@@ -2,7 +2,6 @@ package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
-import no.nav.dokdistsentralprint.consumer.rdist001.HentPostDestinasjonResponseTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.BestillingsInfo;
@@ -33,7 +32,7 @@ public class BestillingMapper {
 	private static final String KONVOLUTT_MED_VINDU = "X";
 	private static final String NAV_STANDARD = "NAV_STANDARD";
 
-	public Bestilling createBestilling(HentForsendelseResponse hentForsendelseResponse, DokumenttypeInfo dokumenttypeInfo, Adresse adresse, HentPostDestinasjonResponseTo hentPostDestinasjonResponseTo) {
+	public Bestilling createBestilling(HentForsendelseResponse hentForsendelseResponse, DokumenttypeInfo dokumenttypeInfo, Adresse adresse, String postdestinasjon) {
 		return new Bestilling()
 				.withBestillingsInfo(new BestillingsInfo()
 						.withModus(hentForsendelseResponse.getModus())
@@ -42,7 +41,7 @@ public class BestillingMapper {
 						.withKundeOpprettet(LocalDate.now().toString())
 						.withDokumentInfo(new DokumentInfo()
 								.withSorteringsfelt(USORTERT)
-								.withDestinasjon(hentPostDestinasjonResponseTo.getPostDestinasjon()))
+								.withDestinasjon(postdestinasjon))
 						.withKanal(new Kanal()
 								.withType(PRINT)
 								.withBehandling(getBehandling(dokumenttypeInfo))))
