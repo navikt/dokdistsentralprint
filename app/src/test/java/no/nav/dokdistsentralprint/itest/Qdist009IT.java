@@ -536,7 +536,7 @@ class Qdist009IT {
 	}
 
 	@Test
-	void shouldThrowRdist001OppdaterForsendelseStatusFunctionalException() throws Exception {
+	void shouldPutMessageOnFunksjonellFeilkoeIfNotFoundFromRdist001() throws Exception {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPutOppdaterForsendelse(NOT_FOUND.value());
@@ -557,7 +557,7 @@ class Qdist009IT {
 	}
 
 	@Test
-	void shouldThrowRdist001OppdaterForsendelseStatusTechnicalException() throws Exception {
+	void shouldPutMessageOnBackoutkoeIfInternalServerErrorFromRdist001() throws Exception {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPutOppdaterForsendelse(INTERNAL_SERVER_ERROR.value());
