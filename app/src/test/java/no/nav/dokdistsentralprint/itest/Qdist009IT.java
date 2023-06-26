@@ -83,6 +83,7 @@ class Qdist009IT {
 	private static final String DOKMET_URL = "/rest/dokumenttypeinfo/dokumenttypeIdHoveddok";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 	private static final String HENTPOSTDESTINASJON_URL = "/rest/v1/administrerforsendelse/hentpostdestinasjon/";
+	private static final String OPPDATERPOSTADRESSE_URL = "/rest/v1/administrerforsendelse/oppdaterpostadresse";
 
 	@TempDir
 	static Path tempDir;
@@ -633,7 +634,7 @@ class Qdist009IT {
 	}
 
 	private void stubPutPostadresse(int status) {
-		stubFor(put("/administrerforsendelse/oppdaterpostadresse")
+		stubFor(put(OPPDATERPOSTADRESSE_URL)
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
