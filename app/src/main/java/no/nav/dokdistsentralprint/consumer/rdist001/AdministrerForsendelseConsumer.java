@@ -2,67 +2,40 @@ package no.nav.dokdistsentralprint.consumer.rdist001;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
-import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.constants.NavHeadersFilter;
 import no.nav.dokdistsentralprint.exception.functional.DokdistsentralprintFunctionalException;
-import no.nav.dokdistsentralprint.exception.functional.Rdist001GetPostDestinasjonFunctionalException;
-import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnicalException;
-import no.nav.dokdistsentralprint.exception.technical.Rdist001GetPostDestinasjonTechnicalException;
-import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
 
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKDISTADMIN;
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.getOAuth2AuthorizeRequestForAzure;
-import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpMethod.PUT;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @Component
 public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
-	private final String administrerforsendelseV1Url;
-	private final RestTemplate restTemplate;
 	private final WebClient webClient;
 	private final ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
-	public AdministrerForsendelseConsumer(@Value("${administrerforsendelse.v1.url}") String administrerforsendelseV1Url,
-										  RestTemplateBuilder restTemplateBuilder,
-										  final ServiceuserAlias serviceuserAlias,
-										  DokdistsentralprintProperties dokdistsentralprintProperties,
+	public AdministrerForsendelseConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
 										  WebClient webClient,
 										  ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) {
-		this.administrerforsendelseV1Url = administrerforsendelseV1Url;
 		this.oAuth2AuthorizedClientManager = oAuth2AuthorizedClientManager;
-		this.restTemplate = restTemplateBuilder
-				.setReadTimeout(Duration.ofSeconds(20))
-				.setConnectTimeout(Duration.ofSeconds(5))
-				.basicAuthentication(serviceuserAlias.getUsername(), serviceuserAlias.getPassword())
-				.build();
 		this.webClient = webClient.mutate()
 				.baseUrl(dokdistsentralprintProperties.getEndpoints().getDokdistadmin().getUrl())
 				.filter(new NavHeadersFilter())
@@ -92,7 +65,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	}
 
 	@Override
-	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(include = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
 
 		webClient.put()
@@ -106,7 +79,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	}
 
 	@Override
-	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(include = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public String hentPostdestinasjon(String landkode) {
 
 		log.info("hentPostdestinasjon henter postdestinasjon for landkode={}", landkode);
@@ -128,25 +101,21 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	}
 
 	@Override
-	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	public void oppdaterPostadresse(OppdaterPostadresseRequest postadresse) {
-		try {
-			HttpEntity<?> entity = new HttpEntity<>(postadresse, createHeaders());
-			restTemplate.exchange(administrerforsendelseV1Url + "/oppdaterpostadresse", PUT, entity, String.class);
-		} catch (HttpClientErrorException e) {
-			throw new Rdist001GetPostDestinasjonFunctionalException(String.format("Kall mot rdist001 - oppdaterPostadresse feilet funksjonelt med statusKode=%s, feilmelding=%s", e
-					.getStatusCode(), e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			throw new Rdist001GetPostDestinasjonTechnicalException(String.format("Kall mot rdist001 - oppdaterPostadresse feilet teknisk med statusKode=%s, feilmelding=%s", e
-					.getStatusCode(), e.getMessage()), e);
-		}
-	}
+	@Retryable(include = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	public void oppdaterPostadresse(OppdaterPostadresseRequest oppdaterPostadresseRequest) {
 
-	private HttpHeaders createHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(APPLICATION_JSON);
-		headers.set(CALL_ID, MDC.get(CALL_ID));
-		return headers;
+		log.info("oppdaterPostadresse skal oppdatere postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
+
+		webClient.put()
+				.uri("/oppdaterpostadresse")
+				.attributes(getOAuth2AuthorizedClient())
+				.bodyValue(oppdaterPostadresseRequest)
+				.retrieve()
+				.toBodilessEntity()
+				.doOnError(this::handleError)
+				.block();
+
+		log.info("oppdaterPostadresse har oppdatert postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
 	}
 
 	private void handleError(Throwable error) {
