@@ -608,7 +608,7 @@ class Qdist009IT {
 	private <T> T receive(Queue queue) {
 		Object response = jmsTemplate.receiveAndConvert(queue);
 		if (response instanceof JAXBElement) {
-			response = ((JAXBElement) response).getValue();
+			response = ((JAXBElement<?>) response).getValue();
 		}
 		return (T) response;
 	}

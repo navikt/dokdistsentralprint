@@ -34,12 +34,13 @@ public class JmsItestConfig {
 	}
 
 	@Bean(initMethod = "start", destroyMethod = "stop")
-	public EmbeddedActiveMQ activeMQServer(@Value("${dokdistsentralprint_qdist009_dist_s_print.queuename}") String qdist009QueueName) throws Exception {
+	public EmbeddedActiveMQ activeMQServer() {
 		EmbeddedActiveMQ embeddedActiveMQ = new EmbeddedActiveMQ();
 		embeddedActiveMQ.setConfigResourcePath("artemis-server.xml");
 		return embeddedActiveMQ;
 	}
 
+	// avhengig av EmbeddedActiveMQ slik at server er startet før klient forsøker lage koblinger
 	@Bean
 	public ConnectionFactory activemqConnectionFactory(EmbeddedActiveMQ embeddedActiveMQ) {
 		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://0");

@@ -6,8 +6,8 @@ import jakarta.xml.bind.JAXBException;
 import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.ExchangePattern;
+import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
-import org.apache.camel.spring.SpringRouteBuilder;
 import org.springframework.stereotype.Component;
 
 import static org.apache.camel.LoggingLevel.ERROR;
@@ -15,7 +15,7 @@ import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
 
 @Component
-public class Qdist009Route extends SpringRouteBuilder {
+public class Qdist009Route extends RouteBuilder {
 
     public static final String SERVICE_ID = "qdist009";
     static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";

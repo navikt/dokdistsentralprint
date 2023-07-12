@@ -117,8 +117,7 @@ class BestillingMapperTest {
 	}
 
 	@Test
-	void shouldMapDefaultValueWhenSentralPrintDokumentTypeIkkeSettPåDokumenttypeInfo() {
-
+	void shouldMapDefaultValueWhenSentralPrintDokumentTypeIkkeSettPaaDokumenttypeInfo() {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoToUtenSentralPrintDokumentType(TOSIDIG_PRINT_TRUE),
 				createAdresse(LAND_NO),
@@ -175,7 +174,7 @@ class BestillingMapperTest {
 	}
 
 	@Test
-	void shouldMapKonvoluttTypeToXWhenKonvoluttvinduTypeIkkeSettPåDokumenttypeInfo() {
+	void shouldMapKonvoluttTypeToXWhenKonvoluttvinduTypeIkkeSettPaaDokumenttypeInfo() {
 
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoUtenKonvoluttvinduType(TOSIDIG_PRINT_TRUE),
