@@ -58,7 +58,6 @@ class BestillingMapperTest {
 
 	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
-
 	@Test
 	void shouldMap() {
 
@@ -80,10 +79,10 @@ class BestillingMapperTest {
 
 		assertEquals(BESTILLINGS_ID, bestilling.getMailpiece().getMailpieceId());
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-						ADRESSELINJE_1 + "\r" +
-						ADRESSELINJE_2 + "\r" +
-						ADRESSELINJE_3 + "\r" +
-						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+					 ADRESSELINJE_1 + "\r" +
+					 ADRESSELINJE_2 + "\r" +
+					 ADRESSELINJE_3 + "\r" +
+					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 
 		assertNull(bestilling.getMailpiece().getLandkode());
@@ -138,10 +137,10 @@ class BestillingMapperTest {
 
 		assertEquals(BESTILLINGS_ID, bestilling.getMailpiece().getMailpieceId());
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-						ADRESSELINJE_1 + "\r" +
-						ADRESSELINJE_2 + "\r" +
-						ADRESSELINJE_3 + "\r" +
-						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+					 ADRESSELINJE_1 + "\r" +
+					 ADRESSELINJE_2 + "\r" +
+					 ADRESSELINJE_3 + "\r" +
+					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 
 		assertNull(bestilling.getMailpiece().getLandkode());
@@ -195,10 +194,10 @@ class BestillingMapperTest {
 
 		assertEquals(BESTILLINGS_ID, bestilling.getMailpiece().getMailpieceId());
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-						ADRESSELINJE_1 + "\r" +
-						ADRESSELINJE_2 + "\r" +
-						ADRESSELINJE_3 + "\r" +
-						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+					 ADRESSELINJE_1 + "\r" +
+					 ADRESSELINJE_2 + "\r" +
+					 ADRESSELINJE_3 + "\r" +
+					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 
 		assertNull(bestilling.getMailpiece().getLandkode());
@@ -252,10 +251,10 @@ class BestillingMapperTest {
 
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-						ADRESSELINJE_1 + "\r" +
-						ADRESSELINJE_2 + "\r" +
-						ADRESSELINJE_3 + "\r" +
-						POSTNUMMER + " " + POSTSTED + "\r" + LAND_SE_NAVN + "]]>",
+					 ADRESSELINJE_1 + "\r" +
+					 ADRESSELINJE_2 + "\r" +
+					 ADRESSELINJE_3 + "\r" +
+					 POSTNUMMER + " " + POSTSTED + "\r" + LAND_SE_NAVN + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 
 		assertEquals(LAND_SE, bestilling.getMailpiece().getLandkode());
@@ -298,10 +297,10 @@ class BestillingMapperTest {
 
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-						ADRESSELINJE_1 + "\r" +
-						ADRESSELINJE_2 + "\r" +
-						ADRESSELINJE_3 + "\r" +
-						POSTNUMMER + " " + POSTSTED + "\r" + LAND_SE_NAVN + "]]>",
+					 ADRESSELINJE_1 + "\r" +
+					 ADRESSELINJE_2 + "\r" +
+					 ADRESSELINJE_3 + "\r" +
+					 POSTNUMMER + " " + POSTSTED + "\r" + LAND_SE_NAVN + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 
 		assertEquals(LAND_SE, bestilling.getMailpiece().getLandkode());
@@ -343,8 +342,8 @@ class BestillingMapperTest {
 				createHentPostdestinasjon());
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-						ADRESSELINJE_1 + "\r" +
-						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+					 ADRESSELINJE_1 + "\r" +
+					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 	}
 
@@ -376,13 +375,13 @@ class BestillingMapperTest {
 	}
 
 	@Test
-	void shouldAssertMottakerSkattyterToTrueWhenMottakerTypeErPersonOrOrganization(){
+	void shouldAssertMottakerSkattyterToTrueWhenMottakerTypeErPersonOrOrganization() {
 		assertTrue(bestillingMapper.isMottakerSkattyter(MOTTAKERTYPE_ORGANISASJON));
 		assertTrue(bestillingMapper.isMottakerSkattyter(MOTTAKERTYPE_PERSON));
 	}
 
 	@Test
-	void shouldAssertMottakerSkattyterToFalseWhenMottakerTypeErIkkePersonOrOrganization(){
+	void shouldAssertMottakerSkattyterToFalseWhenMottakerTypeErIkkePersonOrOrganization() {
 		assertFalse(bestillingMapper.isMottakerSkattyter(MOTTAKERTYPE_UKJENT));
 		assertFalse(bestillingMapper.isMottakerSkattyter(null));
 	}

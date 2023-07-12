@@ -6,4 +6,8 @@ public class KunneIkkeMarshalleBestillingTechnicalException extends AbstractDokd
 		super(message);
 	}
 
+	public KunneIkkeMarshalleBestillingTechnicalException(String message, Throwable e) {
+		super(message, e);
+	}
+
 }

@@ -17,37 +17,30 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.12</version>
+        <version>3.1.1</version>
     </parent>
 
     <properties>
         <java.version>17</java.version>
 
-        <camel.version>3.20.5</camel.version>
-        <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
+        <camel.version>4.0.0-RC1</camel.version>
+        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <google-cloud.version>26.16.0</google-cloud.version>
         <tink.version>1.9.0</tink.version>
         <tink-gcpkms.version>1.8.0</tink-gcpkms.version>
-        <wmq.version>9.3.2.1</wmq.version>
+        <ibm.mq.client.version>9.3.3.0</ibm.mq.client.version>
 
         <dokmet-api.version>13-5459a4f</dokmet-api.version>
-        <melding-virksomhet-dokdistfordeling.version>5-7ff79fc</melding-virksomhet-dokdistfordeling.version>
+        <melding-virksomhet-dokdistfordeling.version>6-4049b35</melding-virksomhet-dokdistfordeling.version>
 
         <!-- Test -->
-        <spring-cloud-contract-wiremock.version>3.1.7</spring-cloud-contract-wiremock.version>
+        <spring-cloud-contract-wiremock.version>4.0.3</spring-cloud-contract-wiremock.version>
         <commons-io.version>2.12.0</commons-io.version>
         <sshd-sftp.version>2.10.0</sshd-sftp.version>
 
-        <!-- Brukt av plugins -->
-        <!-- maven-jaxb2-plugin feiler med versjon 3.x.x -->
-        <jaxb-runtime.version>2.3.8</jaxb-runtime.version>
-
         <!-- Plugins -->
         <maven-toolchains-plugin.version>3.1.0</maven-toolchains-plugin.version>
-        <maven-jaxb2-plugin.version>0.15.3</maven-jaxb2-plugin.version>
-        <jaxb2-basics.version>0.13.1</jaxb2-basics.version>
-        <jaxb2-basics-annotate.version>1.1.0</jaxb2-basics-annotate.version>
-        <jaxb2-fluent-api.version>3.0</jaxb2-fluent-api.version>
+        <hisrc-jaxb.version>2.1.0</hisrc-jaxb.version>
         <jaxb-xew-plugin.version>2.1</jaxb-xew-plugin.version>
     </properties>
 
@@ -82,8 +75,8 @@
             </dependency>
             <dependency>
                 <groupId>com.ibm.mq</groupId>
-                <artifactId>com.ibm.mq.allclient</artifactId>
-                <version>${wmq.version}</version>
+                <artifactId>com.ibm.mq.jakarta.client</artifactId>
+                <version>${ibm.mq.client.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.cloud</groupId>

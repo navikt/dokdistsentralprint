@@ -1,56 +1,52 @@
 package no.nav.dokdistsentralprint.itest.config;
 
 
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.RedeliveryPolicy;
-import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.command.ActiveMQQueue;
-import org.apache.activemq.jms.pool.PooledConnectionFactory;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Queue;
+import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
+import org.messaginghub.pooled.jms.JmsPoolConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Queue;
-
 @Configuration
 @Profile("itest")
 public class JmsItestConfig {
 
-    @Bean
-    public Queue qdist009(@Value("${dokdistsentralprint_qdist009_dist_s_print.queuename}") String qdist008QueueName) {
-        return new ActiveMQQueue(qdist008QueueName);
-    }
+	public static final String QDIST009_BQ = "qdist009Bq";
 
-    @Bean
-    public Queue qdist009FunksjonellFeil(@Value("${dokdistsentralprint_qdist009_funk_feil.queuename}") String qdist008FunksjonellFeil) {
-        return new ActiveMQQueue(qdist008FunksjonellFeil);
-    }
+	@Bean
+	public Queue qdist009(@Value("${dokdistsentralprint_qdist009_dist_s_print.queuename}") String qdist009QueueName) {
+		return new ActiveMQQueue(qdist009QueueName);
+	}
 
-    @Bean
-    public Queue backoutQueue() {
-        return new ActiveMQQueue("ActiveMQ.DLQ");
-    }
+	@Bean
+	public Queue qdist009FunksjonellFeil(@Value("${dokdistsentralprint_qdist009_funk_feil.queuename}") String qdist009FunksjonellFeil) {
+		return new ActiveMQQueue(qdist009FunksjonellFeil);
+	}
 
-    @Bean(initMethod = "start", destroyMethod = "stop")
-    public BrokerService broker() {
-        BrokerService service = new BrokerService();
-        service.setPersistent(false);
-        return service;
-    }
+	@Bean
+	public Queue backoutQueue() {
+		return new ActiveMQQueue(QDIST009_BQ);
+	}
 
-    @Bean
-    public ConnectionFactory activemqConnectionFactory() {
-        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://localhost?create=false");
-        RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-        redeliveryPolicy.setMaximumRedeliveries(0);
-        activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy);
+	@Bean(initMethod = "start", destroyMethod = "stop")
+	public EmbeddedActiveMQ activeMQServer(@Value("${dokdistsentralprint_qdist009_dist_s_print.queuename}") String qdist009QueueName) throws Exception {
+		EmbeddedActiveMQ embeddedActiveMQ = new EmbeddedActiveMQ();
+		embeddedActiveMQ.setConfigResourcePath("artemis-server.xml");
+		return embeddedActiveMQ;
+	}
 
-        PooledConnectionFactory pooledFactory = new PooledConnectionFactory();
-        pooledFactory.setConnectionFactory(activeMQConnectionFactory);
-        pooledFactory.setMaxConnections(1);
-        return pooledFactory;
-    }
+	@Bean
+	public ConnectionFactory activemqConnectionFactory(EmbeddedActiveMQ embeddedActiveMQ) {
+		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://0");
+		JmsPoolConnectionFactory pooledFactory = new JmsPoolConnectionFactory();
+		pooledFactory.setConnectionFactory(activeMQConnectionFactory);
+		pooledFactory.setMaxConnections(1);
+		return pooledFactory;
+	}
 }
 

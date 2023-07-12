@@ -1,15 +1,16 @@
 package no.nav.dokdistsentralprint.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import jakarta.jms.Queue;
+import jakarta.jms.TextMessage;
+import jakarta.xml.bind.JAXBElement;
 import no.nav.dokdistsentralprint.Application;
 import no.nav.dokdistsentralprint.itest.config.ApplicationTestConfig;
 import no.nav.dokdistsentralprint.storage.BucketStorage;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
-import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.sshd.server.SshServer;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -17,13 +18,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
-import javax.jms.Queue;
-import javax.jms.TextMessage;
-import javax.xml.bind.JAXBElement;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -56,15 +58,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@SpringBootTest(classes = {Application.class, ApplicationTestConfig.class},
-		webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = Application.class, webEnvironment = NONE)
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
 class Qdist009IT {
@@ -102,11 +103,23 @@ class Qdist009IT {
 	@Autowired
 	private BucketStorage bucketStorage;
 
-	@BeforeAll
-	public static void setupBeforeAll() throws IOException {
+	@Import(ApplicationTestConfig.class)
+	@Configuration
+	static class Config {
+
+	}
+
+	@DynamicPropertySource
+	static void registerSftpProperties(DynamicPropertyRegistry registry) {
 		sshServer = startSshServer(tempDir);
-		System.setProperty("sftp.privateKeyFile", new ClassPathResource("ssh/id_rsa").getURL().getPath());
-		System.setProperty("sftp.port", Integer.toString(sshServer.getPort()));
+		registry.add("sftp.privateKeyFile", () -> {
+			try {
+				return new ClassPathResource("ssh/id_rsa").getURL().getPath();
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e);
+			}
+		});
+		registry.add("sftp.port", () -> sshServer.getPort());
 	}
 
 	@AfterAll
@@ -578,16 +591,16 @@ class Qdist009IT {
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(MAX_ATTEMPTS_SHORT,
 				putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
-		verify(1, getRequestedFor(urlEqualTo( HENTPOSTDESTINASJON_URL + "TR")));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
 
 	private void sendStringMessage(Queue queue, final String message) {
 		jmsTemplate.send(queue, session -> {
-			TextMessage msg = new ActiveMQTextMessage();
-			msg.setText(message);
-			msg.setStringProperty("callId", CALL_ID);
-			return msg;
+			TextMessage textMessage = session.createTextMessage();
+			textMessage.setText(message);
+			textMessage.setStringProperty("callId", CALL_ID);
+			return textMessage;
 		});
 	}
 
