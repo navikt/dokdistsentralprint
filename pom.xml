@@ -25,7 +25,8 @@
 
         <camel.version>4.0.0-RC1</camel.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-        <google-cloud.version>26.16.0</google-cloud.version>
+        <httpclient.version>4.5.14</httpclient.version>
+        <google-cloud.version>26.18.0</google-cloud.version>
         <tink.version>1.9.0</tink.version>
         <tink-gcpkms.version>1.8.0</tink-gcpkms.version>
         <ibm.mq.client.version>9.3.3.0</ibm.mq.client.version>
@@ -77,6 +78,15 @@
                 <groupId>com.ibm.mq</groupId>
                 <artifactId>com.ibm.mq.jakarta.client</artifactId>
                 <version>${ibm.mq.client.version}</version>
+            </dependency>
+            <!--
+            google-http-java-client runtime avhengighet.
+            https://github.com/googleapis/google-http-java-client/issues/1205
+            -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.cloud</groupId>

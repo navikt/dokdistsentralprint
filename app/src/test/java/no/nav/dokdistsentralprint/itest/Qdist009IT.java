@@ -49,7 +49,6 @@ import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
 import static no.nav.dokdistsentralprint.testUtils.classpathToString;
 import static no.nav.dokdistsentralprint.testUtils.fileToString;
 import static no.nav.dokdistsentralprint.testUtils.unzipToDirectory;
-import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -626,7 +625,7 @@ class Qdist009IT {
 		stubFor(get("/reststs/token?grant_type=client_credentials&scope=openid")
 				.willReturn(aResponse()
 						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("reststs/rest_sts_happy.json")));
 	}
 
@@ -665,7 +664,7 @@ class Qdist009IT {
 		stubFor(get(urlMatching(DOKMET_URL))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("dokumentinfov4/tkat020-happy.json")));
 	}
 
@@ -673,7 +672,7 @@ class Qdist009IT {
 		stubFor(post("/hentMottakerOgAdresse")
 				.willReturn(aResponse()
 						.withStatus(status)
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile(path)));
 	}
 }
