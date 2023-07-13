@@ -1,26 +1,20 @@
 package no.nav.dokdistsentralprint.qdist009.util;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Marshaller;
-import no.nav.dokdistsentralprint.exception.technical.KunneIkkeMarshalleBestillingTechnicalException;
 import no.nav.dokdistsentralprint.exception.technical.KunneIkkeZippeBestillingTechnicalException;
-import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static jakarta.xml.bind.Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION;
 import static java.lang.String.format;
 
-public final class Qdist009TechnicalUtils {
+public final class BestillingZipUtil {
 
-	private Qdist009TechnicalUtils() {
+	private BestillingZipUtil() {
+		// noop
 	}
 
 	public static byte[] zipPrintbestillingToBytes(List<BestillingEntity> bestillingEntities) {
@@ -31,20 +25,6 @@ public final class Qdist009TechnicalUtils {
 			throw new KunneIkkeZippeBestillingTechnicalException(format("Kunne ikke zippe bestilling for bestillingEntities=%s", printBestillingEntities(bestillingEntities)));
 		}
 		return baos.toByteArray();
-	}
-
-	public static String marshalBestillingToXmlString(Bestilling bestilling) {
-		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance(Bestilling.class);
-			Marshaller marshaller = jaxbContext.createMarshaller();
-			marshaller.setProperty(JAXB_NO_NAMESPACE_SCHEMA_LOCATION, "printoppdrag-2_2.xsd");
-			marshaller.setProperty("org.glassfish.jaxb.characterEscapeHandler", new CDataCharacterEscapeHandler());
-			StringWriter sw = new StringWriter();
-			marshaller.marshal(bestilling, sw);
-			return sw.toString();
-		} catch (JAXBException | IllegalArgumentException e) {
-			throw new KunneIkkeMarshalleBestillingTechnicalException("Kunne ikke marshalle bestilling til xmlString", e);
-		}
 	}
 
 	private static void addNewZipEntry(ZipOutputStream zos, BestillingEntity bestillingEntity) {
