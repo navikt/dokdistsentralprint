@@ -1,35 +1,34 @@
 package no.nav.dokdistsentralprint.qdist009;
 
+import jakarta.jms.Queue;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.ExchangePattern;
+import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
-import org.apache.camel.spring.SpringRouteBuilder;
 import org.springframework.stereotype.Component;
-
-import javax.jms.Queue;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 
 import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
 
 @Component
-public class Qdist009Route extends SpringRouteBuilder {
+public class Qdist009Route extends RouteBuilder {
 
     public static final String SERVICE_ID = "qdist009";
     static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";
     static final String PROPERTY_FORSENDELSE_ID = "forsendelseId";
-    private static final String SFTP_SERVER = "sftp://{{sftp.url}}:{{sftp.port}}/{{sftp.remoteFilePath}}" +
+    private static final String SFTP_SERVER = "sftp://{{sftp.url}}:{{sftp.port}}/{{sftp.remote-file-path}}" +
             "?username={{sftp.username}}" +
             "&password=" +
             "&binary=true" +
             "&fileName=${exchangeProperty." + PROPERTY_BESTILLINGS_ID + "}.zip" +
             "&tempFileName=${exchangeProperty." + PROPERTY_BESTILLINGS_ID + "}.tmp" +
-            "&privateKeyFile={{sftp.privateKeyFile}}" +
+            "&privateKeyFile={{sftp.private-key-file}}" +
             "&jschLoggingLevel=TRACE" +
-            "&privateKeyPassphrase={{sftp.privateKeyPassphrase}}" +
+            "&privateKeyPassphrase={{sftp.private-key-passphrase}}" +
             "&preferredAuthentications=publickey";
 
     private final Qdist009Service qdist009Service;

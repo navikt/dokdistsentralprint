@@ -12,6 +12,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_FORSENDELSE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,6 +56,6 @@ class IdsProcessorTest {
     }
 
     private Object defaultQdist009Message() throws IOException {
-        return IOUtils.toString(new ClassPathResource("qdist009/qdist009-happy.xml").getInputStream());
+        return IOUtils.toString(new ClassPathResource("qdist009/qdist009-happy.xml").getInputStream(), UTF_8);
     }
 }

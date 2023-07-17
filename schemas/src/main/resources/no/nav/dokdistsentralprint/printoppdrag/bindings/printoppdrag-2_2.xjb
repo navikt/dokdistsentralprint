@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-			   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:annox="http://annox.dev.java.net"
-			   xsi:schemaLocation="http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd"
-			   version="2.1"
-			   jaxb:extensionBindingPrefixes="xjc annox">
+<jaxb:bindings version="3.0"
+               xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+               jaxb:extensionBindingPrefixes="annox"
+               xmlns:annox="http://jvnet.org/basicjaxb/xjc/annox">
 	<!-- Annotate the following classes with XmlRootElement -->
-	<jaxb:bindings schemaLocation="../xsd/printoppdrag-2_2.xsd" node="/xs:schema">
-		<jaxb:bindings node="xs:complexType[@name='Bestilling']">
+	<jaxb:bindings schemaLocation="../xsd/printoppdrag-2_2.xsd" node="/xsd:schema">
+		<jaxb:bindings node="xsd:complexType[@name='Bestilling']">
 			<annox:annotate>
-				<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Bestilling"/>
+				<annox:annotate annox:class="jakarta.xml.bind.annotation.XmlRootElement" name="Bestilling"/>
 			</annox:annotate>
 		</jaxb:bindings>
 	</jaxb:bindings>

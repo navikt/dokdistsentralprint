@@ -28,11 +28,10 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_BESTILLINGS_ID;
+import static no.nav.dokdistsentralprint.qdist009.util.BestillingZipUtil.zipPrintbestillingToBytes;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.createBestillingEntities;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.getDokumenttypeIdHoveddokument;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.validateForsendelseStatus;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.marshalBestillingToXmlString;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009TechnicalUtils.zipPrintbestillingToBytes;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 
@@ -46,16 +45,20 @@ public class Qdist009Service {
 	private final AdministrerForsendelse administrerForsendelse;
 	private final Regoppslag regoppslag;
 	private final BucketStorage bucketStorage;
-	private final BestillingMapper bestillingMapper = new BestillingMapper();
+	private final BestillingMapper bestillingMapper;
+	private final BestillingMarshaller bestillingMarshaller;
 
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
 						   AdministrerForsendelse administrerForsendelse,
 						   BucketStorage bucketStorage,
-						   Regoppslag regoppslag) {
+						   Regoppslag regoppslag,
+						   BestillingMapper bestillingMapper, BestillingMarshaller bestillingMarshaller) {
 		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
 		this.administrerForsendelse = administrerForsendelse;
 		this.regoppslag = regoppslag;
 		this.bucketStorage = bucketStorage;
+		this.bestillingMapper = bestillingMapper;
+		this.bestillingMarshaller = bestillingMarshaller;
 	}
 
 	@Handler
@@ -81,7 +84,7 @@ public class Qdist009Service {
 		String kanalbehandling = bestilling.getBestillingsInfo().getKanal().getBehandling();
 		log.info("qdist009 lager bestilling til print med kanalbehandling={}, antall_dokumenter={} for bestillingsId={}, dokumenttypeId={}",
 				kanalbehandling, dokdistDokumentList.size(), bestillingsId, dokumenttypeIdHoveddokument);
-		String bestillingXmlString = marshalBestillingToXmlString(bestilling);
+		String bestillingXmlString = bestillingMarshaller.marshalBestillingToXmlString(bestilling);
 		List<BestillingEntity> bestillingEntities = createBestillingEntities(bestillingsId, bestillingXmlString, dokdistDokumentList);
 
 		return zipPrintbestillingToBytes(bestillingEntities);

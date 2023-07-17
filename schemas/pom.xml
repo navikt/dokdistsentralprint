@@ -22,14 +22,14 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>${maven-jaxb2-plugin.version}</version>
+				<groupId>org.patrodyne.jvnet</groupId>
+				<artifactId>hisrc-higherjaxb30-maven-plugin</artifactId>
+				<version>${hisrc-jaxb.version}</version>
 				<dependencies>
 					<dependency>
-						<groupId>org.glassfish.jaxb</groupId>
-						<artifactId>jaxb-runtime</artifactId>
-						<version>${jaxb-runtime.version}</version>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+						<version>${glassfish-jaxb.version}</version>
 					</dependency>
 				</dependencies>
 				<executions>
@@ -48,20 +48,15 @@
 							</generateDirectory>
 							<strict>false</strict>
 							<plugins>
+								<dependency>
+									<groupId>org.patrodyne.jvnet</groupId>
+									<artifactId>hisrc-basicjaxb-plugins</artifactId>
+									<version>${hisrc-jaxb.version}</version>
+								</dependency>
 								<plugin>
-									<groupId>org.jvnet.jaxb2_commons</groupId>
-									<artifactId>jaxb2-basics</artifactId>
-									<version>${jaxb2-basics.version}</version>
-								</plugin>
-								<plugin>
-									<groupId>org.jvnet.jaxb2_commons</groupId>
-									<artifactId>jaxb2-basics-annotate</artifactId>
-									<version>${jaxb2-basics-annotate.version}</version>
-								</plugin>
-								<plugin>
-									<groupId>org.jvnet.jaxb2_commons</groupId>
-									<artifactId>jaxb2-fluent-api</artifactId>
-									<version>${jaxb2-fluent-api.version}</version>
+									<groupId>org.patrodyne.jvnet</groupId>
+									<artifactId>hisrc-hyperjaxb-annox-plugin</artifactId>
+									<version>${hisrc-jaxb.version}</version>
 								</plugin>
 								<plugin>
 									<groupId>com.github.jaxb-xew-plugin</groupId>
@@ -72,7 +67,6 @@
 							<args>
 								<arg>-Xxew</arg>
 								<arg>-Xannotate</arg>
-								<arg>-Xfluent-api</arg>
 							</args>
 						</configuration>
 					</execution>

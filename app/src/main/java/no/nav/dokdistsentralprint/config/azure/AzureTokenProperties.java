@@ -1,10 +1,9 @@
 package no.nav.dokdistsentralprint.config.azure;
 
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.validation.annotation.Validated;
-
-import javax.validation.constraints.NotEmpty;
 
 @Validated
 @ConfigurationProperties(prefix = "azure")

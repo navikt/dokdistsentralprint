@@ -1,7 +1,7 @@
 package no.nav.dokdistsentralprint.qdist009.util;
 
-import com.sun.xml.bind.marshaller.CharacterEscapeHandler;
-import com.sun.xml.bind.marshaller.MinimumEscapeHandler;
+import org.glassfish.jaxb.core.marshaller.CharacterEscapeHandler;
+import org.glassfish.jaxb.core.marshaller.MinimumEscapeHandler;
 
 import java.io.IOException;
 import java.io.Writer;
