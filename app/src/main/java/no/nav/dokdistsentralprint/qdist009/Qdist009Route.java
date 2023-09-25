@@ -10,6 +10,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.springframework.stereotype.Component;
 
+import static org.apache.camel.ExchangePattern.InOnly;
 import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
@@ -67,7 +68,7 @@ public class Qdist009Route extends RouteBuilder {
 
         from("jms:" + qdist009.getQueueName() + "?transacted=true&concurrentConsumers=2")
                 .routeId(SERVICE_ID)
-                .setExchangePattern(ExchangePattern.InOnly)
+                .setExchangePattern(InOnly)
                 .process(new IdsProcessor())
                 .to("validator:no/nav/meldinger/virksomhet/dokdistfordeling/xsd/qdist008/out/distribuertilkanal.xsd")
                 .unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
@@ -76,7 +77,7 @@ public class Qdist009Route extends RouteBuilder {
                 .to(SFTP_SERVER)
                 .log(INFO, log, "qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
                 .bean(dokdistStatusUpdater)
-                .log(INFO, log, "qdist009 har oppdatert forsendelseStatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());
+                .log(INFO, log, "qdist009 har oppdatert forsendelsestatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());
     }
 
     public static String getIdsForLogging() {

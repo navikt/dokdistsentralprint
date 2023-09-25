@@ -1,7 +1,7 @@
 package no.nav.dokdistsentralprint.qdist009.util;
 
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
-import no.nav.dokdistsentralprint.exception.functional.InvalidForsendelseStatusException;
+import no.nav.dokdistsentralprint.exception.functional.UgyldigForsendelsestatusException;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 
@@ -13,14 +13,15 @@ import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.qdist009.domain.Forsendelsestatus.KLAR_FOR_DIST;
 
 public final class Qdist009FunctionalUtils {
+
 	private Qdist009FunctionalUtils() {
 	}
 
 	private static final String HOVEDDOKUMENT = "HOVEDDOKUMENT";
 
-	public static void validateForsendelseStatus(String forsendelseStatus) {
-		if (!KLAR_FOR_DIST.name().equals(forsendelseStatus)) {
-			throw new InvalidForsendelseStatusException(format("ForsendelseStatus må være %s. Fant forsendelseStatus=%s", KLAR_FOR_DIST, forsendelseStatus));
+	public static void validateForsendelsestatus(String forsendelsestatus) {
+		if (!KLAR_FOR_DIST.name().equals(forsendelsestatus)) {
+			throw new UgyldigForsendelsestatusException(format("Forsendelsestatus må være %s. Fant forsendelsestatus=%s", KLAR_FOR_DIST, forsendelsestatus));
 		}
 	}
 
@@ -55,6 +56,5 @@ public final class Qdist009FunctionalUtils {
 						.build()))
 				.collect(Collectors.toList());
 	}
-
 
 }

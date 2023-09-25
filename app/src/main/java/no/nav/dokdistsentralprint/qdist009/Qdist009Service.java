@@ -31,7 +31,7 @@ import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_BESTILL
 import static no.nav.dokdistsentralprint.qdist009.util.BestillingZipUtil.zipPrintbestillingToBytes;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.createBestillingEntities;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.getDokumenttypeIdHoveddokument;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.validateForsendelseStatus;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.validateForsendelsestatus;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 
@@ -70,7 +70,7 @@ public class Qdist009Service {
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingsId);
 
 		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", forsendelseId, bestillingsId);
-		validateForsendelseStatus(hentForsendelseResponse.getForsendelseStatus());
+		validateForsendelsestatus(hentForsendelseResponse.getForsendelseStatus());
 
 		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(hentForsendelseResponse);
 		DokumenttypeInfo dokumenttypeInfo = dokumentkatalogAdmin.hentDokumenttypeInfo(dokumenttypeIdHoveddokument);
