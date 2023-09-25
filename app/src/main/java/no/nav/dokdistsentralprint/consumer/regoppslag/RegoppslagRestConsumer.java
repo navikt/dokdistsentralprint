@@ -50,7 +50,7 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	}
 
 	@Override
-	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(retryFor = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
 		HttpEntity<?> entity = new HttpEntity<>(request, retrieveBearerTokenAndCreateHeader());
 		try {

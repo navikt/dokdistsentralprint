@@ -35,7 +35,7 @@ public class StsRestConsumer {
 				.build();
 	}
 
-	@Retryable(include = StsRetrieveTokenException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(retryFor = StsRetrieveTokenException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	@Cacheable(REST_STS_CACHE)
 	public String getBearerToken() {
 		try {

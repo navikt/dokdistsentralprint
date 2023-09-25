@@ -50,7 +50,7 @@ class DokumentkatalogAdminConsumer implements DokumentkatalogAdmin {
 
 	@Override
 	@Cacheable(TKAT020_CACHE)
-	@Retryable(include = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(retryFor = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public DokumenttypeInfo hentDokumenttypeInfo(final String dokumenttypeId) {
 
 		log.info("hentDokumenttypeInfo henter dokumenttypeinfo med dokumenttypeId={}", dokumenttypeId);
