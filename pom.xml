@@ -17,18 +17,18 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.4</version>
+        <version>3.1.5</version>
     </parent>
 
     <properties>
         <java.version>17</java.version>
 
-        <camel.version>4.0.0</camel.version>
+        <camel.version>4.1.0</camel.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <httpclient.version>4.5.14</httpclient.version>
-        <google-cloud.version>26.23.0</google-cloud.version>
+        <google-cloud.version>26.26.0</google-cloud.version>
         <tink.version>1.11.0</tink.version>
-        <tink-gcpkms.version>1.8.0</tink-gcpkms.version>
+        <tink-gcpkms.version>1.9.0</tink-gcpkms.version>
         <ibm.mq.client.version>9.3.3.1</ibm.mq.client.version>
 
         <dokmet-api.version>13-5459a4f</dokmet-api.version>
@@ -36,8 +36,8 @@
 
         <!-- Test -->
         <spring-cloud-contract-wiremock.version>4.0.4</spring-cloud-contract-wiremock.version>
-        <commons-io.version>2.13.0</commons-io.version>
-        <sshd-sftp.version>2.10.0</sshd-sftp.version>
+        <commons-io.version>2.15.0</commons-io.version>
+        <sshd-sftp.version>2.11.0</sshd-sftp.version>
 
         <!-- Plugins -->
         <maven-toolchains-plugin.version>3.1.0</maven-toolchains-plugin.version>

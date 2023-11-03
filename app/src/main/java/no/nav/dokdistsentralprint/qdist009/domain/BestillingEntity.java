@@ -12,6 +12,7 @@ public class BestillingEntity {
 	String fileName;
 	byte[] entity;
 
+	@Override
 	public String toString() {
 		return format("BestillingEntity{filnavn=%s, entity.length=%s}", this.fileName, this.entity == null ? null : this.entity.length);
 	}
