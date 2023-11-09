@@ -30,6 +30,11 @@
 					<queue name="qdist009Bq"/>
 				</anycast>
 			</address>
+			<address name="qdokopp001">
+				<anycast>
+					<queue name="qdokopp001"/>
+				</anycast>
+			</address>
 		</addresses>
 	</core>
 </configuration>

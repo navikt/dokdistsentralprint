@@ -1,13 +1,14 @@
 package no.nav.dokdistsentralprint.consumer.rdist001;
 
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
 
 import java.util.List;
 
-@Value
+@Data
 @Builder
 public class HentForsendelseResponse {
+	long forsendelseId;
 	String bestillingsId;
 	String originalBestillingsId;
 	String forsendelseStatus;
@@ -16,8 +17,16 @@ public class HentForsendelseResponse {
 	Mottaker mottaker;
 	Postadresse postadresse;
 	List<Dokument> dokumenter;
+	private ArkivInformasjon arkivInformasjon;
 
-	@Value
+	@Data
+	@Builder
+	public static class ArkivInformasjon {
+		ArkivSystemCode arkivSystem;
+		String arkivId;
+	}
+
+	@Data
 	@Builder
 	public static class Mottaker {
 		String mottakerId;
@@ -25,7 +34,7 @@ public class HentForsendelseResponse {
 		String mottakerType;
 	}
 
-	@Value
+	@Data
 	@Builder
 	public static class Postadresse {
 		String adresselinje1;
@@ -36,12 +45,16 @@ public class HentForsendelseResponse {
 		String landkode;
 	}
 
-	@Value
+	@Data
 	@Builder
 	public static class Dokument {
 		String tilknyttetSom;
 		String dokumentObjektReferanse;
 		String dokumenttypeId;
+	}
+
+	public enum ArkivSystemCode {
+		JOARK, MIDL_BREVLAGER, INGEN
 	}
 }
 

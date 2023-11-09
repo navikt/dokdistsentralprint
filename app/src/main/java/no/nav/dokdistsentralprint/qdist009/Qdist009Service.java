@@ -39,44 +39,40 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Service
 public class Qdist009Service {
 
-	private static final String UKJENT_LANDKODE = "???";
-	private static final String XX_LANDKODE = "XX";
+	public static final String UKJENT_LANDKODE = "???";
+	public static final String XX_LANDKODE = "XX";
 	private final DokumentkatalogAdmin dokumentkatalogAdmin;
-	private final AdministrerForsendelse administrerForsendelse;
-	private final Regoppslag regoppslag;
+	private final PostadresseService postadresseService;
 	private final BucketStorage bucketStorage;
 	private final BestillingMapper bestillingMapper;
 	private final BestillingMarshaller bestillingMarshaller;
 
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
-						   AdministrerForsendelse administrerForsendelse,
+						   PostadresseService postadresseService,
 						   BucketStorage bucketStorage,
-						   Regoppslag regoppslag,
 						   BestillingMapper bestillingMapper, BestillingMarshaller bestillingMarshaller) {
 		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
-		this.administrerForsendelse = administrerForsendelse;
-		this.regoppslag = regoppslag;
+		this.postadresseService = postadresseService;
 		this.bucketStorage = bucketStorage;
 		this.bestillingMapper = bestillingMapper;
 		this.bestillingMarshaller = bestillingMarshaller;
 	}
 
 	@Handler
-	public byte[] distribuerForsendelseTilSentralPrintService(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo, Exchange exchange) {
-		final String forsendelseId = distribuerForsendelseTilSentralPrintTo.getForsendelseId();
-		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(forsendelseId);
+	public byte[] distribuerForsendelseTilSentralPrintService(HentForsendelseResponse hentForsendelseResponse, Exchange exchange) {
 
 		final String bestillingsId = hentForsendelseResponse.getBestillingsId();
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingsId);
 
-		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", forsendelseId, bestillingsId);
+		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", hentForsendelseResponse.getForsendelseId(), bestillingsId);
 		validateForsendelsestatus(hentForsendelseResponse.getForsendelseStatus());
+
+		Adresse adresse = getAdresse(hentForsendelseResponse);
+
+		String postdestinasjon = postadresseService.hentPostdestinasjon(adresse);
 
 		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(hentForsendelseResponse);
 		DokumenttypeInfo dokumenttypeInfo = dokumentkatalogAdmin.hentDokumenttypeInfo(dokumenttypeIdHoveddokument);
-
-		Adresse adresse = getAdresse(hentForsendelseResponse, forsendelseId);
-		String postdestinasjon = administrerForsendelse.hentPostdestinasjon(adresse.getLandkode());
 
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(hentForsendelseResponse);
 
@@ -90,42 +86,20 @@ public class Qdist009Service {
 		return zipPrintbestillingToBytes(bestillingEntities);
 	}
 
-	private Adresse getAdresse(HentForsendelseResponse hentForsendelseResponse, String forsendelseId) {
-		final HentForsendelseResponse.Postadresse adresseDokdist = hentForsendelseResponse.getPostadresse();
-		if (adresseDokdist == null) {
-			Adresse postadresse = getAdresseFromRegoppslag(hentForsendelseResponse);
-			administrerForsendelse.oppdaterPostadresse(mapOppdaterPostadresse(forsendelseId, postadresse));
-			return postadresse;
-		} else {
-			return Adresse.builder()
-					.adresselinje1(adresseDokdist.getAdresselinje1())
-					.adresselinje2(adresseDokdist.getAdresselinje2())
-					.adresselinje3(adresseDokdist.getAdresselinje3())
-					.landkode(mapLandkode(adresseDokdist.getLandkode()))
-					.postnummer(adresseDokdist.getPostnummer())
-					.poststed(adresseDokdist.getPoststed())
-					.build();
-		}
-	}
-
 	private String mapLandkode(String landkode) {
 		return isBlank(landkode) || UKJENT_LANDKODE.equals(landkode) ? XX_LANDKODE : landkode;
 	}
 
-	private Adresse getAdresseFromRegoppslag(HentForsendelseResponse hentForsendelseResponse) {
-		AdresseTo adresseTo = regoppslag.treg002HentAdresse(HentAdresseRequestTo.builder()
-				.identifikator(hentForsendelseResponse.getMottaker().getMottakerId())
-				.type(hentForsendelseResponse.getMottaker().getMottakerType())
-				.tema(hentForsendelseResponse.getTema())
-				.build());
+	private Adresse getAdresse(HentForsendelseResponse hentForsendelseResponse) {
+		HentForsendelseResponse.Postadresse postadresse = hentForsendelseResponse.getPostadresse();
 
 		return Adresse.builder()
-				.adresselinje1(adresseTo.getAdresselinje1())
-				.adresselinje2(adresseTo.getAdresselinje2())
-				.adresselinje3(adresseTo.getAdresselinje3())
-				.landkode(mapLandkode(adresseTo.getLandkode()))
-				.postnummer(adresseTo.getPostnummer())
-				.poststed(adresseTo.getPoststed())
+				.adresselinje1(postadresse.getAdresselinje1())
+				.adresselinje2(postadresse.getAdresselinje2())
+				.adresselinje3(postadresse.getAdresselinje3())
+				.landkode(mapLandkode(postadresse.getLandkode()))
+				.postnummer(postadresse.getPostnummer())
+				.poststed(postadresse.getPoststed())
 				.build();
 	}
 
@@ -163,18 +137,6 @@ public class Qdist009Service {
 			throw new NoDocumentFromBucketTechnicalException(format("Det fantes et innslag i bucket på dokumentobjektreferanse=%s, men dette var ikke tilknyttet noe dokument.", objektReferanse));
 		}
 		return dokdistDokument;
-	}
-
-	private OppdaterPostadresseRequest mapOppdaterPostadresse(String forsendelseId, Adresse adresse) {
-		return OppdaterPostadresseRequest.builder()
-				.forsendelseId(Long.valueOf(forsendelseId))
-				.adresselinje1(adresse.getAdresselinje1())
-				.adresselinje2(adresse.getAdresselinje2())
-				.adresselinje3(adresse.getAdresselinje3())
-				.postnummer(adresse.getPostnummer())
-				.poststed(adresse.getPoststed())
-				.landkode(adresse.getLandkode())
-				.build();
 	}
 
 }

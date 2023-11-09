@@ -40,6 +40,11 @@ public class JmsConfig {
 	}
 
 	@Bean
+	public Queue qdokopp001(@Value("${dokopp_qopp001_opprett_oppgave.queuename}") String qdokopp001QueueName) throws JMSException {
+		return new MQQueue(qdokopp001QueueName);
+	}
+
+	@Bean
 	public ConnectionFactory mqConnectionFactory(final MqGatewayAlias mqGatewayAlias,
                                                  final ServiceuserAlias serviceuserAlias) throws JMSException {
 		return createConnectionFactory(mqGatewayAlias, serviceuserAlias);

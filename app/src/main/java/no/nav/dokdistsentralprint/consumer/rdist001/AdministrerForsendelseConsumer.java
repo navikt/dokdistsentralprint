@@ -118,6 +118,22 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 		log.info("oppdaterPostadresse har oppdatert postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
 	}
 
+	@Retryable(include = DokdistsentralprintTechnicalException.class,  backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	public void feilregistrerForsendelse(FeilregistrerForsendelseRequest feilregistrerForsendelse) {
+		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.forsendelseId());
+
+		webClient.put()
+				.uri("/feilregistrerforsendelse")
+				.attributes(getOAuth2AuthorizedClient())
+				.bodyValue(feilregistrerForsendelse)
+				.retrieve()
+				.toBodilessEntity()
+				.doOnError(this::handleError)
+				.block();
+
+		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.forsendelseId());
+	}
+
 	private void handleError(Throwable error) {
 		if (error instanceof WebClientResponseException response && ((WebClientResponseException) error).getStatusCode().is4xxClientError()) {
 			throw new DokdistsentralprintFunctionalException(

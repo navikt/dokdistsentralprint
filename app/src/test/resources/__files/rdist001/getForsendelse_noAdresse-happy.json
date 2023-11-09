@@ -1,10 +1,15 @@
 {
+  "forsendelseId": "33333",
   "bestillingsId": "insertCallIdHere",
   "forsendelseStatus": "KLAR_FOR_DIST",
   "mottaker": {
     "mottakerId": "mottakerId",
     "mottakerNavn": "mottakerNavn",
     "mottakerType": "PERSON"
+  },
+  "arkivInformasjon": {
+    "arkivSystem": "JOARK",
+    "arkivId": "234567819"
   },
   "dokumenter": [
     {

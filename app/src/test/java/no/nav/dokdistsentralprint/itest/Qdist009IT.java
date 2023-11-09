@@ -84,6 +84,8 @@ class Qdist009IT {
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 	private static final String HENTPOSTDESTINASJON_URL = "/rest/v1/administrerforsendelse/hentpostdestinasjon/";
 	private static final String OPPDATERPOSTADRESSE_URL = "/rest/v1/administrerforsendelse/oppdaterpostadresse";
+	private static final String FEIL_REGISTRER_FORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
+
 
 	@TempDir
 	static Path tempDir;
@@ -99,6 +101,8 @@ class Qdist009IT {
 	private Queue qdist009FunksjonellFeil;
 	@Autowired
 	private Queue backoutQueue;
+	@Autowired
+	private Queue qdokopp001;
 	@Autowired
 	private BucketStorage bucketStorage;
 
@@ -314,6 +318,26 @@ class Qdist009IT {
 	}
 
 	@Test
+	void shouldSendMeldingToQdokopp001QueueWhenPostadresseIsNull() throws IOException {
+		stubRestSts();
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubFeilPostHentMottakerOgAdresse(NOT_FOUND.value());
+		stubPutFeilregistrerForsendelse();
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(100, SECONDS).untilAsserted(() -> {
+			String qdokopp001Receive = receive(qdokopp001);
+			assertNotNull(qdokopp001Receive);
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
+		verify(1, putRequestedFor(urlEqualTo(FEIL_REGISTRER_FORSENDELSE_URL)));
+	}
+
+
+	@Test
 	void shouldThrowForsendelseManglerForsendelseIdFunctionalExceptionManglerForsendelseId() throws Exception {
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-feilId.xml"));
 
@@ -388,6 +412,11 @@ class Qdist009IT {
 		stubFor(get(urlMatching(DOKMET_URL))
 				.willReturn(aResponse().withStatus(NOT_FOUND.value())));
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubRestSts();
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -406,6 +435,11 @@ class Qdist009IT {
 		stubFor(get(urlMatching(DOKMET_URL))
 				.willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR.value())));
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubRestSts();
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -423,8 +457,9 @@ class Qdist009IT {
 	void shouldThrowRegoppslagHentAdresseFunctionalException() throws Exception {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
-		stubPostHentMottakerOgAdresse(null, NOT_FOUND.value());
 		stubRestSts();
+		stubPostHentMottakerOgAdresse(null, NOT_FOUND.value());
+
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -434,7 +469,6 @@ class Qdist009IT {
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
 
-		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
@@ -454,7 +488,6 @@ class Qdist009IT {
 			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
 
-		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(MAX_ATTEMPTS_SHORT, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
 	}
@@ -477,7 +510,6 @@ class Qdist009IT {
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
 
-		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
@@ -500,7 +532,6 @@ class Qdist009IT {
 			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
 
-		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(MAX_ATTEMPTS_SHORT, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
@@ -535,7 +566,12 @@ class Qdist009IT {
 	void shouldThrowDokumentIkkeFunnetIBucketException() throws Exception {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_withAdresse-NotInBucket-happy.json", OK.value());
-		stubGetPostdestinasjon("NO", "rdist001/hentPostdestinasjon-happy.json", NOT_FOUND.value());
+		stubGetPostdestinasjon("NO", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+
+		stubRestSts();
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
@@ -645,6 +681,12 @@ class Qdist009IT {
 								CALL_ID))));
 	}
 
+	private void stubPutFeilregistrerForsendelse() {
+		stubFor(put(urlEqualTo(FEIL_REGISTRER_FORSENDELSE_URL))
+				.willReturn(aResponse()
+						.withStatus(OK.value())));
+	}
+
 	private void stubPutPostadresse(int status) {
 		stubFor(put(OPPDATERPOSTADRESSE_URL)
 				.willReturn(aResponse()
@@ -674,6 +716,14 @@ class Qdist009IT {
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile(path)));
+	}
+
+	private void stubFeilPostHentMottakerOgAdresse(int status) {
+		stubFor(post("/hentMottakerOgAdresse")
+				.willReturn(aResponse()
+						.withStatus(status)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody("{\"status\":\"404 \",\"message\":\"Fant ikke adresse for personen i PDL\"}")));
 	}
 }
 

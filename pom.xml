@@ -33,6 +33,8 @@
 
         <dokmet-api.version>13-5459a4f</dokmet-api.version>
         <melding-virksomhet-dokdistfordeling.version>6-4049b35</melding-virksomhet-dokdistfordeling.version>
+        <opprettoppgave-tjenestespesifikasjon-v1.version>2-3843acc</opprettoppgave-tjenestespesifikasjon-v1.version>
+
 
         <!-- Test -->
         <spring-cloud-contract-wiremock.version>4.0.4</spring-cloud-contract-wiremock.version>
@@ -56,6 +58,11 @@
                 <groupId>no.nav.meldinger.virksomhet</groupId>
                 <artifactId>melding-virksomhet-dokdistfordeling</artifactId>
                 <version>${melding-virksomhet-dokdistfordeling.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.dok</groupId>
+                <artifactId>opprettoppgave-tjenestespesifikasjon-v1</artifactId>
+                <version>${opprettoppgave-tjenestespesifikasjon-v1.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.dokmet</groupId>
