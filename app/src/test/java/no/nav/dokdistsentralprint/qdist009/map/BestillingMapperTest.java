@@ -6,7 +6,6 @@ import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.Dokument;
 import no.nav.dokdistsentralprint.qdist009.BestillingMapper;
-import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -61,9 +60,8 @@ class BestillingMapperTest {
 	@Test
 	void shouldMap() {
 
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresse(LAND_NO), MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
-				createAdresse(LAND_NO),
 				createHentPostdestinasjon());
 
 
@@ -118,9 +116,8 @@ class BestillingMapperTest {
 
 	@Test
 	void shouldMapDefaultValueWhenSentralPrintDokumentTypeIkkeSettPaaDokumenttypeInfo() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresse(LAND_NO), MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoToUtenSentralPrintDokumentType(TOSIDIG_PRINT_TRUE),
-				createAdresse(LAND_NO),
 				createHentPostdestinasjon());
 
 
@@ -176,9 +173,8 @@ class BestillingMapperTest {
 	@Test
 	void shouldMapKonvoluttTypeToXWhenKonvoluttvinduTypeIkkeSettPaaDokumenttypeInfo() {
 
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresse(LAND_NO), MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoUtenKonvoluttvinduType(TOSIDIG_PRINT_TRUE),
-				createAdresse(LAND_NO),
 				createHentPostdestinasjon());
 
 		assertEquals(MODUS, bestilling.getBestillingsInfo().getModus());
@@ -232,9 +228,8 @@ class BestillingMapperTest {
 
 	@Test
 	void shouldMapBestillingWithTosidigPrintFalse() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_ORGANISASJON),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresse(LAND_NO), MOTTAKERTYPE_ORGANISASJON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
-				createAdresse(LAND_NO),
 				createHentPostdestinasjon());
 
 		assertEquals(PORTOKLASSE + "_" + KONVOLUTTVINDU_TYPE + "_S", bestilling.getBestillingsInfo().getKanal().getBehandling());
@@ -243,9 +238,8 @@ class BestillingMapperTest {
 
 	@Test
 	void shouldMapBestillingWithUtenlandsLandkode() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_ORGANISASJON),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresse(LAND_SE), MOTTAKERTYPE_ORGANISASJON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
-				createAdresse(LAND_SE),
 				createHentPostdestinasjon());
 
 
@@ -289,9 +283,8 @@ class BestillingMapperTest {
 
 	@Test
 	void shouldNotMapSkatteyternummerInneBestillingWhenMottakerTypeErIkkeOrganizationEllerPerson() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_UKJENT),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresse(LAND_SE), MOTTAKERTYPE_UKJENT),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
-				createAdresse(LAND_SE),
 				createHentPostdestinasjon());
 
 
@@ -335,9 +328,8 @@ class BestillingMapperTest {
 
 	@Test
 	void shouldMapWithOnlyOneAddress() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(MOTTAKERTYPE_PERSON),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresseWithSingleAdress(), MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
-				createAdresseWithSingleAdress(),
 				createHentPostdestinasjon());
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
@@ -346,10 +338,11 @@ class BestillingMapperTest {
 				bestilling.getMailpiece().getRessurs().getAdresse());
 	}
 
-	private HentForsendelseResponse createHentForsendelseResponseTo(String mottakerType) {
+	private HentForsendelseResponse createHentForsendelseResponseTo(HentForsendelseResponse.Postadresse postadresse, String mottakerType) {
 		return HentForsendelseResponse.builder()
 				.bestillingsId(BESTILLINGS_ID)
 				.modus(MODUS)
+				.postadresse(postadresse)
 				.mottaker(HentForsendelseResponse.Mottaker.builder()
 						.mottakerId(MOTTAKER_ID)
 						.mottakerNavn(MOTTAKER_NAVN)
@@ -410,8 +403,8 @@ class BestillingMapperTest {
 				.build();
 	}
 
-	private Adresse createAdresse(String landkode) {
-		return Adresse.builder()
+	private HentForsendelseResponse.Postadresse createAdresse(String landkode) {
+		return HentForsendelseResponse.Postadresse.builder()
 				.adresselinje1(ADRESSELINJE_1)
 				.adresselinje2(ADRESSELINJE_2)
 				.adresselinje3(ADRESSELINJE_3)
@@ -421,8 +414,8 @@ class BestillingMapperTest {
 				.build();
 	}
 
-	private Adresse createAdresseWithSingleAdress() {
-		return Adresse.builder()
+	private HentForsendelseResponse.Postadresse createAdresseWithSingleAdress() {
+		return HentForsendelseResponse.Postadresse.builder()
 				.adresselinje1(ADRESSELINJE_1)
 				.postnummer(POSTNUMMER)
 				.poststed(POSTSTED)

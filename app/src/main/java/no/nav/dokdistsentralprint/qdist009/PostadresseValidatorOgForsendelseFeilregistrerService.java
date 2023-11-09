@@ -8,41 +8,38 @@ import no.nav.dokdistsentralprint.consumer.rdist001.OppdaterPostadresseRequest;
 import no.nav.dokdistsentralprint.consumer.regoppslag.Regoppslag;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
-import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
 import no.nav.dokdistsentralprint.qdist009.domain.DistribuerForsendelseTilSentralPrintTo;
-import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-import static no.nav.dokdistsentralprint.qdist009.Qdist009Service.UKJENT_LANDKODE;
-import static no.nav.dokdistsentralprint.qdist009.Qdist009Service.XX_LANDKODE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
 @Component
-public class PostadresseService {
+public class PostadresseValidatorOgForsendelseFeilregistrerService {
 
-	private static final String BEHANDLE_MANGLENDE_ADRESSE = "BEHANDLE_MANGLENDE_ADRESSE";
+	public static final String UKJENT_LANDKODE = "???";
+	public static final String XX_LANDKODE = "XX";
 	private static final String FORSENDELSE_FEIL_TYPE = "MELDINGSFEIL";
 	private static final String FEIL_MELDING_DETALJER = "Manglende adresse";
 	private final Regoppslag regoppslag;
 	private final AdministrerForsendelseConsumer administrerForsendelse;
 
-	public PostadresseService(Regoppslag regoppslag,
-							  AdministrerForsendelseConsumer administrerForsendelse) {
+	public PostadresseValidatorOgForsendelseFeilregistrerService(Regoppslag regoppslag,
+																 AdministrerForsendelseConsumer administrerForsendelse) {
 		this.regoppslag = regoppslag;
 		this.administrerForsendelse = administrerForsendelse;
 	}
 
 	@Handler
-	public HentForsendelseResponse hentForsendelseResponse(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo) {
+	public HentForsendelseResponse hentForsendelse(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo) {
 		final String forsendelseId = distribuerForsendelseTilSentralPrintTo.getForsendelseId();
 		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}", forsendelseId);
 
 		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(forsendelseId);
-		Adresse adresse = getAdresse(hentForsendelseResponse);
+		HentForsendelseResponse.Postadresse adresse = getAdresse(hentForsendelseResponse);
 		if (adresse == null) {
 			administrerForsendelse.feilregistrerForsendelse(mapFeilregistrerForsendelse(hentForsendelseResponse));
 			return hentForsendelseResponse;
@@ -63,26 +60,18 @@ public class PostadresseService {
 		return hentForsendelseResponse;
 	}
 
-	public OpprettOppgave opprettOppgave(HentForsendelseResponse hentForsendelseResponse) {
-		OpprettOppgave opprettOppgave = new OpprettOppgave();
-		opprettOppgave.setOppgaveType(BEHANDLE_MANGLENDE_ADRESSE);
-		opprettOppgave.setArkivSystem(hentForsendelseResponse.getArkivInformasjon().getArkivSystem().name());
-		opprettOppgave.setArkivKode(hentForsendelseResponse.getArkivInformasjon().getArkivId());
-		return opprettOppgave;
-	}
-
-	public String hentPostdestinasjon(Adresse adresse) {
+	public String hentPostdestinasjon(HentForsendelseResponse.Postadresse adresse) {
 		return administrerForsendelse.hentPostdestinasjon(adresse.getLandkode());
 	}
 
-	private Adresse getAdresse(HentForsendelseResponse hentForsendelseResponse) {
+	private HentForsendelseResponse.Postadresse getAdresse(HentForsendelseResponse hentForsendelseResponse) {
 		final HentForsendelseResponse.Postadresse adresseDokdist = hentForsendelseResponse.getPostadresse();
 		if (adresseDokdist == null) {
-			Adresse postadresse = getAdresseFromRegoppslag(hentForsendelseResponse);
-			oppdaterPostadresse(postadresse, hentForsendelseResponse);
-			return postadresse;
+			HentForsendelseResponse.Postadresse pdlPostadresse = getAdresseFromRegoppslag(hentForsendelseResponse);
+			oppdaterPostadresse(hentForsendelseResponse.getForsendelseId(), pdlPostadresse);
+			return pdlPostadresse;
 		} else {
-			return Adresse.builder()
+			return HentForsendelseResponse.Postadresse.builder()
 					.adresselinje1(adresseDokdist.getAdresselinje1())
 					.adresselinje2(adresseDokdist.getAdresselinje2())
 					.adresselinje3(adresseDokdist.getAdresselinje3())
@@ -93,34 +82,35 @@ public class PostadresseService {
 		}
 	}
 
-	private void oppdaterPostadresse(Adresse adresse, HentForsendelseResponse hentForsendelseResponse) {
-		if (adresse != null) {
-			administrerForsendelse.oppdaterPostadresse(mapOppdaterPostadresse(hentForsendelseResponse.getForsendelseId(), adresse));
+	private void oppdaterPostadresse(Long forsendelseId, HentForsendelseResponse.Postadresse postadresse) {
+		if (postadresse != null) {
+			administrerForsendelse.oppdaterPostadresse(mapOppdaterPostadresse(forsendelseId, postadresse));
 		}
 	}
 
-	private Adresse getAdresseFromRegoppslag(HentForsendelseResponse hentForsendelseResponse) {
+	private HentForsendelseResponse.Postadresse getAdresseFromRegoppslag(HentForsendelseResponse hentForsendelseResponse) {
 		AdresseTo adresseTo = regoppslag.treg002HentAdresse(HentAdresseRequestTo.builder()
 				.identifikator(hentForsendelseResponse.getMottaker().getMottakerId())
 				.type(hentForsendelseResponse.getMottaker().getMottakerType())
 				.tema(hentForsendelseResponse.getTema())
 				.build());
 
-		return adresseTo == null ? null : Adresse.builder()
-				.adresselinje1(adresseTo.getAdresselinje1())
-				.adresselinje2(adresseTo.getAdresselinje2())
-				.adresselinje3(adresseTo.getAdresselinje3())
-				.landkode(mapLandkode(adresseTo.getLandkode()))
-				.postnummer(adresseTo.getPostnummer())
-				.poststed(adresseTo.getPoststed())
-				.build();
+		return adresseTo == null ? null :
+				HentForsendelseResponse.Postadresse.builder()
+						.adresselinje1(adresseTo.getAdresselinje1())
+						.adresselinje2(adresseTo.getAdresselinje2())
+						.adresselinje3(adresseTo.getAdresselinje3())
+						.landkode(mapLandkode(adresseTo.getLandkode()))
+						.postnummer(adresseTo.getPostnummer())
+						.poststed(adresseTo.getPoststed())
+						.build();
 	}
 
 	private String mapLandkode(String landkode) {
 		return isBlank(landkode) || UKJENT_LANDKODE.equals(landkode) ? XX_LANDKODE : landkode;
 	}
 
-	private OppdaterPostadresseRequest mapOppdaterPostadresse(Long forsendelseId, Adresse adresse) {
+	private OppdaterPostadresseRequest mapOppdaterPostadresse(Long forsendelseId, HentForsendelseResponse.Postadresse adresse) {
 		return OppdaterPostadresseRequest.builder()
 				.forsendelseId(forsendelseId)
 				.adresselinje1(adresse.getAdresselinje1())

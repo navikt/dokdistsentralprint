@@ -40,8 +40,8 @@ public class JmsConfig {
 	}
 
 	@Bean
-	public Queue qdokopp001(@Value("${dokopp_qopp001_opprett_oppgave.queuename}") String qdokopp001QueueName) throws JMSException {
-		return new MQQueue(qdokopp001QueueName);
+	public Queue qopp001(@Value("${dokopp_qopp001_opprett_oppgave.queuename}") String qopp001QueueName) throws JMSException {
+		return new MQQueue(qopp001QueueName);
 	}
 
 	@Bean

@@ -28,8 +28,8 @@ public class JmsItestConfig {
 	}
 
 	@Bean
-	public Queue qdokopp001(@Value("${dokopp_qopp001_opprett_oppgave.queuename}") String qdokopp001QueueName) {
-		return new ActiveMQQueue(qdokopp001QueueName);
+	public Queue qopp001(@Value("${dokopp_qopp001_opprett_oppgave.queuename}") String qopp001QueueName) {
+		return new ActiveMQQueue(qopp001QueueName);
 	}
 
 	@Bean

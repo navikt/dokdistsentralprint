@@ -35,26 +35,26 @@ public class Qdist009Route extends RouteBuilder {
             "&preferredAuthentications=publickey";
 
     private final Qdist009Service qdist009Service;
-    private final PostadresseService postadresseService;
+    private final PostadresseValidatorOgForsendelseFeilregistrerService postadresseService;
     private final DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper;
 
     private final DokdistStatusUpdater dokdistStatusUpdater;
     private final Queue qdist009;
-    private final Queue qdokopp001;
+    private final Queue qopp001;
     private final Queue qdist009FunksjonellFeil;
 
     public Qdist009Route(Qdist009Service qdist009Service,
                          DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper,
                          DokdistStatusUpdater dokdistStatusUpdater,
                          Queue qdist009,
-                         Queue qdokopp001,
+                         Queue qopp001,
                          Queue qdist009FunksjonellFeil,
-                         PostadresseService postadresseService) {
+                         PostadresseValidatorOgForsendelseFeilregistrerService postadresseService) {
         this.qdist009Service = qdist009Service;
         this.distribuerForsendelseTilSentralPrintMapper = distribuerForsendelseTilSentralPrintMapper;
         this.dokdistStatusUpdater = dokdistStatusUpdater;
         this.qdist009 = qdist009;
-        this.qdokopp001 = qdokopp001;
+        this.qopp001 = qopp001;
         this.qdist009FunksjonellFeil = qdist009FunksjonellFeil;
         this.postadresseService = postadresseService;
     }
@@ -84,11 +84,11 @@ public class Qdist009Route extends RouteBuilder {
                 .bean(postadresseService)
                 .choice()
                     .when(simple("${body.postadresse}").isNull())
-                        .log(INFO, log, "forsendelse med fosendelseId=" + "${body.forsendelseId}" + " mangler postadresse og sender manglende postadresse oppgave til qdok001")
-                        .bean(postadresseService, "opprettOppgave")
+                        .log(INFO, log, "forsendelse med forsendelseID=" + "${body.forsendelseId}" + " mangler postadresse og sender manglende postadresse oppgave til qdok001")
+                        .bean(qdist009Service, "opprettOppgave")
                         .marshal(new JaxbDataFormat(JAXBContext.newInstance(OpprettOppgave.class)))
                         .convertBodyTo(String.class, StandardCharsets.UTF_8.toString())
-                        .to("jms:" + qdokopp001.getQueueName())
+                        .to("jms:" + qopp001.getQueueName())
                 .otherwise()
                     .bean(qdist009Service)
                     .to(SFTP_SERVER)

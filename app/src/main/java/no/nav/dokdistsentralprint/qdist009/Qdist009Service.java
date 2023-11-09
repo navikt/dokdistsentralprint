@@ -1,24 +1,18 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse.Dokument;
-import no.nav.dokdistsentralprint.consumer.rdist001.OppdaterPostadresseRequest;
-import no.nav.dokdistsentralprint.consumer.regoppslag.Regoppslag;
-import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
-import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.exception.functional.KunneIkkeDeserialisereBucketJsonPayloadFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.NoDocumentFromBucketTechnicalException;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
-import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
-import no.nav.dokdistsentralprint.qdist009.domain.DistribuerForsendelseTilSentralPrintTo;
 import no.nav.dokdistsentralprint.storage.BucketStorage;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
+import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
@@ -39,18 +33,19 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Service
 public class Qdist009Service {
 
-	public static final String UKJENT_LANDKODE = "???";
-	public static final String XX_LANDKODE = "XX";
+	private static final String BEHANDLE_MANGLENDE_ADRESSE = "BEHANDLE_MANGLENDE_ADRESSE";
+
 	private final DokumentkatalogAdmin dokumentkatalogAdmin;
-	private final PostadresseService postadresseService;
+	private final PostadresseValidatorOgForsendelseFeilregistrerService postadresseService;
 	private final BucketStorage bucketStorage;
 	private final BestillingMapper bestillingMapper;
 	private final BestillingMarshaller bestillingMarshaller;
 
 	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
-						   PostadresseService postadresseService,
+						   PostadresseValidatorOgForsendelseFeilregistrerService postadresseService,
 						   BucketStorage bucketStorage,
-						   BestillingMapper bestillingMapper, BestillingMarshaller bestillingMarshaller) {
+						   BestillingMapper bestillingMapper,
+						   BestillingMarshaller bestillingMarshaller) {
 		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
 		this.postadresseService = postadresseService;
 		this.bucketStorage = bucketStorage;
@@ -67,16 +62,14 @@ public class Qdist009Service {
 		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", hentForsendelseResponse.getForsendelseId(), bestillingsId);
 		validateForsendelsestatus(hentForsendelseResponse.getForsendelseStatus());
 
-		Adresse adresse = getAdresse(hentForsendelseResponse);
-
-		String postdestinasjon = postadresseService.hentPostdestinasjon(adresse);
+		String postdestinasjon = postadresseService.hentPostdestinasjon(hentForsendelseResponse.getPostadresse());
 
 		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(hentForsendelseResponse);
 		DokumenttypeInfo dokumenttypeInfo = dokumentkatalogAdmin.hentDokumenttypeInfo(dokumenttypeIdHoveddokument);
 
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(hentForsendelseResponse);
 
-		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponse, dokumenttypeInfo, adresse, postdestinasjon);
+		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponse, dokumenttypeInfo, postdestinasjon);
 		String kanalbehandling = bestilling.getBestillingsInfo().getKanal().getBehandling();
 		log.info("qdist009 lager bestilling til print med kanalbehandling={}, antall_dokumenter={} for bestillingsId={}, dokumenttypeId={}",
 				kanalbehandling, dokdistDokumentList.size(), bestillingsId, dokumenttypeIdHoveddokument);
@@ -86,21 +79,15 @@ public class Qdist009Service {
 		return zipPrintbestillingToBytes(bestillingEntities);
 	}
 
-	private String mapLandkode(String landkode) {
-		return isBlank(landkode) || UKJENT_LANDKODE.equals(landkode) ? XX_LANDKODE : landkode;
-	}
-
-	private Adresse getAdresse(HentForsendelseResponse hentForsendelseResponse) {
-		HentForsendelseResponse.Postadresse postadresse = hentForsendelseResponse.getPostadresse();
-
-		return Adresse.builder()
-				.adresselinje1(postadresse.getAdresselinje1())
-				.adresselinje2(postadresse.getAdresselinje2())
-				.adresselinje3(postadresse.getAdresselinje3())
-				.landkode(mapLandkode(postadresse.getLandkode()))
-				.postnummer(postadresse.getPostnummer())
-				.poststed(postadresse.getPoststed())
-				.build();
+	/**
+	 * Forsendelser som mangler postadresse feilregistert og sendes meldingen til qopp001 kø for å opprette oppgave for videre saksbehandling.
+	 **/
+	public OpprettOppgave opprettOppgave(HentForsendelseResponse hentForsendelseResponse) {
+		OpprettOppgave opprettOppgave = new OpprettOppgave();
+		opprettOppgave.setOppgaveType(BEHANDLE_MANGLENDE_ADRESSE);
+		opprettOppgave.setArkivSystem(hentForsendelseResponse.getArkivInformasjon().getArkivSystem().name());
+		opprettOppgave.setArkivKode(hentForsendelseResponse.getArkivInformasjon().getArkivId());
+		return opprettOppgave;
 	}
 
 	/**

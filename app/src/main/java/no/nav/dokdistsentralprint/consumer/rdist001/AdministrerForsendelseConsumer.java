@@ -118,9 +118,9 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 		log.info("oppdaterPostadresse har oppdatert postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
 	}
 
-	@Retryable(include = DokdistsentralprintTechnicalException.class,  backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(retryFor = DokdistsentralprintTechnicalException.class,  backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public void feilregistrerForsendelse(FeilregistrerForsendelseRequest feilregistrerForsendelse) {
-		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.forsendelseId());
+		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 
 		webClient.put()
 				.uri("/feilregistrerforsendelse")
@@ -131,7 +131,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.doOnError(this::handleError)
 				.block();
 
-		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.forsendelseId());
+		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 	}
 
 	private void handleError(Throwable error) {

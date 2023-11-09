@@ -84,7 +84,7 @@ class Qdist009IT {
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 	private static final String HENTPOSTDESTINASJON_URL = "/rest/v1/administrerforsendelse/hentpostdestinasjon/";
 	private static final String OPPDATERPOSTADRESSE_URL = "/rest/v1/administrerforsendelse/oppdaterpostadresse";
-	private static final String FEIL_REGISTRER_FORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
+	private static final String FEILREGISTRER_FORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
 
 
 	@TempDir
@@ -102,7 +102,7 @@ class Qdist009IT {
 	@Autowired
 	private Queue backoutQueue;
 	@Autowired
-	private Queue qdokopp001;
+	private Queue qopp001;
 	@Autowired
 	private BucketStorage bucketStorage;
 
@@ -318,7 +318,7 @@ class Qdist009IT {
 	}
 
 	@Test
-	void shouldSendMeldingToQdokopp001QueueWhenPostadresseIsNull() throws IOException {
+	void shouldSendMeldingToqopp001QueueWhenPostadresseIsNull() throws IOException {
 		stubRestSts();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubFeilPostHentMottakerOgAdresse(NOT_FOUND.value());
@@ -326,14 +326,14 @@ class Qdist009IT {
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
-		await().atMost(100, SECONDS).untilAsserted(() -> {
-			String qdokopp001Receive = receive(qdokopp001);
-			assertNotNull(qdokopp001Receive);
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String qopp001Receive = receive(qopp001);
+			assertNotNull(qopp001Receive);
 		});
 
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1, postRequestedFor(urlEqualTo("/hentMottakerOgAdresse")));
-		verify(1, putRequestedFor(urlEqualTo(FEIL_REGISTRER_FORSENDELSE_URL)));
+		verify(1, putRequestedFor(urlEqualTo(FEILREGISTRER_FORSENDELSE_URL)));
 	}
 
 
@@ -682,7 +682,7 @@ class Qdist009IT {
 	}
 
 	private void stubPutFeilregistrerForsendelse() {
-		stubFor(put(urlEqualTo(FEIL_REGISTRER_FORSENDELSE_URL))
+		stubFor(put(urlEqualTo(FEILREGISTRER_FORSENDELSE_URL))
 				.willReturn(aResponse()
 						.withStatus(OK.value())));
 	}
