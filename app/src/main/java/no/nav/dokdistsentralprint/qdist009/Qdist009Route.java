@@ -84,7 +84,7 @@ public class Qdist009Route extends RouteBuilder {
                 .bean(postadresseService)
                 .choice()
                     .when(simple("${body.postadresse}").isNull())
-                        .log(INFO, log, "forsendelse med forsendelseID=" + "${body.forsendelseId}" + " mangler postadresse og sender manglende postadresse oppgave til qdok001")
+                        .log(INFO, log, "forsendelse med forsendelseId=" + "${body.forsendelseId}" + " mangler postadresse og sender manglende postadresse oppgave til qopp001")
                         .bean(qdist009Service, "opprettOppgave")
                         .marshal(new JaxbDataFormat(JAXBContext.newInstance(OpprettOppgave.class)))
                         .convertBodyTo(String.class, StandardCharsets.UTF_8.toString())
