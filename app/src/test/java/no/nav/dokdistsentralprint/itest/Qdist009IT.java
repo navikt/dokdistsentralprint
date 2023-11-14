@@ -49,6 +49,7 @@ import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
 import static no.nav.dokdistsentralprint.testUtils.classpathToString;
 import static no.nav.dokdistsentralprint.testUtils.fileToString;
 import static no.nav.dokdistsentralprint.testUtils.unzipToDirectory;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -329,6 +330,7 @@ class Qdist009IT {
 		await().atMost(100, SECONDS).untilAsserted(() -> {
 			String qopp001Receive = receive(qopp001);
 			assertNotNull(qopp001Receive);
+			assertThat(qopp001Receive).isEqualToIgnoringWhitespace(classpathToString("__files/qopp001/qopp001-happy-melding.xml"));
 		});
 
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));

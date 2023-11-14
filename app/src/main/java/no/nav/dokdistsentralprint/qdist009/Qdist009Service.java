@@ -12,7 +12,6 @@ import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse.Dokument;
 import no.nav.dokdistsentralprint.storage.BucketStorage;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
-import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
@@ -32,9 +31,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Slf4j
 @Service
 public class Qdist009Service {
-
-	private static final String BEHANDLE_MANGLENDE_ADRESSE = "BEHANDLE_MANGLENDE_ADRESSE";
-
 	private final DokumentkatalogAdmin dokumentkatalogAdmin;
 	private final PostadresseValidatorOgForsendelseFeilregistrerService postadresseService;
 	private final BucketStorage bucketStorage;
@@ -77,17 +73,6 @@ public class Qdist009Service {
 		List<BestillingEntity> bestillingEntities = createBestillingEntities(bestillingsId, bestillingXmlString, dokdistDokumentList);
 
 		return zipPrintbestillingToBytes(bestillingEntities);
-	}
-
-	/**
-	 * Forsendelser som mangler postadresse feilregistert og sendes meldingen til qopp001 kø for å opprette oppgave for videre saksbehandling.
-	 **/
-	public OpprettOppgave opprettOppgave(InternForsendelse internForsendelse) {
-		OpprettOppgave opprettOppgave = new OpprettOppgave();
-		opprettOppgave.setOppgaveType(BEHANDLE_MANGLENDE_ADRESSE);
-		opprettOppgave.setArkivSystem(internForsendelse.getArkivInformasjon().getArkivSystem().name());
-		opprettOppgave.setArkivKode(internForsendelse.getArkivInformasjon().getArkivId());
-		return opprettOppgave;
 	}
 
 	/**

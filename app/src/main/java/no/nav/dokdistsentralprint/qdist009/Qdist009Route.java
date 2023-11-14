@@ -4,6 +4,8 @@ import jakarta.jms.Queue;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse.ArkivInformasjon;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.builder.RouteBuilder;
@@ -19,6 +21,8 @@ import static org.apache.camel.LoggingLevel.WARN;
 
 @Component
 public class Qdist009Route extends RouteBuilder {
+
+    private static final String BEHANDLE_MANGLENDE_ADRESSE = "BEHANDLE_MANGLENDE_ADRESSE";
 
     public static final String SERVICE_ID = "qdist009";
     static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";
@@ -84,8 +88,19 @@ public class Qdist009Route extends RouteBuilder {
                 .bean(postadresseService)
                 .choice()
                     .when(simple("${body.postadresse}").isNull())
-                        .log(INFO, log, "forsendelse med forsendelseId=" + "${body.forsendelseId}" + " mangler postadresse og sender manglende postadresse oppgave til qopp001")
-                        .bean(qdist009Service, "opprettOppgave")
+                        .log(INFO, log, "forsendelse med " + getIdsForLogging() + " mangler postadresse og sender manglende postadresse oppgave til qopp001")
+                        .process(exchange -> {
+                            /**
+                             * Forsendelser som mangler postadresse feilregistert og sendes meldingen til qopp001 kø
+                             * for å opprette oppgave for videre saksbehandling.
+                             **/
+                            ArkivInformasjon arkivInformasjon = exchange.getIn().getBody(InternForsendelse.class).getArkivInformasjon();
+                            OpprettOppgave opprettOppgave = new OpprettOppgave();
+                            opprettOppgave.setOppgaveType(BEHANDLE_MANGLENDE_ADRESSE);
+                            opprettOppgave.setArkivSystem(arkivInformasjon.getArkivSystem().name());
+                            opprettOppgave.setArkivKode(arkivInformasjon.getArkivId());
+                            exchange.getIn().setBody(opprettOppgave);
+                        })
                         .marshal(new JaxbDataFormat(JAXBContext.newInstance(OpprettOppgave.class)))
                         .convertBodyTo(String.class, StandardCharsets.UTF_8.toString())
                         .to("jms:" + qopp001.getQueueName())
