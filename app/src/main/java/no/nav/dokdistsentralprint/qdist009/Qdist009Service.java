@@ -1,14 +1,14 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
-import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse.Dokument;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.exception.functional.KunneIkkeDeserialisereBucketJsonPayloadFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.NoDocumentFromBucketTechnicalException;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse.Dokument;
 import no.nav.dokdistsentralprint.storage.BucketStorage;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
@@ -54,22 +54,22 @@ public class Qdist009Service {
 	}
 
 	@Handler
-	public byte[] distribuerForsendelseTilSentralPrintService(HentForsendelseResponse hentForsendelseResponse, Exchange exchange) {
+	public byte[] distribuerForsendelseTilSentralPrintService(InternForsendelse internForsendelse, Exchange exchange) {
 
-		final String bestillingsId = hentForsendelseResponse.getBestillingsId();
+		final String bestillingsId = internForsendelse.getBestillingsId();
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingsId);
 
-		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", hentForsendelseResponse.getForsendelseId(), bestillingsId);
-		validateForsendelsestatus(hentForsendelseResponse.getForsendelseStatus());
+		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", internForsendelse.getForsendelseId(), bestillingsId);
+		validateForsendelsestatus(internForsendelse.getForsendelseStatus());
 
-		String postdestinasjon = postadresseService.hentPostdestinasjon(hentForsendelseResponse.getPostadresse());
+		String postdestinasjon = postadresseService.hentPostdestinasjon(internForsendelse.getPostadresse());
 
-		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(hentForsendelseResponse);
+		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(internForsendelse);
 		DokumenttypeInfo dokumenttypeInfo = dokumentkatalogAdmin.hentDokumenttypeInfo(dokumenttypeIdHoveddokument);
 
-		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(hentForsendelseResponse);
+		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(internForsendelse);
 
-		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponse, dokumenttypeInfo, postdestinasjon);
+		Bestilling bestilling = bestillingMapper.createBestilling(internForsendelse, dokumenttypeInfo, postdestinasjon);
 		String kanalbehandling = bestilling.getBestillingsInfo().getKanal().getBehandling();
 		log.info("qdist009 lager bestilling til print med kanalbehandling={}, antall_dokumenter={} for bestillingsId={}, dokumenttypeId={}",
 				kanalbehandling, dokdistDokumentList.size(), bestillingsId, dokumenttypeIdHoveddokument);
@@ -82,11 +82,11 @@ public class Qdist009Service {
 	/**
 	 * Forsendelser som mangler postadresse feilregistert og sendes meldingen til qopp001 kø for å opprette oppgave for videre saksbehandling.
 	 **/
-	public OpprettOppgave opprettOppgave(HentForsendelseResponse hentForsendelseResponse) {
+	public OpprettOppgave opprettOppgave(InternForsendelse internForsendelse) {
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
 		opprettOppgave.setOppgaveType(BEHANDLE_MANGLENDE_ADRESSE);
-		opprettOppgave.setArkivSystem(hentForsendelseResponse.getArkivInformasjon().getArkivSystem().name());
-		opprettOppgave.setArkivKode(hentForsendelseResponse.getArkivInformasjon().getArkivId());
+		opprettOppgave.setArkivSystem(internForsendelse.getArkivInformasjon().getArkivSystem().name());
+		opprettOppgave.setArkivKode(internForsendelse.getArkivInformasjon().getArkivId());
 		return opprettOppgave;
 	}
 
@@ -94,13 +94,13 @@ public class Qdist009Service {
 	 * Her er rekkefølgen viktig. HentForsendelseResponseTo.dokumenter består av en ordnet liste av dokumenter i rekkefølgen HOVEDDOK, VEDLEGG1, VEDLEGG2, ...
 	 * Denne rekkefølgen må bevares slik at bestillingen blir korrekt. Siden vi bruker List.java blir denne rekkefølgen ivaretatt
 	 **/
-	private List<DokdistDokument> getDocumentsFromBucket(HentForsendelseResponse hentForsendelseResponse) {
-		return hentForsendelseResponse.getDokumenter().stream()
+	private List<DokdistDokument> getDocumentsFromBucket(InternForsendelse internForsendelse) {
+		return internForsendelse.getDokumenter().stream()
 				.map(dokument -> {
-					if (isBlank(hentForsendelseResponse.getOriginalBestillingsId())) {
-						return getDokdistDokument(dokument, hentForsendelseResponse.getBestillingsId());
+					if (isBlank(internForsendelse.getOriginalBestillingsId())) {
+						return getDokdistDokument(dokument, internForsendelse.getBestillingsId());
 					} else {
-						return getDokdistDokument(dokument, hentForsendelseResponse.getOriginalBestillingsId());
+						return getDokdistDokument(dokument, internForsendelse.getOriginalBestillingsId());
 					}
 				})
 				.collect(Collectors.toList());

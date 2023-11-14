@@ -9,11 +9,15 @@ import no.nav.dokdistsentralprint.consumer.regoppslag.Regoppslag;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.qdist009.domain.DistribuerForsendelseTilSentralPrintTo;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse.Postadresse;
+import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_BESTILLINGS_ID;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
@@ -26,60 +30,66 @@ public class PostadresseValidatorOgForsendelseFeilregistrerService {
 	private static final String FEIL_MELDING_DETALJER = "Manglende adresse";
 	private final Regoppslag regoppslag;
 	private final AdministrerForsendelseConsumer administrerForsendelse;
+	private final ForsendelseMapper forsendelseMapper;
 
-	public PostadresseValidatorOgForsendelseFeilregistrerService(Regoppslag regoppslag,
+	public PostadresseValidatorOgForsendelseFeilregistrerService(Regoppslag regoppslag, ForsendelseMapper forsendelseMapper,
 																 AdministrerForsendelseConsumer administrerForsendelse) {
 		this.regoppslag = regoppslag;
 		this.administrerForsendelse = administrerForsendelse;
+		this.forsendelseMapper = forsendelseMapper;
 	}
 
 	@Handler
-	public HentForsendelseResponse hentForsendelse(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo) {
+	public InternForsendelse hentForsendelse(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo, Exchange exchange) {
 		final String forsendelseId = distribuerForsendelseTilSentralPrintTo.getForsendelseId();
-		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}", forsendelseId);
-
 		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(forsendelseId);
-		HentForsendelseResponse.Postadresse adresse = getAdresse(hentForsendelseResponse);
-		if (adresse == null) {
-			administrerForsendelse.feilregistrerForsendelse(mapFeilregistrerForsendelse(hentForsendelseResponse));
-			return hentForsendelseResponse;
+
+		final String bestillingsId = hentForsendelseResponse.getBestillingsId();
+		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingsId);
+
+		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", forsendelseId, bestillingsId);
+
+
+		if (hentForsendelseResponse.getPostadresse() != null) {
+			return forsendelseMapper.mapForsendelse(hentForsendelseResponse);
 		}
 
-		if (hentForsendelseResponse.getPostadresse() == null) {
-			HentForsendelseResponse.Postadresse postadresse = HentForsendelseResponse.Postadresse.builder()
-					.adresselinje1(adresse.getAdresselinje1())
-					.adresselinje2(adresse.getAdresselinje2())
-					.adresselinje3(adresse.getAdresselinje3())
-					.postnummer(adresse.getPostnummer())
-					.poststed(adresse.getPoststed())
-					.landkode(adresse.getLandkode())
-					.build();
-			hentForsendelseResponse.setPostadresse(postadresse);
-		}
-
-		return hentForsendelseResponse;
+		return mapPostadresseAndForsendelse(hentForsendelseResponse);
 	}
 
-	public String hentPostdestinasjon(HentForsendelseResponse.Postadresse adresse) {
+	public String hentPostdestinasjon(Postadresse adresse) {
 		return administrerForsendelse.hentPostdestinasjon(adresse.getLandkode());
 	}
 
-	private HentForsendelseResponse.Postadresse getAdresse(HentForsendelseResponse hentForsendelseResponse) {
-		final HentForsendelseResponse.Postadresse adresseDokdist = hentForsendelseResponse.getPostadresse();
-		if (adresseDokdist == null) {
-			HentForsendelseResponse.Postadresse pdlPostadresse = getAdresseFromRegoppslag(hentForsendelseResponse);
-			oppdaterPostadresse(hentForsendelseResponse.getForsendelseId(), pdlPostadresse);
-			return pdlPostadresse;
-		} else {
-			return HentForsendelseResponse.Postadresse.builder()
-					.adresselinje1(adresseDokdist.getAdresselinje1())
-					.adresselinje2(adresseDokdist.getAdresselinje2())
-					.adresselinje3(adresseDokdist.getAdresselinje3())
-					.landkode(mapLandkode(adresseDokdist.getLandkode()))
-					.postnummer(adresseDokdist.getPostnummer())
-					.poststed(adresseDokdist.getPoststed())
-					.build();
+	private InternForsendelse mapPostadresseAndForsendelse(HentForsendelseResponse hentForsendelseResponse) {
+
+		HentForsendelseResponse.Postadresse regoppslagPostadresse = getAdresseFromRegoppslag(hentForsendelseResponse);
+
+		if (regoppslagPostadresse == null) {
+			administrerForsendelse.feilregistrerForsendelse(mapFeilregistrerForsendelse(hentForsendelseResponse));
+			return forsendelseMapper.mapForsendelse(hentForsendelseResponse);
 		}
+
+		oppdaterPostadresse(hentForsendelseResponse.getForsendelseId(), regoppslagPostadresse);
+
+
+		InternForsendelse forsendelseWithAdressFraRegoppslag = forsendelseMapper.mapForsendelse(hentForsendelseResponse);
+
+		/**
+		 *  mapper postadresse som har fått fra regoppslag.
+		 */
+		Postadresse nyPostadresse = Postadresse.builder()
+				.adresselinje1(regoppslagPostadresse.getAdresselinje1())
+				.adresselinje2(regoppslagPostadresse.getAdresselinje2())
+				.adresselinje3(regoppslagPostadresse.getAdresselinje3())
+				.landkode(mapLandkode(regoppslagPostadresse.getLandkode()))
+				.postnummer(regoppslagPostadresse.getPostnummer())
+				.poststed(regoppslagPostadresse.getPoststed())
+				.build();
+
+		forsendelseWithAdressFraRegoppslag.setPostadresse(nyPostadresse);
+
+		return forsendelseWithAdressFraRegoppslag;
 	}
 
 	private void oppdaterPostadresse(Long forsendelseId, HentForsendelseResponse.Postadresse postadresse) {

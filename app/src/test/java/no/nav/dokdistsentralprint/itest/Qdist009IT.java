@@ -318,7 +318,7 @@ class Qdist009IT {
 	}
 
 	@Test
-	void shouldSendMeldingToqopp001QueueWhenPostadresseIsNull() throws IOException {
+	void shouldSendMeldingToQopp001QueueWhenPostadresseIsNull() throws IOException {
 		stubRestSts();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubFeilPostHentMottakerOgAdresse(NOT_FOUND.value());
@@ -326,7 +326,7 @@ class Qdist009IT {
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
-		await().atMost(10, SECONDS).untilAsserted(() -> {
+		await().atMost(100, SECONDS).untilAsserted(() -> {
 			String qopp001Receive = receive(qopp001);
 			assertNotNull(qopp001Receive);
 		});

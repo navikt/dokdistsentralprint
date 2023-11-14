@@ -1,11 +1,11 @@
 package no.nav.dokdistsentralprint.qdist009.map;
 
-import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostdestinasjonResponse;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.Dokument;
 import no.nav.dokdistsentralprint.qdist009.BestillingMapper;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -333,32 +333,32 @@ class BestillingMapperTest {
 				createHentPostdestinasjon());
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-					 ADRESSELINJE_1 + "\r" +
-					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+						ADRESSELINJE_1 + "\r" +
+						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 	}
 
-	private HentForsendelseResponse createHentForsendelseResponseTo(HentForsendelseResponse.Postadresse postadresse, String mottakerType) {
-		return HentForsendelseResponse.builder()
+	private InternForsendelse createHentForsendelseResponseTo(InternForsendelse.Postadresse postadresse, String mottakerType) {
+		return InternForsendelse.builder()
 				.bestillingsId(BESTILLINGS_ID)
 				.modus(MODUS)
 				.postadresse(postadresse)
-				.mottaker(HentForsendelseResponse.Mottaker.builder()
+				.mottaker(InternForsendelse.Mottaker.builder()
 						.mottakerId(MOTTAKER_ID)
 						.mottakerNavn(MOTTAKER_NAVN)
 						.mottakerType(mottakerType)
 						.build())
-				.dokumenter(Arrays.asList(HentForsendelseResponse.Dokument.builder()
+				.dokumenter(Arrays.asList(InternForsendelse.Dokument.builder()
 								.dokumentObjektReferanse(OBJEKT_REFERANSE_HOVEDDOK)
 								.dokumenttypeId(DOKUMENTTYPE_ID_HOVEDDOK)
 								.tilknyttetSom(TILKNYTTET_SOM_HOVEDDOK)
 								.build(),
-						HentForsendelseResponse.Dokument.builder()
+						InternForsendelse.Dokument.builder()
 								.dokumentObjektReferanse(OBJEKT_REFERANSE_VEDLEGG1)
 								.dokumenttypeId(DOKUMENTTYPE_ID_VEDLEGG1)
 								.tilknyttetSom(TILKNYTTET_SOM_VEDLEGG)
 								.build(),
-						HentForsendelseResponse.Dokument.builder()
+						InternForsendelse.Dokument.builder()
 								.dokumentObjektReferanse(OBJEKT_REFERANSE_VEDLEGG2)
 								.dokumenttypeId(DOKUMENTTYPE_ID_VEDLEGG2)
 								.tilknyttetSom(TILKNYTTET_SOM_VEDLEGG)
@@ -403,8 +403,8 @@ class BestillingMapperTest {
 				.build();
 	}
 
-	private HentForsendelseResponse.Postadresse createAdresse(String landkode) {
-		return HentForsendelseResponse.Postadresse.builder()
+	private InternForsendelse.Postadresse createAdresse(String landkode) {
+		return InternForsendelse.Postadresse.builder()
 				.adresselinje1(ADRESSELINJE_1)
 				.adresselinje2(ADRESSELINJE_2)
 				.adresselinje3(ADRESSELINJE_3)
@@ -414,8 +414,8 @@ class BestillingMapperTest {
 				.build();
 	}
 
-	private HentForsendelseResponse.Postadresse createAdresseWithSingleAdress() {
-		return HentForsendelseResponse.Postadresse.builder()
+	private InternForsendelse.Postadresse createAdresseWithSingleAdress() {
+		return InternForsendelse.Postadresse.builder()
 				.adresselinje1(ADRESSELINJE_1)
 				.postnummer(POSTNUMMER)
 				.poststed(POSTSTED)
