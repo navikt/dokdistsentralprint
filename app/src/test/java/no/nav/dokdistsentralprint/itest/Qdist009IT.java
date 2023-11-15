@@ -43,12 +43,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
 import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
-import static no.nav.dokdistsentralprint.testUtils.classpathToString;
-import static no.nav.dokdistsentralprint.testUtils.fileToString;
-import static no.nav.dokdistsentralprint.testUtils.unzipToDirectory;
+import static no.nav.dokdistsentralprint.TestUtils.classpathToString;
+import static no.nav.dokdistsentralprint.TestUtils.fileToString;
+import static no.nav.dokdistsentralprint.TestUtils.unzipToDirectory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -140,6 +141,7 @@ class Qdist009IT {
 		WireMock.removeAllMappings();
 
 		cacheManager.getCache(TKAT020_CACHE).clear();
+		cacheManager.getCache(POSTDESTINASJON_CACHE).clear();
 		reset(bucketStorage);
 		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
 		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build()));
