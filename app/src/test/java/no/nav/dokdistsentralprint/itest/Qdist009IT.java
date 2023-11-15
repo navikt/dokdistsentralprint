@@ -329,7 +329,7 @@ class Qdist009IT {
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
-		await().atMost(100, SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String qopp001Receive = receive(qopp001);
 			assertNotNull(qopp001Receive);
 			assertThat(qopp001Receive).isEqualToIgnoringWhitespace(classpathToString("__files/qopp001/qopp001-happy-melding.xml"));
