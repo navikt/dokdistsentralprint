@@ -2,6 +2,6 @@
 
 JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.keyStore=${DOKDISTSENTRALPRINTCERT_KEYSTORE}"
 JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.keyStoreType=jks"
-JAVA_OPTS="${JAVA_OPTS} -Xmx2048m -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=nais"
+JAVA_OPTS="${JAVA_OPTS} -Xmx3192m -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=nais"
 
 export JAVA_OPTS
