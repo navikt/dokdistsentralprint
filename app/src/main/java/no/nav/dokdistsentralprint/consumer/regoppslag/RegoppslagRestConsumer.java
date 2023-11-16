@@ -24,16 +24,19 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 import java.util.UUID;
 
+import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_CALLID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Slf4j
 @Component
 public class RegoppslagRestConsumer implements Regoppslag {
 
+	private final String MANGLENDE_ADRESSE_FEIL_MELDING = "Fant ikke adresse for personen i PDL";
 	private final RestTemplate restTemplate;
 	private final String hentMottakerOgAdresseUrl;
 	private final StsRestConsumer stsRestConsumer;
@@ -58,13 +61,19 @@ public class RegoppslagRestConsumer implements Regoppslag {
 					.getAdresse();
 		} catch (HttpClientErrorException e) {
 			if (e.getStatusCode().equals(UNAUTHORIZED)) {
-				throw new RegoppslagHentAdresseSecurityException(String.format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e
+				throw new RegoppslagHentAdresseSecurityException(format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e
 						.getMessage()));
 			}
-			throw new RegoppslagHentAdresseFunctionalException(String.format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, HttpRespons=%s, Feilmelding=%s", e
+
+			if (e.getStatusCode().equals(NOT_FOUND) && e.getMessage().contains(MANGLENDE_ADRESSE_FEIL_MELDING)) {
+				log.warn(format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, HttpRespons=%s, Feilmelding=%s", e
+						.getStatusCode(), e.getResponseBodyAsString(), e.getMessage()));
+				return null;
+			}
+			throw new RegoppslagHentAdresseFunctionalException(format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, HttpRespons=%s, Feilmelding=%s", e
 					.getStatusCode(), e.getResponseBodyAsString(), e.getMessage()));
 		} catch (HttpServerErrorException e) {
-			throw new RegoppslagHentAdresseTechnicalException(String.format("Kall mot TREG002 feilet teknisk. HttpStatusKode=%s, Feilmelding=%s", e
+			throw new RegoppslagHentAdresseTechnicalException(format("Kall mot TREG002 feilet teknisk. HttpStatusKode=%s, Feilmelding=%s", e
 					.getStatusCode(), e.getMessage()));
 		}
 	}

@@ -1,7 +1,6 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.BestillingsInfo;
@@ -10,7 +9,7 @@ import no.nav.dokdistsentralprint.printoppdrag.DokumentInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Kanal;
 import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
 import no.nav.dokdistsentralprint.printoppdrag.Ressurs;
-import no.nav.dokdistsentralprint.qdist009.domain.Adresse;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
 import no.nav.dokdistsentralprint.qdist009.util.Landkoder;
 import org.springframework.stereotype.Component;
 
@@ -34,17 +33,17 @@ public class BestillingMapper {
 	private static final String KONVOLUTT_MED_VINDU = "X";
 	private static final String NAV_STANDARD = "NAV_STANDARD";
 
-	public Bestilling createBestilling(HentForsendelseResponse hentForsendelseResponse, DokumenttypeInfo dokumenttypeInfo, Adresse adresse, String postdestinasjon) {
+	public Bestilling createBestilling(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo, String postdestinasjon) {
 		Bestilling bestilling = new Bestilling();
 		BestillingsInfo bestillingsInfo = new BestillingsInfo();
-		bestillingsInfo.setModus(hentForsendelseResponse.getModus());
+		bestillingsInfo.setModus(internForsendelse.getModus());
 		bestillingsInfo.setKundeId(KUNDE_ID_NAV_IKT);
-		bestillingsInfo.setBestillingsId(hentForsendelseResponse.getBestillingsId());
+		bestillingsInfo.setBestillingsId(internForsendelse.getBestillingsId());
 		bestillingsInfo.setKundeOpprettet(LocalDate.now().toString());
 		bestillingsInfo.setDokumentInfo(mapDokumentInfo(postdestinasjon));
 		bestillingsInfo.setKanal(mapKanal(dokumenttypeInfo));
 		bestilling.setBestillingsInfo(bestillingsInfo);
-		bestilling.setMailpiece(mapMailpiece(hentForsendelseResponse, adresse, dokumenttypeInfo));
+		bestilling.setMailpiece(mapMailpiece(internForsendelse, dokumenttypeInfo));
 		return bestilling;
 	}
 
@@ -62,47 +61,52 @@ public class BestillingMapper {
 		return dokumentInfo;
 	}
 
-	private Mailpiece mapMailpiece(HentForsendelseResponse hentForsendelseResponse, Adresse adresse, DokumenttypeInfo dokumenttypeInfo) {
+	private Mailpiece mapMailpiece(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo) {
+		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
+
 		Mailpiece mailpiece = new Mailpiece();
-		mailpiece.setMailpieceId(hentForsendelseResponse.getBestillingsId());
-		mailpiece.setRessurs(mapRessurs(hentForsendelseResponse, adresse));
+		mailpiece.setMailpieceId(internForsendelse.getBestillingsId());
+		mailpiece.setRessurs(mapRessurs(internForsendelse));
 		mailpiece.setLandkode(getLandkode(adresse));
 		mailpiece.setPostnummer(getPostnummer(adresse));
-		mailpiece.getDokument().addAll(mapDokumenter(hentForsendelseResponse, dokumenttypeInfo, adresse));
+		mailpiece.getDokument().addAll(mapDokumenter(internForsendelse, dokumenttypeInfo));
 		return mailpiece;
 	}
 
-	private Ressurs mapRessurs(HentForsendelseResponse hentForsendelseResponse, Adresse adresse) {
+	private Ressurs mapRessurs(InternForsendelse internForsendelse) {
 		Ressurs ressurs = new Ressurs();
-		ressurs.setAdresse(addCDataToString(getAdresse(adresse, hentForsendelseResponse.getMottaker().getMottakerNavn())));
+		ressurs.setAdresse(addCDataToString(getAdresse(internForsendelse.getPostadresse(), internForsendelse.getMottaker().getMottakerNavn())));
 		return ressurs;
 	}
 
-	private List<Dokument> mapDokumenter(HentForsendelseResponse hentForsendelseResponse, DokumenttypeInfo dokumenttypeInfo, Adresse adresse) {
-		return hentForsendelseResponse.getDokumenter().stream()
+	private List<Dokument> mapDokumenter(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo) {
+		return internForsendelse.getDokumenter().stream()
 				.map(dokumentTo ->
-						isMottakerSkattyter(hentForsendelseResponse.getMottaker().getMottakerType()) ?
-								mapDokumentSkattyter(hentForsendelseResponse, dokumenttypeInfo, adresse, dokumentTo) :
-								mapDokumentUtlending(hentForsendelseResponse, dokumenttypeInfo, adresse, dokumentTo))
+						isMottakerSkattyter(internForsendelse.getMottaker().getMottakerType()) ?
+								mapDokumentSkattyter(internForsendelse, dokumenttypeInfo, dokumentTo) :
+								mapDokumentUtlending(internForsendelse, dokumenttypeInfo, dokumentTo))
 				.collect(Collectors.toList());
 	}
 
-	private Dokument mapDokumentSkattyter(HentForsendelseResponse hentForsendelseResponse, DokumenttypeInfo dokumenttypeInfo, Adresse adresse, HentForsendelseResponse.Dokument dokumentTo) {
+	private Dokument mapDokumentSkattyter(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo, InternForsendelse.Dokument dokumentTo) {
+		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
+
 		Dokument dokument = new Dokument();
 		dokument.setDokumentType(mapDokumentType(dokumenttypeInfo.getSentralPrintDokumentType()));
 		dokument.setDokumentId(dokumentTo.getDokumentObjektReferanse());
-		dokument.setSkattyternummer(hentForsendelseResponse.getMottaker().getMottakerId());
-		dokument.setNavn(addCDataToString(hentForsendelseResponse.getMottaker().getMottakerNavn()));
+		dokument.setSkattyternummer(internForsendelse.getMottaker().getMottakerId());
+		dokument.setNavn(addCDataToString(internForsendelse.getMottaker().getMottakerNavn()));
 		dokument.setLandkode(getLandkode(adresse));
 		dokument.setPostnummer(getPostnummer(adresse));
 		return dokument;
 	}
 
-	private Dokument mapDokumentUtlending(HentForsendelseResponse hentForsendelseResponse, DokumenttypeInfo dokumenttypeInfo, Adresse adresse, HentForsendelseResponse.Dokument dokumentTo) {
+	private Dokument mapDokumentUtlending(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo, InternForsendelse.Dokument dokumentTo) {
+		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
 		Dokument dokument = new Dokument();
 		dokument.setDokumentType(mapDokumentType(dokumenttypeInfo.getSentralPrintDokumentType()));
 		dokument.setDokumentId(dokumentTo.getDokumentObjektReferanse());
-		dokument.setNavn(addCDataToString(hentForsendelseResponse.getMottaker().getMottakerNavn()));
+		dokument.setNavn(addCDataToString(internForsendelse.getMottaker().getMottakerNavn()));
 		dokument.setLandkode(getLandkode(adresse));
 		dokument.setPostnummer(getPostnummer(adresse));
 		return dokument;
@@ -112,7 +116,7 @@ public class BestillingMapper {
 		return MOTTAKERTYPE_PERSON.equals(mottakerType) || MOTTAKERTYPE_ORGANISASJON.equals(mottakerType);
 	}
 
-	private String getLandkode(Adresse adresse) {
+	private String getLandkode(InternForsendelse.Postadresse adresse) {
 		if (LANDKODE_NO.equals(adresse.getLandkode())) {
 			return null;
 		} else {
@@ -120,7 +124,7 @@ public class BestillingMapper {
 		}
 	}
 
-	private String getPostnummer(Adresse adresse) {
+	private String getPostnummer(InternForsendelse.Postadresse adresse) {
 		if (LANDKODE_NO.equals(adresse.getLandkode())) {
 			return adresse.getPostnummer();
 		} else {
@@ -128,7 +132,7 @@ public class BestillingMapper {
 		}
 	}
 
-	private String getAdresse(Adresse adresse, String mottakerNavn) {
+	private String getAdresse(InternForsendelse.Postadresse adresse, String mottakerNavn) {
 		return formatAdresseEntity(mottakerNavn) +
 			   formatAdresseEntity(adresse.getAdresselinje1()) +
 			   formatAdresseEntity(adresse.getAdresselinje2()) +

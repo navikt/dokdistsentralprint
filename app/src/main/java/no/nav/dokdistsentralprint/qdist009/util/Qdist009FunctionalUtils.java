@@ -1,8 +1,8 @@
 package no.nav.dokdistsentralprint.qdist009.util;
 
-import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.exception.functional.UgyldigForsendelsestatusException;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 
 import java.util.ArrayList;
@@ -25,10 +25,10 @@ public final class Qdist009FunctionalUtils {
 		}
 	}
 
-	public static String getDokumenttypeIdHoveddokument(HentForsendelseResponse hentForsendelseResponse) {
-		return hentForsendelseResponse.getDokumenter().stream()
+	public static String getDokumenttypeIdHoveddokument(InternForsendelse internForsendelse) {
+		return internForsendelse.getDokumenter().stream()
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
-				.map(HentForsendelseResponse.Dokument::getDokumenttypeId).toList()
+				.map(InternForsendelse.Dokument::getDokumenttypeId).toList()
 				.get(0);
 	}
 

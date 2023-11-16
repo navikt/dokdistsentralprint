@@ -5,6 +5,7 @@ import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
 import no.nav.dokdistsentralprint.constants.NavHeadersFilter;
 import no.nav.dokdistsentralprint.exception.functional.DokdistsentralprintFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnicalException;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -20,6 +21,7 @@ import java.util.function.Consumer;
 
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKDISTADMIN;
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.getOAuth2AuthorizeRequestForAzure;
+import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -79,6 +81,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	}
 
 	@Override
+	@Cacheable(POSTDESTINASJON_CACHE)
 	@Retryable(retryFor = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public String hentPostdestinasjon(String landkode) {
 
@@ -116,6 +119,22 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.block();
 
 		log.info("oppdaterPostadresse har oppdatert postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
+	}
+
+	@Retryable(retryFor = DokdistsentralprintTechnicalException.class,  backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	public void feilregistrerForsendelse(FeilregistrerForsendelseRequest feilregistrerForsendelse) {
+		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
+
+		webClient.put()
+				.uri("/feilregistrerforsendelse")
+				.attributes(getOAuth2AuthorizedClient())
+				.bodyValue(feilregistrerForsendelse)
+				.retrieve()
+				.toBodilessEntity()
+				.doOnError(this::handleError)
+				.block();
+
+		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 	}
 
 	private void handleError(Throwable error) {

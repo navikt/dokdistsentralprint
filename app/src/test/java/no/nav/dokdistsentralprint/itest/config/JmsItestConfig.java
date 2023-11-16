@@ -1,6 +1,5 @@
 package no.nav.dokdistsentralprint.itest.config;
 
-
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Queue;
 import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
@@ -26,6 +25,11 @@ public class JmsItestConfig {
 	@Bean
 	public Queue qdist009FunksjonellFeil(@Value("${dokdistsentralprint_qdist009_funk_feil.queuename}") String qdist009FunksjonellFeil) {
 		return new ActiveMQQueue(qdist009FunksjonellFeil);
+	}
+
+	@Bean
+	public Queue qopp001(@Value("${dokopp_qopp001_opprett_oppgave.queuename}") String qopp001QueueName) {
+		return new ActiveMQQueue(qopp001QueueName);
 	}
 
 	@Bean

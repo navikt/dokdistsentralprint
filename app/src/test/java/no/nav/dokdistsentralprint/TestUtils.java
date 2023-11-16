@@ -16,8 +16,9 @@ import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public final class testUtils {
-	private testUtils() {
+public final class TestUtils {
+
+	private TestUtils() {
 	}
 
 	public static String classpathToString(String classpathResource) throws IOException {

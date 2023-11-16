@@ -5,10 +5,12 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import no.nav.dokdistsentralprint.exception.functional.AbstractDokdistsentralprintFunctionalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
-import org.apache.camel.ExchangePattern;
+import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.springframework.stereotype.Component;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.apache.camel.ExchangePattern.InOnly;
 import static org.apache.camel.LoggingLevel.ERROR;
@@ -17,6 +19,8 @@ import static org.apache.camel.LoggingLevel.WARN;
 
 @Component
 public class Qdist009Route extends RouteBuilder {
+
+    private static final String BEHANDLE_MANGLENDE_ADRESSE = "BEHANDLE_MANGLENDE_ADRESSE";
 
     public static final String SERVICE_ID = "qdist009";
     static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";
@@ -33,22 +37,30 @@ public class Qdist009Route extends RouteBuilder {
             "&preferredAuthentications=publickey";
 
     private final Qdist009Service qdist009Service;
+    private final PostadresseValidatorOgForsendelseFeilregistrerService postadresseService;
     private final DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper;
+    private final OpprettOppgaverMapper opprettOppgaverMapper;
 
     private final DokdistStatusUpdater dokdistStatusUpdater;
     private final Queue qdist009;
+    private final Queue qopp001;
     private final Queue qdist009FunksjonellFeil;
 
     public Qdist009Route(Qdist009Service qdist009Service,
                          DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper,
                          DokdistStatusUpdater dokdistStatusUpdater,
                          Queue qdist009,
-                         Queue qdist009FunksjonellFeil) {
+                         Queue qopp001,
+                         Queue qdist009FunksjonellFeil,
+                         PostadresseValidatorOgForsendelseFeilregistrerService postadresseService) {
         this.qdist009Service = qdist009Service;
         this.distribuerForsendelseTilSentralPrintMapper = distribuerForsendelseTilSentralPrintMapper;
         this.dokdistStatusUpdater = dokdistStatusUpdater;
         this.qdist009 = qdist009;
+        this.qopp001 = qopp001;
         this.qdist009FunksjonellFeil = qdist009FunksjonellFeil;
+        this.postadresseService = postadresseService;
+        this.opprettOppgaverMapper = new OpprettOppgaverMapper();
     }
 
     @Override
@@ -73,11 +85,22 @@ public class Qdist009Route extends RouteBuilder {
                 .to("validator:no/nav/meldinger/virksomhet/dokdistfordeling/xsd/qdist008/out/distribuertilkanal.xsd")
                 .unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
                 .bean(distribuerForsendelseTilSentralPrintMapper)
-                .bean(qdist009Service)
-                .to(SFTP_SERVER)
-                .log(INFO, log, "qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
-                .bean(dokdistStatusUpdater)
-                .log(INFO, log, "qdist009 har oppdatert forsendelsestatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging());
+                .bean(postadresseService)
+                .choice()
+                    .when(simple("${body.postadresse}").isNull())
+                        .log(INFO, log, "forsendelse med " + getIdsForLogging() + " mangler postadresse og sender manglende postadresse oppgave til qopp001")
+                        .bean(opprettOppgaverMapper)
+                        .marshal(new JaxbDataFormat(JAXBContext.newInstance(OpprettOppgave.class)))
+                        .convertBodyTo(String.class, StandardCharsets.UTF_8.toString())
+                        .to("jms:" + qopp001.getQueueName())
+                .otherwise()
+                    .bean(qdist009Service)
+                    .to(SFTP_SERVER)
+                    .log(INFO, log, "qdist009 har lagt forsendelse med " + getIdsForLogging() + " på filshare til SITS for distribusjon via PRINT")
+                    .bean(dokdistStatusUpdater)
+                    .log(INFO, log, "qdist009 har oppdatert forsendelsestatus i dokdist og avslutter behandling av forsendelse med " + getIdsForLogging())
+                .endChoice()
+                .end();
     }
 
     public static String getIdsForLogging() {

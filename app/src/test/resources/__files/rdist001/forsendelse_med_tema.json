@@ -23,5 +23,9 @@
       "dokumentObjektReferanse": "dokumentObjektReferanseVedlegg2",
       "dokumenttypeId": "dokumenttypeIdVedlegg2"
     }
-  ]
+  ],
+  "arkivInformasjon": {
+    "arkivSystem": "JOARK",
+    "arkivId": "234567819"
+  }
 }

@@ -1,19 +1,20 @@
-package no.nav.dokdistsentralprint.consumer.rdist001;
+package no.nav.dokdistsentralprint.qdist009.domain;
 
 import lombok.Builder;
 import lombok.Data;
+import no.nav.dokdistsentralprint.consumer.rdist001.ArkivSystemCode;
 
 import java.util.List;
 
 @Data
 @Builder
-public class HentForsendelseResponse {
+public class InternForsendelse {
 	long forsendelseId;
 	String bestillingsId;
 	String originalBestillingsId;
 	String forsendelseStatus;
-	String modus;
 	String tema;
+	String modus;
 	Mottaker mottaker;
 	Postadresse postadresse;
 	List<Dokument> dokumenter;
@@ -52,6 +53,4 @@ public class HentForsendelseResponse {
 		String dokumentObjektReferanse;
 		String dokumenttypeId;
 	}
-
 }
-
