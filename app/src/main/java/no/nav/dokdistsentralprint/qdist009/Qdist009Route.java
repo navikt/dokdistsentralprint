@@ -39,7 +39,7 @@ public class Qdist009Route extends RouteBuilder {
     private final Qdist009Service qdist009Service;
     private final PostadresseValidatorOgForsendelseFeilregistrerService postadresseService;
     private final DistribuerForsendelseTilSentralPrintMapper distribuerForsendelseTilSentralPrintMapper;
-    private final Qopp001OpprettOppgave qopp001OpprettOppgave;
+    private final OpprettOppgaverMapper opprettOppgaverMapper;
 
     private final DokdistStatusUpdater dokdistStatusUpdater;
     private final Queue qdist009;
@@ -60,7 +60,7 @@ public class Qdist009Route extends RouteBuilder {
         this.qopp001 = qopp001;
         this.qdist009FunksjonellFeil = qdist009FunksjonellFeil;
         this.postadresseService = postadresseService;
-        this.qopp001OpprettOppgave = new Qopp001OpprettOppgave();
+        this.opprettOppgaverMapper = new OpprettOppgaverMapper();
     }
 
     @Override
@@ -89,7 +89,7 @@ public class Qdist009Route extends RouteBuilder {
                 .choice()
                     .when(simple("${body.postadresse}").isNull())
                         .log(INFO, log, "forsendelse med " + getIdsForLogging() + " mangler postadresse og sender manglende postadresse oppgave til qopp001")
-                        .bean(qopp001OpprettOppgave)
+                        .bean(opprettOppgaverMapper)
                         .marshal(new JaxbDataFormat(JAXBContext.newInstance(OpprettOppgave.class)))
                         .convertBodyTo(String.class, StandardCharsets.UTF_8.toString())
                         .to("jms:" + qopp001.getQueueName())

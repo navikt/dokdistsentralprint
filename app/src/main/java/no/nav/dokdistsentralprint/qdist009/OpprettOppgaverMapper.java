@@ -5,11 +5,8 @@ import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppga
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
-
-
 @Component
-public class Qopp001OpprettOppgave {
+public class OpprettOppgaverMapper {
 
 	private static final String BEHANDLE_MANGLENDE_ADRESSE = "BEHANDLE_MANGLENDE_ADRESSE";
 
