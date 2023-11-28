@@ -36,7 +36,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @Component
 public class RegoppslagRestConsumer implements Regoppslag {
 
-	private final String MANGLENDE_ADRESSE_FEIL_MELDING = "Fant ikke adresse for personen i PDL";
+	private final String MANGLENDE_ADRESSE_FEIL_MELDING = "for personen i PDL";
 	private final RestTemplate restTemplate;
 	private final String hentMottakerOgAdresseUrl;
 	private final StsRestConsumer stsRestConsumer;
@@ -65,7 +65,7 @@ public class RegoppslagRestConsumer implements Regoppslag {
 						.getMessage()));
 			}
 
-			if (e.getStatusCode().equals(NOT_FOUND) && e.getMessage().contains(MANGLENDE_ADRESSE_FEIL_MELDING)) {
+			if (e.getStatusCode().equals(NOT_FOUND) || e.getMessage().contains(MANGLENDE_ADRESSE_FEIL_MELDING)) {
 				log.warn(format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, HttpRespons=%s, Feilmelding=%s", e
 						.getStatusCode(), e.getResponseBodyAsString(), e.getMessage()));
 				return null;
