@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 @Component
 public class ForsendelseMapper {
@@ -32,9 +33,9 @@ public class ForsendelseMapper {
 
 	private Optional<Postadresse> mapPostadresse(HentForsendelseResponse.Postadresse adresse) {
 		return adresse == null ? Optional.empty() : ofNullable(Postadresse.builder()
-				.adresselinje1(adresse.getAdresselinje1())
-				.adresselinje2(adresse.getAdresselinje2())
-				.adresselinje3(adresse.getAdresselinje3())
+				.adresselinje1(substring(adresse.getAdresselinje1(), 0, 128))
+				.adresselinje2(substring(adresse.getAdresselinje2(),0,128))
+				.adresselinje3(substring(adresse.getAdresselinje3(),0,128))
 				.postnummer(adresse.getPostnummer())
 				.poststed(adresse.getPoststed())
 				.landkode(adresse.getLandkode())
@@ -51,7 +52,7 @@ public class ForsendelseMapper {
 	private Mottaker mapMottaker(HentForsendelseResponse.Mottaker mottaker) {
 		return Mottaker.builder()
 				.mottakerId(mottaker.getMottakerId())
-				.mottakerNavn(mottaker.getMottakerNavn())
+				.mottakerNavn(substring(mottaker.getMottakerNavn(),0,128))
 				.mottakerType(mottaker.getMottakerType())
 				.build();
 	}
