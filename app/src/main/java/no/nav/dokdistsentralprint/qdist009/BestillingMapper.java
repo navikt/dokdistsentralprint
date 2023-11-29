@@ -11,7 +11,6 @@ import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
 import no.nav.dokdistsentralprint.printoppdrag.Ressurs;
 import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
 import no.nav.dokdistsentralprint.qdist009.util.Landkoder;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -135,15 +134,15 @@ public class BestillingMapper {
 	}
 
 	private String getAdresse(InternForsendelse.Postadresse adresse, String mottakerNavn) {
-		return formatAdresseEntity(mottakerNavn) +
-				formatAdresseEntity(adresse.getAdresselinje1()) +
-				formatAdresseEntity(adresse.getAdresselinje2()) +
-				formatAdresseEntity(adresse.getAdresselinje3()) +
+		return formatNavnOgAdresseEntity(mottakerNavn) +
+				formatNavnOgAdresseEntity(adresse.getAdresselinje1()) +
+				formatNavnOgAdresseEntity(adresse.getAdresselinje2()) +
+				formatNavnOgAdresseEntity(adresse.getAdresselinje3()) +
 				formatPostnummerAndPoststed(adresse.getPostnummer(), adresse.getPoststed()) +
 				formatLandkode(adresse.getLandkode());
 	}
 
-	private String formatAdresseEntity(String entity) {
+	private String formatNavnOgAdresseEntity(String entity) {
 		if (entity == null || entity.isEmpty()) {
 			return "";
 		} else {

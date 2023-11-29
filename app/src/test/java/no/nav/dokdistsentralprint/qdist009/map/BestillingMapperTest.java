@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1;
-import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1_FOR_LANG;
+import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1_FOR_LANG_128_TEGN;
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_2;
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_3;
 import static no.nav.dokdistsentralprint.TestData.BESTILLINGS_ID;
@@ -23,6 +23,8 @@ import static no.nav.dokdistsentralprint.TestData.MOTTAKERTYPE_PERSON;
 import static no.nav.dokdistsentralprint.TestData.MOTTAKERTYPE_UKJENT;
 import static no.nav.dokdistsentralprint.TestData.MOTTAKER_ID;
 import static no.nav.dokdistsentralprint.TestData.MOTTAKER_NAVN;
+import static no.nav.dokdistsentralprint.TestData.MOTTAKER_NAVN_FOR_LANG;
+import static no.nav.dokdistsentralprint.TestData.MOTTAKER_NAVN_FOR_LANG_128_TEGN;
 import static no.nav.dokdistsentralprint.TestData.NAV_STANDARD;
 import static no.nav.dokdistsentralprint.TestData.OBJEKT_REFERANSE_HOVEDDOK;
 import static no.nav.dokdistsentralprint.TestData.OBJEKT_REFERANSE_VEDLEGG1;
@@ -336,13 +338,13 @@ class BestillingMapperTest {
 	}
 
 	@Test
-	void shoudlMapWithFirst128CharactersOfAddress() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresseWithLongAdresselinje1(), MOTTAKERTYPE_PERSON),
+	void shouldMapFirst128CharactersOfNameAndAddress() {
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresseWithLongAdresselinje1(), MOTTAKERTYPE_PERSON, MOTTAKER_NAVN_FOR_LANG),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
 				createHentPostdestinasjon());
 
-		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-						ADRESSELINJE_1_FOR_LANG.substring(0,128) + "\r" +
+		assertEquals("<![CDATA[" + MOTTAKER_NAVN_FOR_LANG_128_TEGN + "\r" +
+						ADRESSELINJE_1_FOR_LANG_128_TEGN + "\r" +
 						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 	}

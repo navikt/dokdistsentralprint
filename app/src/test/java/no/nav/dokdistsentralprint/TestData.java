@@ -16,9 +16,12 @@ public class TestData {
 	public static final String MODUS = "modus";
 	public static final String FORSENDELSE_STATUS = "KLAR_FOR_DIST";
 	public static final String MOTTAKER_NAVN = "mottakerNavn";
+	public static final String MOTTAKER_NAVN_FOR_LANG = "Dette mottakernavnet er 131 bokstaver lang, men bare de 128 første skal være med i adresselinjen.. tegn nr 129 kommer bak kolon:her";
+	public static final String MOTTAKER_NAVN_FOR_LANG_128_TEGN = "Dette mottakernavnet er 131 bokstaver lang, men bare de 128 første skal være med i adresselinjen.. tegn nr 129 kommer bak kolon:";
 	public static final String MOTTAKER_ID = "mottakerId";
 	public static final String ADRESSELINJE_1 = "adresselinje1";
 	public static final String ADRESSELINJE_1_FOR_LANG = "Denne adresselinje 1 er 131 bokstaver lang, men bare de 128 første skal være med i adresselinjen.. tegn nr 129 kommer bak kolon:her";
+	public static final String ADRESSELINJE_1_FOR_LANG_128_TEGN = "Denne adresselinje 1 er 131 bokstaver lang, men bare de 128 første skal være med i adresselinjen.. tegn nr 129 kommer bak kolon:";
 	public static final String ADRESSELINJE_2 = "adresselinje2";
 	public static final String ADRESSELINJE_3 = "adresselinje3";
 	public static final String POSTNUMMER = "postnummer";
@@ -49,14 +52,19 @@ public class TestData {
 	public static final String NAV_STANDARD = "NAV_STANDARD";
 	public static final String JOURNALPOST_ID = "123456789";
 
+
+
 	public static InternForsendelse createHentForsendelseResponseTo(InternForsendelse.Postadresse postadresse, String mottakerType) {
+		return createHentForsendelseResponseTo(postadresse, mottakerType, MOTTAKER_NAVN);
+	}
+	public static InternForsendelse createHentForsendelseResponseTo(InternForsendelse.Postadresse postadresse, String mottakerType, String mottakerNavn) {
 		return InternForsendelse.builder()
 				.bestillingsId(BESTILLINGS_ID)
 				.modus(MODUS)
 				.postadresse(postadresse)
 				.mottaker(InternForsendelse.Mottaker.builder()
 						.mottakerId(MOTTAKER_ID)
-						.mottakerNavn(MOTTAKER_NAVN)
+						.mottakerNavn(mottakerNavn)
 						.mottakerType(mottakerType)
 						.build())
 				.dokumenter(Arrays.asList(InternForsendelse.Dokument.builder()
