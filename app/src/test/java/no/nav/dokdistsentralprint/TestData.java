@@ -18,6 +18,7 @@ public class TestData {
 	public static final String MOTTAKER_NAVN = "mottakerNavn";
 	public static final String MOTTAKER_ID = "mottakerId";
 	public static final String ADRESSELINJE_1 = "adresselinje1";
+	public static final String ADRESSELINJE_1_FOR_LANG = "Denne adresselinje 1 er 131 bokstaver lang, men bare de 128 første skal være med i adresselinjen.. tegn nr 129 kommer bak kolon:her";
 	public static final String ADRESSELINJE_2 = "adresselinje2";
 	public static final String ADRESSELINJE_3 = "adresselinje3";
 	public static final String POSTNUMMER = "postnummer";
@@ -152,6 +153,16 @@ public class TestData {
 				.poststed(POSTSTED)
 				.landkode(LAND_NO)
 				.build();
+	}
+
+	public static InternForsendelse.Postadresse createAdresseWithLongAdresselinje1(){
+		return InternForsendelse.Postadresse.builder()
+				.adresselinje1(ADRESSELINJE_1_FOR_LANG)
+				.postnummer(POSTNUMMER)
+				.poststed(POSTSTED)
+				.landkode(LAND_NO)
+				.build();
+
 	}
 
 

@@ -145,6 +145,9 @@ public class BestillingMapper {
 		if (entity == null || entity.isEmpty()) {
 			return "";
 		} else {
+			if(entity.length() >128){
+				return format("%s\r", entity.substring(0,128));
+			}
 			return format("%s\r", entity);
 		}
 	}

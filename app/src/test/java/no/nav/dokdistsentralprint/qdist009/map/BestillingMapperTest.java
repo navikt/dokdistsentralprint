@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1;
+import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1_FOR_LANG;
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_2;
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_3;
 import static no.nav.dokdistsentralprint.TestData.BESTILLINGS_ID;
@@ -34,6 +35,7 @@ import static no.nav.dokdistsentralprint.TestData.SENTRALPRINT_DOKTYPE;
 import static no.nav.dokdistsentralprint.TestData.TOSIDIG_PRINT_FALSE;
 import static no.nav.dokdistsentralprint.TestData.TOSIDIG_PRINT_TRUE;
 import static no.nav.dokdistsentralprint.TestData.createAdresse;
+import static no.nav.dokdistsentralprint.TestData.createAdresseWithLongAdresselinje1;
 import static no.nav.dokdistsentralprint.TestData.createAdresseWithSingleAdress;
 import static no.nav.dokdistsentralprint.TestData.createDokumenttypeInfoTo;
 import static no.nav.dokdistsentralprint.TestData.createDokumenttypeInfoToUtenSentralPrintDokumentType;
@@ -72,10 +74,10 @@ class BestillingMapperTest {
 
 		assertEquals(BESTILLINGS_ID, bestilling.getMailpiece().getMailpieceId());
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-					 ADRESSELINJE_1 + "\r" +
-					 ADRESSELINJE_2 + "\r" +
-					 ADRESSELINJE_3 + "\r" +
-					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+						ADRESSELINJE_1 + "\r" +
+						ADRESSELINJE_2 + "\r" +
+						ADRESSELINJE_3 + "\r" +
+						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 
 		assertNull(bestilling.getMailpiece().getLandkode());
@@ -128,10 +130,10 @@ class BestillingMapperTest {
 
 		assertEquals(BESTILLINGS_ID, bestilling.getMailpiece().getMailpieceId());
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-					 ADRESSELINJE_1 + "\r" +
-					 ADRESSELINJE_2 + "\r" +
-					 ADRESSELINJE_3 + "\r" +
-					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+						ADRESSELINJE_1 + "\r" +
+						ADRESSELINJE_2 + "\r" +
+						ADRESSELINJE_3 + "\r" +
+						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 
 		assertNull(bestilling.getMailpiece().getLandkode());
@@ -184,10 +186,10 @@ class BestillingMapperTest {
 
 		assertEquals(BESTILLINGS_ID, bestilling.getMailpiece().getMailpieceId());
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-					 ADRESSELINJE_1 + "\r" +
-					 ADRESSELINJE_2 + "\r" +
-					 ADRESSELINJE_3 + "\r" +
-					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+						ADRESSELINJE_1 + "\r" +
+						ADRESSELINJE_2 + "\r" +
+						ADRESSELINJE_3 + "\r" +
+						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 
 		assertNull(bestilling.getMailpiece().getLandkode());
@@ -239,10 +241,10 @@ class BestillingMapperTest {
 
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-					 ADRESSELINJE_1 + "\r" +
-					 ADRESSELINJE_2 + "\r" +
-					 ADRESSELINJE_3 + "\r" +
-					 POSTNUMMER + " " + POSTSTED + "\r" + LAND_SE_NAVN + "]]>",
+						ADRESSELINJE_1 + "\r" +
+						ADRESSELINJE_2 + "\r" +
+						ADRESSELINJE_3 + "\r" +
+						POSTNUMMER + " " + POSTSTED + "\r" + LAND_SE_NAVN + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 
 		assertEquals(LAND_SE, bestilling.getMailpiece().getLandkode());
@@ -284,10 +286,10 @@ class BestillingMapperTest {
 
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-					 ADRESSELINJE_1 + "\r" +
-					 ADRESSELINJE_2 + "\r" +
-					 ADRESSELINJE_3 + "\r" +
-					 POSTNUMMER + " " + POSTSTED + "\r" + LAND_SE_NAVN + "]]>",
+						ADRESSELINJE_1 + "\r" +
+						ADRESSELINJE_2 + "\r" +
+						ADRESSELINJE_3 + "\r" +
+						POSTNUMMER + " " + POSTSTED + "\r" + LAND_SE_NAVN + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 
 		assertEquals(LAND_SE, bestilling.getMailpiece().getLandkode());
@@ -333,6 +335,17 @@ class BestillingMapperTest {
 				bestilling.getMailpiece().getRessurs().getAdresse());
 	}
 
+	@Test
+	void shoudlMapWithFirst128CharactersOfAddress() {
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresseWithLongAdresselinje1(), MOTTAKERTYPE_PERSON),
+				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
+				createHentPostdestinasjon());
+
+		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
+						ADRESSELINJE_1_FOR_LANG.substring(0,128) + "\r" +
+						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+				bestilling.getMailpiece().getRessurs().getAdresse());
+	}
 
 
 	@Test
