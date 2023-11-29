@@ -3,11 +3,13 @@ package no.nav.dokdistsentralprint.qdist009.map;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.Dokument;
 import no.nav.dokdistsentralprint.qdist009.BestillingMapper;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1;
+import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1_FOR_LANG;
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1_FOR_LANG_128_TEGN;
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_2;
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_3;
@@ -37,7 +39,6 @@ import static no.nav.dokdistsentralprint.TestData.SENTRALPRINT_DOKTYPE;
 import static no.nav.dokdistsentralprint.TestData.TOSIDIG_PRINT_FALSE;
 import static no.nav.dokdistsentralprint.TestData.TOSIDIG_PRINT_TRUE;
 import static no.nav.dokdistsentralprint.TestData.createAdresse;
-import static no.nav.dokdistsentralprint.TestData.createAdresseWithLongAdresselinje1;
 import static no.nav.dokdistsentralprint.TestData.createAdresseWithSingleAdress;
 import static no.nav.dokdistsentralprint.TestData.createDokumenttypeInfoTo;
 import static no.nav.dokdistsentralprint.TestData.createDokumenttypeInfoToUtenSentralPrintDokumentType;
@@ -339,7 +340,19 @@ class BestillingMapperTest {
 
 	@Test
 	void shouldMapFirst128CharactersOfNameAndAddress() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresseWithLongAdresselinje1(), MOTTAKERTYPE_PERSON, MOTTAKER_NAVN_FOR_LANG),
+		InternForsendelse.Postadresse postadresse = InternForsendelse.Postadresse.builder()
+				.adresselinje1(ADRESSELINJE_1_FOR_LANG)
+				.postnummer(POSTNUMMER)
+				.poststed(POSTSTED)
+				.landkode(LAND_NO)
+				.build();
+		InternForsendelse internForsendelse = createHentForsendelseResponseTo(postadresse, MOTTAKERTYPE_PERSON);
+		internForsendelse.setMottaker(InternForsendelse.Mottaker.builder()
+				.mottakerId(internForsendelse.getMottaker().getMottakerId())
+				.mottakerNavn(MOTTAKER_NAVN_FOR_LANG)
+				.mottakerType(MOTTAKERTYPE_PERSON)
+				.build());
+		Bestilling bestilling = bestillingMapper.createBestilling(internForsendelse,
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
 				createHentPostdestinasjon());
 

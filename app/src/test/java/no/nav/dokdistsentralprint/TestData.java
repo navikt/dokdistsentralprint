@@ -53,18 +53,14 @@ public class TestData {
 	public static final String JOURNALPOST_ID = "123456789";
 
 
-
 	public static InternForsendelse createHentForsendelseResponseTo(InternForsendelse.Postadresse postadresse, String mottakerType) {
-		return createHentForsendelseResponseTo(postadresse, mottakerType, MOTTAKER_NAVN);
-	}
-	public static InternForsendelse createHentForsendelseResponseTo(InternForsendelse.Postadresse postadresse, String mottakerType, String mottakerNavn) {
 		return InternForsendelse.builder()
 				.bestillingsId(BESTILLINGS_ID)
 				.modus(MODUS)
 				.postadresse(postadresse)
 				.mottaker(InternForsendelse.Mottaker.builder()
 						.mottakerId(MOTTAKER_ID)
-						.mottakerNavn(mottakerNavn)
+						.mottakerNavn(MOTTAKER_NAVN)
 						.mottakerType(mottakerType)
 						.build())
 				.dokumenter(Arrays.asList(InternForsendelse.Dokument.builder()
@@ -161,16 +157,6 @@ public class TestData {
 				.poststed(POSTSTED)
 				.landkode(LAND_NO)
 				.build();
-	}
-
-	public static InternForsendelse.Postadresse createAdresseWithLongAdresselinje1(){
-		return InternForsendelse.Postadresse.builder()
-				.adresselinje1(ADRESSELINJE_1_FOR_LANG)
-				.postnummer(POSTNUMMER)
-				.poststed(POSTSTED)
-				.landkode(LAND_NO)
-				.build();
-
 	}
 
 
