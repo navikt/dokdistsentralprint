@@ -11,6 +11,7 @@ import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
 import no.nav.dokdistsentralprint.printoppdrag.Ressurs;
 import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
 import no.nav.dokdistsentralprint.qdist009.util.Landkoder;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 @Slf4j
 @Component
@@ -134,21 +136,18 @@ public class BestillingMapper {
 
 	private String getAdresse(InternForsendelse.Postadresse adresse, String mottakerNavn) {
 		return formatAdresseEntity(mottakerNavn) +
-			   formatAdresseEntity(adresse.getAdresselinje1()) +
-			   formatAdresseEntity(adresse.getAdresselinje2()) +
-			   formatAdresseEntity(adresse.getAdresselinje3()) +
-			   formatPostnummerAndPoststed(adresse.getPostnummer(), adresse.getPoststed()) +
-			   formatLandkode(adresse.getLandkode());
+				formatAdresseEntity(adresse.getAdresselinje1()) +
+				formatAdresseEntity(adresse.getAdresselinje2()) +
+				formatAdresseEntity(adresse.getAdresselinje3()) +
+				formatPostnummerAndPoststed(adresse.getPostnummer(), adresse.getPoststed()) +
+				formatLandkode(adresse.getLandkode());
 	}
 
 	private String formatAdresseEntity(String entity) {
 		if (entity == null || entity.isEmpty()) {
 			return "";
 		} else {
-			if(entity.length() >128){
-				return format("%s\r", entity.substring(0,128));
-			}
-			return format("%s\r", entity);
+			return format("%s\r", substring(entity, 0, 128));
 		}
 	}
 
@@ -168,7 +167,7 @@ public class BestillingMapper {
 				return Landkoder.valueOf(landkode).getLandnavn();
 			} catch (IllegalArgumentException e) {
 				log.error("Mapping av landkode={} til landnavn feilet, da landkoden ikke ligger i Landkoder-enumen. " +
-						  "Hør med teamet om landkoden bør legges inn.", landkode, e);
+						"Hør med teamet om landkoden bør legges inn.", landkode, e);
 				return landkode;
 			}
 		}
