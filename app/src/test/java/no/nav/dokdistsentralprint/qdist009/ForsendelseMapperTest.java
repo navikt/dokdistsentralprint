@@ -1,9 +1,12 @@
 package no.nav.dokdistsentralprint.qdist009;
 
+import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1;
+import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1_FOR_LANG;
+import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1_FOR_LANG_128_TEGN;
 import static no.nav.dokdistsentralprint.TestData.BESTILLINGS_ID;
 import static no.nav.dokdistsentralprint.TestData.FORSENDELSE_ID;
 import static no.nav.dokdistsentralprint.TestData.FORSENDELSE_STATUS;
@@ -12,6 +15,8 @@ import static no.nav.dokdistsentralprint.TestData.LAND_NO;
 import static no.nav.dokdistsentralprint.TestData.MOTTAKERTYPE_PERSON;
 import static no.nav.dokdistsentralprint.TestData.MOTTAKER_ID;
 import static no.nav.dokdistsentralprint.TestData.MOTTAKER_NAVN;
+import static no.nav.dokdistsentralprint.TestData.MOTTAKER_NAVN_FOR_LANG;
+import static no.nav.dokdistsentralprint.TestData.MOTTAKER_NAVN_FOR_LANG_128_TEGN;
 import static no.nav.dokdistsentralprint.TestData.POSTNUMMER;
 import static no.nav.dokdistsentralprint.TestData.POSTSTED;
 import static no.nav.dokdistsentralprint.TestData.TEMA;
@@ -62,5 +67,25 @@ class ForsendelseMapperTest {
 				assertThat(dokument).hasFieldOrPropertyWithValue("dokumentObjektReferanse", dokument.getDokumentObjektReferanse())
 						.hasFieldOrPropertyWithValue("tilknyttetSom", dokument.getTilknyttetSom())
 						.hasFieldOrPropertyWithValue("dokumenttypeId", dokument.getDokumenttypeId()));
+	}
+
+	@Test
+	public void mapHentForsendelseMedForLangtNavnOgAdresse(){
+		HentForsendelseResponse hentForsendelseResponse = createHentForsendelseResponse();
+		hentForsendelseResponse.setMottaker(HentForsendelseResponse.Mottaker.builder()
+						.mottakerId(MOTTAKER_ID)
+						.mottakerNavn(MOTTAKER_NAVN_FOR_LANG)
+						.mottakerType(MOTTAKERTYPE_PERSON)
+						.build());
+		hentForsendelseResponse.setPostadresse(HentForsendelseResponse.Postadresse.builder()
+				.adresselinje1(ADRESSELINJE_1_FOR_LANG)
+				.postnummer(POSTNUMMER)
+				.poststed(POSTSTED)
+				.landkode(LAND_NO)
+				.build());
+		InternForsendelse internForsendelse = forsendelseMapper.mapForsendelse(hentForsendelseResponse);
+
+		assertThat(internForsendelse.getMottaker().getMottakerNavn()).isEqualTo(MOTTAKER_NAVN_FOR_LANG_128_TEGN);
+		assertThat(internForsendelse.getPostadresse().getAdresselinje1()).isEqualTo(ADRESSELINJE_1_FOR_LANG_128_TEGN);
 	}
 }
