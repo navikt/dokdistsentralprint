@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_BESTILLINGS_ID;
+import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.validateForsendelsestatus;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
@@ -43,6 +44,7 @@ public class PostadresseValidatorOgForsendelseFeilregistrerService {
 	public InternForsendelse hentForsendelse(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo, Exchange exchange) {
 		final String forsendelseId = distribuerForsendelseTilSentralPrintTo.getForsendelseId();
 		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(forsendelseId);
+		validateForsendelsestatus(hentForsendelseResponse.getForsendelseStatus());
 
 		final String bestillingsId = hentForsendelseResponse.getBestillingsId();
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingsId);

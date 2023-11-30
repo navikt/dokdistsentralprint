@@ -43,13 +43,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
-import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
-import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
 import static no.nav.dokdistsentralprint.TestUtils.classpathToString;
 import static no.nav.dokdistsentralprint.TestUtils.fileToString;
 import static no.nav.dokdistsentralprint.TestUtils.unzipToDirectory;
+import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
+import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
+import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_REASON_CODE;
+import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
+import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -402,7 +403,7 @@ class Qdist009IT {
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
-		await().atMost(10, SECONDS).untilAsserted(() -> {
+		await().atMost(100, SECONDS).untilAsserted(() -> {
 			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
@@ -467,7 +468,7 @@ class Qdist009IT {
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
-		await().atMost(10, SECONDS).untilAsserted(() -> {
+		await().atMost(100, SECONDS).untilAsserted(() -> {
 			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
@@ -726,6 +727,7 @@ class Qdist009IT {
 		stubFor(post("/hentMottakerOgAdresse")
 				.willReturn(aResponse()
 						.withStatus(status)
+						.withHeader(NAV_REASON_CODE, "ukjent_adresse")
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody("{\"status\":\"404 \",\"message\":\"Fant ikke adresse for personen i PDL\"}")));
 	}

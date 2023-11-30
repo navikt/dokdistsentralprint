@@ -27,6 +27,7 @@ import java.util.UUID;
 import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_CALLID;
+import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_REASON_CODE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -36,6 +37,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @Component
 public class RegoppslagRestConsumer implements Regoppslag {
 
+	public final String UKJENT_ADRESSE_REASON_KODE = "ukjent_adresse";
 	private final RestTemplate restTemplate;
 	private final String hentMottakerOgAdresseUrl;
 	private final StsRestConsumer stsRestConsumer;
@@ -64,9 +66,12 @@ public class RegoppslagRestConsumer implements Regoppslag {
 						.getMessage()));
 			}
 
-			if (e.getStatusCode().equals(NOT_FOUND)) {
-				log.warn(format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, HttpRespons=%s, Feilmelding=%s", e
-						.getStatusCode(), e.getResponseBodyAsString(), e.getMessage()));
+			String reasonCode = e.getResponseHeaders().containsKey(NAV_REASON_CODE) ? e.getResponseHeaders().get(NAV_REASON_CODE).stream()
+					.findAny().orElse(null) : null;
+
+			if (e.getStatusCode().equals(NOT_FOUND) && UKJENT_ADRESSE_REASON_KODE.equals(reasonCode)) {
+				log.warn(format("Kall mot TREG002 feilet funksjonelt. HttpStatus=%s, reasonCode=%s, Feilmelding=%s", e
+						.getStatusCode(), reasonCode, e.getMessage()));
 				return null;
 			}
 			throw new RegoppslagHentAdresseFunctionalException(format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, HttpRespons=%s, Feilmelding=%s", e
