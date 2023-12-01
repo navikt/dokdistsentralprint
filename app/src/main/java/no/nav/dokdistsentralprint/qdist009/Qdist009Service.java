@@ -24,7 +24,6 @@ import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_BESTILL
 import static no.nav.dokdistsentralprint.qdist009.util.BestillingZipUtil.zipPrintbestillingToBytes;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.createBestillingEntities;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.getDokumenttypeIdHoveddokument;
-import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.validateForsendelsestatus;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 
@@ -54,9 +53,6 @@ public class Qdist009Service {
 
 		final String bestillingsId = internForsendelse.getBestillingsId();
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingsId);
-
-		log.info("qdist009 har mottatt bestilling til print med forsendelseId={}, bestillingsId={}", internForsendelse.getForsendelseId(), bestillingsId);
-		validateForsendelsestatus(internForsendelse.getForsendelseStatus());
 
 		String postdestinasjon = postadresseService.hentPostdestinasjon(internForsendelse.getPostadresse());
 

@@ -19,9 +19,6 @@ import static org.apache.camel.LoggingLevel.WARN;
 
 @Component
 public class Qdist009Route extends RouteBuilder {
-
-    private static final String BEHANDLE_MANGLENDE_ADRESSE = "BEHANDLE_MANGLENDE_ADRESSE";
-
     public static final String SERVICE_ID = "qdist009";
     static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";
     static final String PROPERTY_FORSENDELSE_ID = "forsendelseId";
