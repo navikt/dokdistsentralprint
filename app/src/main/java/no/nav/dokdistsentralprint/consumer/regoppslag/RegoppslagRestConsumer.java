@@ -37,7 +37,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @Component
 public class RegoppslagRestConsumer implements Regoppslag {
 
-	public final String UKJENT_ADRESSE_REASON_KODE = "ukjent_adresse";
+	public final String UKJENT_ADRESSE_REASON_CODE = "ukjent_adresse";
 	private final RestTemplate restTemplate;
 	private final String hentMottakerOgAdresseUrl;
 	private final StsRestConsumer stsRestConsumer;
@@ -69,7 +69,7 @@ public class RegoppslagRestConsumer implements Regoppslag {
 			String reasonCode = e.getResponseHeaders().containsKey(NAV_REASON_CODE) ? e.getResponseHeaders().get(NAV_REASON_CODE).stream()
 					.findAny().orElse(null) : null;
 
-			if (e.getStatusCode().equals(NOT_FOUND) && UKJENT_ADRESSE_REASON_KODE.equals(reasonCode)) {
+			if (e.getStatusCode().equals(NOT_FOUND) && UKJENT_ADRESSE_REASON_CODE.equals(reasonCode)) {
 				log.warn(format("Kall mot TREG002 feilet funksjonelt. HttpStatus=%s, reasonCode=%s, Feilmelding=%s", e
 						.getStatusCode(), reasonCode, e.getMessage()));
 				return null;

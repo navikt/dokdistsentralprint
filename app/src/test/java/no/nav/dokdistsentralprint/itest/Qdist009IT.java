@@ -325,7 +325,7 @@ class Qdist009IT {
 	void shouldSendMeldingToQopp001QueueWhenPostadresseIsNull() throws IOException {
 		stubRestSts();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
-		stubFeilPostHentMottakerOgAdresse(NOT_FOUND.value());
+		stubFeilPostHentMottakerOgAdresse();
 		stubPutFeilregistrerForsendelse();
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
@@ -403,7 +403,7 @@ class Qdist009IT {
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
-		await().atMost(100, SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
@@ -468,7 +468,7 @@ class Qdist009IT {
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
-		await().atMost(100, SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
 			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
@@ -723,10 +723,10 @@ class Qdist009IT {
 						.withBodyFile(path)));
 	}
 
-	private void stubFeilPostHentMottakerOgAdresse(int status) {
+	private void stubFeilPostHentMottakerOgAdresse() {
 		stubFor(post("/hentMottakerOgAdresse")
 				.willReturn(aResponse()
-						.withStatus(status)
+						.withStatus(NOT_FOUND.value())
 						.withHeader(NAV_REASON_CODE, "ukjent_adresse")
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody("{\"status\":\"404 \",\"message\":\"Fant ikke adresse for personen i PDL\"}")));
