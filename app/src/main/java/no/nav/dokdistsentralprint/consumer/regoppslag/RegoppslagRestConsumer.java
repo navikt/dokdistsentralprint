@@ -58,27 +58,25 @@ public class RegoppslagRestConsumer implements Regoppslag {
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
 		HttpEntity<?> entity = new HttpEntity<>(request, retrieveBearerTokenAndCreateHeader());
 		try {
-			return restTemplate.postForObject(this.hentMottakerOgAdresseUrl, entity, HentMottakerOgAdresseResponseTo.class)
-					.getAdresse();
+			return restTemplate.postForObject(this.hentMottakerOgAdresseUrl, entity, HentMottakerOgAdresseResponseTo.class).getAdresse();
 		} catch (HttpClientErrorException e) {
 			if (e.getStatusCode().equals(UNAUTHORIZED)) {
-				throw new RegoppslagHentAdresseSecurityException(format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e
-						.getMessage()));
+				throw new RegoppslagHentAdresseSecurityException(format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e.getMessage()));
 			}
 
 			String reasonCode = e.getResponseHeaders().containsKey(NAV_REASON_CODE) ? e.getResponseHeaders().get(NAV_REASON_CODE).stream()
 					.findAny().orElse(null) : null;
 
 			if (e.getStatusCode().equals(NOT_FOUND) && UKJENT_ADRESSE_REASON_CODE.equals(reasonCode)) {
-				log.warn(format("Kall mot TREG002 feilet funksjonelt. HttpStatus=%s, reasonCode=%s, Feilmelding=%s", e
-						.getStatusCode(), reasonCode, e.getMessage()));
+				log.warn(format("Kall mot TREG002 feilet funksjonelt. HttpStatus=%s, reasonCode=%s, Feilmelding=%s",
+						e.getStatusCode(), reasonCode, e.getMessage()));
 				return null;
 			}
-			throw new RegoppslagHentAdresseFunctionalException(format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, HttpRespons=%s, Feilmelding=%s", e
-					.getStatusCode(), e.getResponseBodyAsString(), e.getMessage()));
+			throw new RegoppslagHentAdresseFunctionalException(format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, HttpRespons=%s, Feilmelding=%s",
+					e.getStatusCode(), e.getResponseBodyAsString(), e.getMessage()));
 		} catch (HttpServerErrorException e) {
-			throw new RegoppslagHentAdresseTechnicalException(format("Kall mot TREG002 feilet teknisk. HttpStatusKode=%s, Feilmelding=%s", e
-					.getStatusCode(), e.getMessage()));
+			throw new RegoppslagHentAdresseTechnicalException(format("Kall mot TREG002 feilet teknisk. HttpStatusKode=%s, Feilmelding=%s",
+					e.getStatusCode(), e.getMessage()));
 		}
 	}
 

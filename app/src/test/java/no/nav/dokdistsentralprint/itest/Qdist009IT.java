@@ -1,6 +1,5 @@
 package no.nav.dokdistsentralprint.itest;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import jakarta.jms.Queue;
 import jakarta.jms.TextMessage;
 import jakarta.xml.bind.JAXBElement;
@@ -42,6 +41,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokdistsentralprint.TestUtils.classpathToString;
 import static no.nav.dokdistsentralprint.TestUtils.fileToString;
@@ -82,7 +82,7 @@ class Qdist009IT {
 	private static final String LANDKODE_TR = "TR";
 	private static final String LANDKODE_XX = "XX";
 
-	private static final String HENTFORSENDELSE_URL = String.format("/rest/v1/administrerforsendelse/%s", FORSENDELSE_ID);
+	private static final String HENTFORSENDELSE_URL = format("/rest/v1/administrerforsendelse/%s", FORSENDELSE_ID);
 	private static final String DOKMET_URL = "/rest/dokumenttypeinfo/dokumenttypeIdHoveddok";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 	private static final String HENTPOSTDESTINASJON_URL = "/rest/v1/administrerforsendelse/hentpostdestinasjon/";
@@ -112,7 +112,6 @@ class Qdist009IT {
 	@Import(ApplicationTestConfig.class)
 	@Configuration
 	static class Config {
-
 	}
 
 	@DynamicPropertySource
@@ -136,10 +135,6 @@ class Qdist009IT {
 	@BeforeEach
 	public void setupBefore() {
 		CALL_ID = UUID.randomUUID().toString();
-
-		WireMock.reset();
-		WireMock.resetAllRequests();
-		WireMock.removeAllMappings();
 
 		cacheManager.getCache(TKAT020_CACHE).clear();
 		cacheManager.getCache(POSTDESTINASJON_CACHE).clear();
