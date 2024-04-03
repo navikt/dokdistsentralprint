@@ -32,6 +32,7 @@ public class BestillingMapper {
 	private static final String MOTTAKERTYPE_ORGANISASJON = "ORGANISASJON";
 	private static final String KONVOLUTT_MED_VINDU = "X";
 	private static final String NAV_STANDARD = "NAV_STANDARD";
+	private static final int MAKS_ADRESSELINJE_LENGDE = 128;
 
 	public Bestilling createBestilling(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo, String postdestinasjon) {
 		Bestilling bestilling = new Bestilling();
@@ -145,6 +146,9 @@ public class BestillingMapper {
 		if (entity == null || entity.isEmpty()) {
 			return "";
 		} else {
+			if(entity.length() > MAKS_ADRESSELINJE_LENGDE) {
+				return format("%s...\r", entity.substring(0, 125));
+			}
 			return format("%s\r", entity);
 		}
 	}
