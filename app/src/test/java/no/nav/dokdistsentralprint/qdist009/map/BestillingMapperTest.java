@@ -54,6 +54,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BestillingMapperTest {
 
+	static final String MOTTAKER_NAVN_LANG_FORVENTET = "Alejandro González Hernández de la Rosa Martínez de la Cruz y Rodríguez del Valle García Sánchez de los Santos Pérez López Ra...";
+	static final String ADRESSELINJE_LANG_FORVENTET = "Calle Real de la Esperanza, 23, Edificio del Ministerio de Asuntos Internos y Externos, Departamento de Gestión de Recursos y...";
+
 	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
 	@Test
@@ -354,11 +357,10 @@ class BestillingMapperTest {
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
 				createHentPostdestinasjon());
 
-		String expectedAdresselinje = ADRESSELINJE_LANG.substring(0, 125) + "...\r";
-		assertEquals("<![CDATA[" + MOTTAKER_NAVN_LANG.substring(0, 125) + "...\r" +
-					 expectedAdresselinje +
-					 expectedAdresselinje +
-					 expectedAdresselinje +
+		assertEquals("<![CDATA[" + MOTTAKER_NAVN_LANG_FORVENTET + "\r" +
+					 ADRESSELINJE_LANG_FORVENTET + "\r" +
+					 ADRESSELINJE_LANG_FORVENTET + "\r" +
+					 ADRESSELINJE_LANG_FORVENTET + "\r" +
 					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 	}

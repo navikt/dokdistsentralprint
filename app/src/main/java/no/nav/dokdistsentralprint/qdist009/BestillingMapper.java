@@ -146,7 +146,7 @@ public class BestillingMapper {
 		if (entity == null || entity.isEmpty()) {
 			return "";
 		} else {
-			if(entity.length() > MAKS_ADRESSELINJE_LENGDE) {
+			if (entity.length() > MAKS_ADRESSELINJE_LENGDE) {
 				return format("%s...\r", entity.substring(0, 125));
 			}
 			return format("%s\r", entity);
