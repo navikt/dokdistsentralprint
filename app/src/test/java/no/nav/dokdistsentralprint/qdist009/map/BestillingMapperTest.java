@@ -3,6 +3,7 @@ package no.nav.dokdistsentralprint.qdist009.map;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.Dokument;
 import no.nav.dokdistsentralprint.qdist009.BestillingMapper;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_1;
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_2;
 import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_3;
+import static no.nav.dokdistsentralprint.TestData.ADRESSELINJE_LANG;
 import static no.nav.dokdistsentralprint.TestData.BESTILLINGS_ID;
 import static no.nav.dokdistsentralprint.TestData.CDATA_MOTTAKER_NAVN;
 import static no.nav.dokdistsentralprint.TestData.KONVOLUTTVINDU_TYPE;
@@ -22,6 +24,7 @@ import static no.nav.dokdistsentralprint.TestData.MOTTAKERTYPE_PERSON;
 import static no.nav.dokdistsentralprint.TestData.MOTTAKERTYPE_UKJENT;
 import static no.nav.dokdistsentralprint.TestData.MOTTAKER_ID;
 import static no.nav.dokdistsentralprint.TestData.MOTTAKER_NAVN;
+import static no.nav.dokdistsentralprint.TestData.MOTTAKER_NAVN_LANG;
 import static no.nav.dokdistsentralprint.TestData.NAV_STANDARD;
 import static no.nav.dokdistsentralprint.TestData.OBJEKT_REFERANSE_HOVEDDOK;
 import static no.nav.dokdistsentralprint.TestData.OBJEKT_REFERANSE_VEDLEGG1;
@@ -39,6 +42,7 @@ import static no.nav.dokdistsentralprint.TestData.createDokumenttypeInfoTo;
 import static no.nav.dokdistsentralprint.TestData.createDokumenttypeInfoToUtenSentralPrintDokumentType;
 import static no.nav.dokdistsentralprint.TestData.createDokumenttypeInfoUtenKonvoluttvinduType;
 import static no.nav.dokdistsentralprint.TestData.createHentForsendelseResponseTo;
+import static no.nav.dokdistsentralprint.TestData.createHentForsendelseResponseToBuilder;
 import static no.nav.dokdistsentralprint.TestData.createHentPostdestinasjon;
 import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.KUNDE_ID_NAV_IKT;
 import static no.nav.dokdistsentralprint.qdist009.BestillingMapper.PRINT;
@@ -49,6 +53,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BestillingMapperTest {
+
+	static final String MOTTAKER_NAVN_LANG_FORVENTET = "Alejandro González Hernández de la Rosa Martínez de la Cruz y Rodríguez del Valle García Sánchez de los Santos Pérez López Ra...";
+	static final String ADRESSELINJE_LANG_FORVENTET = "Calle Real de la Esperanza, 23, Edificio del Ministerio de Asuntos Internos y Externos, Departamento de Gestión de Recursos y...";
 
 	private final BestillingMapper bestillingMapper = new BestillingMapper();
 
@@ -237,7 +244,6 @@ class BestillingMapperTest {
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createHentPostdestinasjon());
 
-
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
 					 ADRESSELINJE_1 + "\r" +
 					 ADRESSELINJE_2 + "\r" +
@@ -281,7 +287,6 @@ class BestillingMapperTest {
 		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresse(LAND_SE), MOTTAKERTYPE_UKJENT),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_FALSE),
 				createHentPostdestinasjon());
-
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
 					 ADRESSELINJE_1 + "\r" +
@@ -328,12 +333,37 @@ class BestillingMapperTest {
 				createHentPostdestinasjon());
 
 		assertEquals("<![CDATA[" + MOTTAKER_NAVN + "\r" +
-						ADRESSELINJE_1 + "\r" +
-						POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+					 ADRESSELINJE_1 + "\r" +
+					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
 				bestilling.getMailpiece().getRessurs().getAdresse());
 	}
 
+	@Test
+	void shouldTruncateMottakerAndAdresseLinjeTo128Chars() {
+		InternForsendelse.InternForsendelseBuilder hentForsendelseResponseToBuilder = createHentForsendelseResponseToBuilder(InternForsendelse.Postadresse.builder()
+				.adresselinje1(ADRESSELINJE_LANG)
+				.adresselinje2(ADRESSELINJE_LANG)
+				.adresselinje3(ADRESSELINJE_LANG)
+				.postnummer(POSTNUMMER)
+				.poststed(POSTSTED)
+				.landkode(LAND_NO)
+				.build(), MOTTAKERTYPE_PERSON)
+				.mottaker(InternForsendelse.Mottaker.builder()
+						.mottakerId(MOTTAKER_ID)
+						.mottakerNavn(MOTTAKER_NAVN_LANG)
+						.mottakerType(MOTTAKERTYPE_PERSON)
+						.build());
+		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseToBuilder.build(),
+				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
+				createHentPostdestinasjon());
 
+		assertEquals("<![CDATA[" + MOTTAKER_NAVN_LANG_FORVENTET + "\r" +
+					 ADRESSELINJE_LANG_FORVENTET + "\r" +
+					 ADRESSELINJE_LANG_FORVENTET + "\r" +
+					 ADRESSELINJE_LANG_FORVENTET + "\r" +
+					 POSTNUMMER + " " + POSTSTED + "\r" + "]]>",
+				bestilling.getMailpiece().getRessurs().getAdresse());
+	}
 
 	@Test
 	void shouldAssertMottakerSkattyterToTrueWhenMottakerTypeErPersonOrOrganization() {

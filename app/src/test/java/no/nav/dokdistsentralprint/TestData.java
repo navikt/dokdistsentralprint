@@ -16,10 +16,12 @@ public class TestData {
 	public static final String MODUS = "modus";
 	public static final String FORSENDELSE_STATUS = "KLAR_FOR_DIST";
 	public static final String MOTTAKER_NAVN = "mottakerNavn";
+	public static final String MOTTAKER_NAVN_LANG = "Alejandro González Hernández de la Rosa Martínez de la Cruz y Rodríguez del Valle García Sánchez de los Santos Pérez López Ramírez Domínguez Ruiz Fernández Gutiérrez Martín";
 	public static final String MOTTAKER_ID = "mottakerId";
 	public static final String ADRESSELINJE_1 = "adresselinje1";
 	public static final String ADRESSELINJE_2 = "adresselinje2";
 	public static final String ADRESSELINJE_3 = "adresselinje3";
+	public static final String ADRESSELINJE_LANG = "Calle Real de la Esperanza, 23, Edificio del Ministerio de Asuntos Internos y Externos, Departamento de Gestión de Recursos y Servicios Públicos, 28001 Madrid, España";
 	public static final String POSTNUMMER = "postnummer";
 	public static final String POSTSTED = "poststed";
 	public static final String LAND_NO = "NO";
@@ -49,6 +51,11 @@ public class TestData {
 	public static final String JOURNALPOST_ID = "123456789";
 
 	public static InternForsendelse createHentForsendelseResponseTo(InternForsendelse.Postadresse postadresse, String mottakerType) {
+		return createHentForsendelseResponseToBuilder(postadresse, mottakerType)
+				.build();
+	}
+
+	public static InternForsendelse.InternForsendelseBuilder createHentForsendelseResponseToBuilder(InternForsendelse.Postadresse postadresse, String mottakerType) {
 		return InternForsendelse.builder()
 				.bestillingsId(BESTILLINGS_ID)
 				.modus(MODUS)
@@ -72,8 +79,7 @@ public class TestData {
 								.dokumentObjektReferanse(OBJEKT_REFERANSE_VEDLEGG2)
 								.dokumenttypeId(DOKUMENTTYPE_ID_VEDLEGG2)
 								.tilknyttetSom(TILKNYTTET_SOM_VEDLEGG)
-								.build()))
-				.build();
+								.build()));
 	}
 
 	public static HentForsendelseResponse createHentForsendelseResponse() {
@@ -107,7 +113,6 @@ public class TestData {
 								.build()))
 				.build();
 	}
-
 
 	public static DokumenttypeInfo createDokumenttypeInfoTo(boolean tosidigPrint) {
 		return DokumenttypeInfo.builder()
@@ -153,7 +158,6 @@ public class TestData {
 				.landkode(LAND_NO)
 				.build();
 	}
-
 
 	public static HentForsendelseResponse.Postadresse createPostadresse() {
 		return HentForsendelseResponse.Postadresse.builder()
