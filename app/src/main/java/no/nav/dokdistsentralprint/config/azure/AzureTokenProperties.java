@@ -15,6 +15,7 @@ public record AzureTokenProperties(
 	public static final String SPRING_DEFAULT_PRINCIPAL = "anonymousUser";
 	public static final String CLIENT_REGISTRATION_DOKMET = "azure-dokmet";
 	public static final String CLIENT_REGISTRATION_DOKDISTADMIN = "azure-dokdistadmin";
+	public static final String CLIENT_REGISTRATION_REGOPPSLAG = "azure-regoppslag";
 
 	public static OAuth2AuthorizeRequest getOAuth2AuthorizeRequestForAzure(String clientRegistrationId) {
 		return OAuth2AuthorizeRequest

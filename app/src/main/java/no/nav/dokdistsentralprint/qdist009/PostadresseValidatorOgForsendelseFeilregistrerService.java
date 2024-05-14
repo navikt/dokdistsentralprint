@@ -5,7 +5,7 @@ import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelseConsum
 import no.nav.dokdistsentralprint.consumer.rdist001.FeilregistrerForsendelseRequest;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.consumer.rdist001.OppdaterPostadresseRequest;
-import no.nav.dokdistsentralprint.consumer.regoppslag.Regoppslag;
+import no.nav.dokdistsentralprint.consumer.regoppslag.RegoppslagRestConsumer;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.qdist009.domain.DistribuerForsendelseTilSentralPrintTo;
@@ -29,13 +29,14 @@ public class PostadresseValidatorOgForsendelseFeilregistrerService {
 	public static final String XX_LANDKODE = "XX";
 	private static final String FORSENDELSE_FEIL_TYPE = "MELDINGSFEIL";
 	private static final String FEIL_MELDING_DETALJER = "Manglende adresse";
-	private final Regoppslag regoppslag;
+	private final RegoppslagRestConsumer regoppslagRestConsumer;
 	private final AdministrerForsendelseConsumer administrerForsendelse;
 	private final ForsendelseMapper forsendelseMapper;
 
-	public PostadresseValidatorOgForsendelseFeilregistrerService(Regoppslag regoppslag, ForsendelseMapper forsendelseMapper,
+	public PostadresseValidatorOgForsendelseFeilregistrerService(RegoppslagRestConsumer regoppslagRestConsumer,
+																 ForsendelseMapper forsendelseMapper,
 																 AdministrerForsendelseConsumer administrerForsendelse) {
-		this.regoppslag = regoppslag;
+		this.regoppslagRestConsumer = regoppslagRestConsumer;
 		this.administrerForsendelse = administrerForsendelse;
 		this.forsendelseMapper = forsendelseMapper;
 	}
@@ -101,7 +102,7 @@ public class PostadresseValidatorOgForsendelseFeilregistrerService {
 	}
 
 	private HentForsendelseResponse.Postadresse getAdresseFromRegoppslag(HentForsendelseResponse hentForsendelseResponse) {
-		AdresseTo adresseTo = regoppslag.treg002HentAdresse(HentAdresseRequestTo.builder()
+		AdresseTo adresseTo = regoppslagRestConsumer.treg002HentAdresse(HentAdresseRequestTo.builder()
 				.identifikator(hentForsendelseResponse.getMottaker().getMottakerId())
 				.type(hentForsendelseResponse.getMottaker().getMottakerType())
 				.tema(hentForsendelseResponse.getTema())

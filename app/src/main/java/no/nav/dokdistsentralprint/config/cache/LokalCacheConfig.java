@@ -20,7 +20,6 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 public class LokalCacheConfig {
 
 	public static final String TKAT020_CACHE = "tkat020Cache";
-	public static final String REST_STS_CACHE = "restStsCache";
 	public static final String POSTDESTINASJON_CACHE = "postdestinasjonCache";
 
 	@Bean
@@ -31,9 +30,6 @@ public class LokalCacheConfig {
 		manager.setCaches(Arrays.asList(
 				new CaffeineCache(TKAT020_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(1, DAYS)
-						.build()),
-				new CaffeineCache(REST_STS_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(50, MINUTES)
 						.build()),
 				new CaffeineCache(POSTDESTINASJON_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(60, MINUTES)

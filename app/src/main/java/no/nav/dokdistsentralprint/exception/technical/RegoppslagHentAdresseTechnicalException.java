@@ -5,4 +5,8 @@ public class RegoppslagHentAdresseTechnicalException extends AbstractDokdistsent
 	public RegoppslagHentAdresseTechnicalException(String message) {
 		super(message);
 	}
+
+	public RegoppslagHentAdresseTechnicalException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }
