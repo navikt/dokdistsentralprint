@@ -1,99 +1,91 @@
 package no.nav.dokdistsentralprint.consumer.regoppslag;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
+import no.nav.dokdistsentralprint.constants.NavHeadersFilter;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.AdresseTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentMottakerOgAdresseResponseTo;
 import no.nav.dokdistsentralprint.exception.functional.RegoppslagHentAdresseFunctionalException;
-import no.nav.dokdistsentralprint.exception.technical.AbstractDokdistsentralprintTechnicalException;
-import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseSecurityException;
 import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseTechnicalException;
-import no.nav.dokdistsentralprint.qdist009.reststs.StsRestConsumer;
-import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
-import java.time.Duration;
-import java.util.UUID;
+import java.util.function.Consumer;
 
-import static java.lang.String.format;
-import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
-import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_CALLID;
+import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_REGOPPSLAG;
 import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_REASON_CODE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Slf4j
 @Component
-public class RegoppslagRestConsumer implements Regoppslag {
+public class RegoppslagRestConsumer {
 
-	public final String UKJENT_ADRESSE_REASON_CODE = "ukjent_adresse";
-	private final RestTemplate restTemplate;
-	private final String hentMottakerOgAdresseUrl;
-	private final StsRestConsumer stsRestConsumer;
+	private static final String HENT_MOTTAKER_OG_ADRESSE_PATH = "/rest/hentMottakerOgAdresse";
+	private static final String UKJENT_ADRESSE_REASON_CODE = "ukjent_adresse";
 
-	public RegoppslagRestConsumer(RestTemplateBuilder restTemplateBuilder,
-								  @Value("${regoppslag.hentmottakerogadresse.url}") String hentMottakerOgAdresseUrl,
-								  StsRestConsumer stsRestConsumer) {
-		this.hentMottakerOgAdresseUrl = hentMottakerOgAdresseUrl;
-		this.stsRestConsumer = stsRestConsumer;
-		this.restTemplate = restTemplateBuilder
-				.setReadTimeout(Duration.ofSeconds(20))
-				.setConnectTimeout(Duration.ofSeconds(5))
+	private final WebClient webClient;
+
+	public RegoppslagRestConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
+								  WebClient webClient) {
+		this.webClient = webClient.mutate()
+				.baseUrl(dokdistsentralprintProperties.getEndpoints().getRegoppslag().getUrl())
+				.filter(new NavHeadersFilter())
+				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.build();
 	}
 
-	@Override
-	@Retryable(retryFor = AbstractDokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(retryFor = RegoppslagHentAdresseTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
-		HttpEntity<?> entity = new HttpEntity<>(request, retrieveBearerTokenAndCreateHeader());
-		try {
-			return restTemplate.postForObject(this.hentMottakerOgAdresseUrl, entity, HentMottakerOgAdresseResponseTo.class).getAdresse();
-		} catch (HttpClientErrorException e) {
-			if (e.getStatusCode().equals(UNAUTHORIZED)) {
-				throw new RegoppslagHentAdresseSecurityException(format("Kall mot TREG002 feilet. Ingen tilgang. Feilmelding=%s", e.getMessage()));
-			}
 
-			String reasonCode = e.getResponseHeaders().containsKey(NAV_REASON_CODE) ? e.getResponseHeaders().get(NAV_REASON_CODE).stream()
-					.findAny().orElse(null) : null;
-
-			if (e.getStatusCode().equals(NOT_FOUND) && UKJENT_ADRESSE_REASON_CODE.equals(reasonCode)) {
-				log.warn(format("Kall mot TREG002 feilet funksjonelt. HttpStatus=%s, reasonCode=%s, Feilmelding=%s",
-						e.getStatusCode(), reasonCode, e.getMessage()));
-				return null;
-			}
-			throw new RegoppslagHentAdresseFunctionalException(format("Kall mot TREG002 feilet funksjonelt. HttpStatusKode=%s, HttpRespons=%s, Feilmelding=%s",
-					e.getStatusCode(), e.getResponseBodyAsString(), e.getMessage()));
-		} catch (HttpServerErrorException e) {
-			throw new RegoppslagHentAdresseTechnicalException(format("Kall mot TREG002 feilet teknisk. HttpStatusKode=%s, Feilmelding=%s",
-					e.getStatusCode(), e.getMessage()));
-		}
+		return webClient.post()
+				.uri(uriBuilder -> uriBuilder.path(HENT_MOTTAKER_OG_ADRESSE_PATH).build())
+				.bodyValue(request)
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_REGOPPSLAG))
+				.retrieve()
+				.bodyToMono(HentMottakerOgAdresseResponseTo.class)
+				.map(HentMottakerOgAdresseResponseTo::getAdresse)
+				.onErrorResume(WebClientResponseException.class, this::handleUkjentAdresse)
+				.doOnError(handleError())
+				.block();
 	}
 
-	private HttpHeaders retrieveBearerTokenAndCreateHeader() {
-		String callId = getCallId();
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setBearerAuth(stsRestConsumer.getBearerToken());
-		httpHeaders.set(CALL_ID, callId);
-		httpHeaders.set(NAV_CALLID, callId);
-		return httpHeaders;
+	private Mono<AdresseTo> handleUkjentAdresse(WebClientResponseException e) {
+		var reasonCode = e.getHeaders().getFirst(NAV_REASON_CODE);
+
+		if (NOT_FOUND.equals(e.getStatusCode()) && UKJENT_ADRESSE_REASON_CODE.equals(reasonCode)) {
+			log.warn("Kall mot TREG002 feilet funksjonelt med statusKode={}, reasonCode={}, feilmelding={}", e.getStatusCode(), reasonCode, e.getResponseBodyAsString());
+			return Mono.empty();
+		}
+		return Mono.error(e);
 	}
 
-	private String getCallId() {
-		String callId = MDC.get(CALL_ID);
-		if (callId == null) {
-			return UUID.randomUUID().toString();
-		}
-		return callId;
+	private Consumer<Throwable> handleError() {
+		return error -> {
+			if (error instanceof WebClientResponseException e) {
+				if (e.getStatusCode().is4xxClientError()) {
+					throw new RegoppslagHentAdresseFunctionalException(
+							"Kall mot TREG002 feilet funksjonelt med statusKode=%s, feilmelding=%s".formatted(e.getStatusCode(), e.getResponseBodyAsString()),
+							e);
+				} else {
+					throw new RegoppslagHentAdresseTechnicalException(
+							"Kall mot TREG002 feilet teknisk med statusKode=%s, feilmelding=%s".formatted(e.getStatusCode(), e.getResponseBodyAsString()),
+							e);
+				}
+			} else {
+				throw new RegoppslagHentAdresseTechnicalException(
+						"Kall mot TREG002 feilet med ukjent teknisk feil. Feilmelding=%s".formatted(error.getMessage()),
+						error);
+			}
+		};
 	}
 }

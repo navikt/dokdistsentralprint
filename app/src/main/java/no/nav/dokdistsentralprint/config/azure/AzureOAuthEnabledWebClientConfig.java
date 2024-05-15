@@ -1,7 +1,6 @@
 package no.nav.dokdistsentralprint.config.azure;
 
 import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -24,6 +23,7 @@ import java.util.List;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKDISTADMIN;
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKMET;
+import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_REGOPPSLAG;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.CLIENT_CREDENTIALS;
 import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
 
@@ -101,6 +101,14 @@ public class AzureOAuthEnabledWebClientConfig {
 						.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
 						.authorizationGrantType(CLIENT_CREDENTIALS)
 						.scope(dokdistsentralprintProperties.getEndpoints().getDokdistadmin().getScope())
+						.build(),
+				ClientRegistration.withRegistrationId(CLIENT_REGISTRATION_REGOPPSLAG)
+						.tokenUri(azureTokenProperties.openidConfigTokenEndpoint())
+						.clientId(azureTokenProperties.appClientId())
+						.clientSecret(azureTokenProperties.appClientSecret())
+						.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
+						.authorizationGrantType(CLIENT_CREDENTIALS)
+						.scope(dokdistsentralprintProperties.getEndpoints().getRegoppslag().getScope())
 						.build()
 		);
 	}

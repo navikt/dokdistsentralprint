@@ -20,6 +20,9 @@ public class DokdistsentralprintProperties {
 
 		@NotNull
 		private AzureEndpoint dokdistadmin;
+
+		@NotNull
+		private AzureEndpoint regoppslag;
 	}
 
 	@Data

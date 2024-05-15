@@ -34,7 +34,7 @@
         <dokmet-api.version>23-5fe145a</dokmet-api.version>
         <melding-virksomhet-dokdistfordeling.version>7-18c61bf</melding-virksomhet-dokdistfordeling.version>
         <opprettoppgave-tjenestespesifikasjon-v1.version>2-3843acc</opprettoppgave-tjenestespesifikasjon-v1.version>
-
+        <context-propagation.version>1.1.1</context-propagation.version>
 
         <!-- Test -->
         <spring-cloud-contract-wiremock.version>4.1.1</spring-cloud-contract-wiremock.version>
@@ -117,6 +117,11 @@
                 <groupId>com.google.crypto.tink</groupId>
                 <artifactId>tink-gcpkms</artifactId>
                 <version>${tink-gcpkms.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>context-propagation</artifactId>
+                <version>${context-propagation.version}</version>
             </dependency>
 
             <!-- Test -->

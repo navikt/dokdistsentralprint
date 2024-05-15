@@ -5,4 +5,8 @@ public class RegoppslagHentAdresseFunctionalException extends AbstractDokdistsen
 	public RegoppslagHentAdresseFunctionalException(String message) {
 		super(message);
 	}
+
+	public RegoppslagHentAdresseFunctionalException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }
