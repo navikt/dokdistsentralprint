@@ -22,7 +22,6 @@ import java.util.List;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKDISTADMIN;
-import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKMET;
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_REGOPPSLAG;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.CLIENT_CREDENTIALS;
 import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
@@ -86,14 +85,6 @@ public class AzureOAuthEnabledWebClientConfig {
 			DokdistsentralprintProperties dokdistsentralprintProperties,
 			AzureTokenProperties azureTokenProperties) {
 		return List.of(
-				ClientRegistration.withRegistrationId(CLIENT_REGISTRATION_DOKMET)
-						.tokenUri(azureTokenProperties.openidConfigTokenEndpoint())
-						.clientId(azureTokenProperties.appClientId())
-						.clientSecret(azureTokenProperties.appClientSecret())
-						.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
-						.authorizationGrantType(CLIENT_CREDENTIALS)
-						.scope(dokdistsentralprintProperties.getEndpoints().getDokmet().getScope())
-						.build(),
 				ClientRegistration.withRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN)
 						.tokenUri(azureTokenProperties.openidConfigTokenEndpoint())
 						.clientId(azureTokenProperties.appClientId())

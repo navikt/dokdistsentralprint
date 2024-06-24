@@ -1,8 +1,8 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistsentralprint.consumer.tkat020.DokumentkatalogAdmin;
-import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
+import no.nav.dokdistsentralprint.consumer.dokmet.DokmetConsumer;
+import no.nav.dokdistsentralprint.consumer.dokmet.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.exception.functional.KunneIkkeDeserialisereBucketJsonPayloadFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.NoDocumentFromBucketTechnicalException;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
@@ -30,18 +30,19 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Slf4j
 @Service
 public class Qdist009Service {
-	private final DokumentkatalogAdmin dokumentkatalogAdmin;
+
+	private final DokmetConsumer dokmetConsumer;
 	private final PostadresseValidatorOgForsendelseFeilregistrerService postadresseService;
 	private final BucketStorage bucketStorage;
 	private final BestillingMapper bestillingMapper;
 	private final BestillingMarshaller bestillingMarshaller;
 
-	public Qdist009Service(DokumentkatalogAdmin dokumentkatalogAdmin,
+	public Qdist009Service(DokmetConsumer dokmetConsumer,
 						   PostadresseValidatorOgForsendelseFeilregistrerService postadresseService,
 						   BucketStorage bucketStorage,
 						   BestillingMapper bestillingMapper,
 						   BestillingMarshaller bestillingMarshaller) {
-		this.dokumentkatalogAdmin = dokumentkatalogAdmin;
+		this.dokmetConsumer = dokmetConsumer;
 		this.postadresseService = postadresseService;
 		this.bucketStorage = bucketStorage;
 		this.bestillingMapper = bestillingMapper;
@@ -57,7 +58,7 @@ public class Qdist009Service {
 		String postdestinasjon = postadresseService.hentPostdestinasjon(internForsendelse.getPostadresse());
 
 		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(internForsendelse);
-		DokumenttypeInfo dokumenttypeInfo = dokumentkatalogAdmin.hentDokumenttypeInfo(dokumenttypeIdHoveddokument);
+		DokumenttypeInfo dokumenttypeInfo = dokmetConsumer.hentDokumenttypeInfo(dokumenttypeIdHoveddokument);
 
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(internForsendelse);
 

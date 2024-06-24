@@ -13,7 +13,6 @@ public record AzureTokenProperties(
 		@NotEmpty String appClientSecret
 ) {
 	public static final String SPRING_DEFAULT_PRINCIPAL = "anonymousUser";
-	public static final String CLIENT_REGISTRATION_DOKMET = "azure-dokmet";
 	public static final String CLIENT_REGISTRATION_DOKDISTADMIN = "azure-dokdistadmin";
 	public static final String CLIENT_REGISTRATION_REGOPPSLAG = "azure-regoppslag";
 

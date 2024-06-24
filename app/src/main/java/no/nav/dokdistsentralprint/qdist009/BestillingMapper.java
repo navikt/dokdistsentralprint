@@ -1,7 +1,7 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
+import no.nav.dokdistsentralprint.consumer.dokmet.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.BestillingsInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Dokument;
@@ -93,7 +93,7 @@ public class BestillingMapper {
 		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
 
 		Dokument dokument = new Dokument();
-		dokument.setDokumentType(mapDokumentType(dokumenttypeInfo.getSentralPrintDokumentType()));
+		dokument.setDokumentType(mapDokumentType(dokumenttypeInfo.sentralPrintDokumentType()));
 		dokument.setDokumentId(dokumentTo.getDokumentObjektReferanse());
 		dokument.setSkattyternummer(internForsendelse.getMottaker().getMottakerId());
 		dokument.setNavn(addCDataToString(internForsendelse.getMottaker().getMottakerNavn()));
@@ -105,7 +105,7 @@ public class BestillingMapper {
 	private Dokument mapDokumentUtlending(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo, InternForsendelse.Dokument dokumentTo) {
 		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
 		Dokument dokument = new Dokument();
-		dokument.setDokumentType(mapDokumentType(dokumenttypeInfo.getSentralPrintDokumentType()));
+		dokument.setDokumentType(mapDokumentType(dokumenttypeInfo.sentralPrintDokumentType()));
 		dokument.setDokumentId(dokumentTo.getDokumentObjektReferanse());
 		dokument.setNavn(addCDataToString(internForsendelse.getMottaker().getMottakerNavn()));
 		dokument.setLandkode(getLandkode(adresse));
@@ -180,12 +180,11 @@ public class BestillingMapper {
 	}
 
 	private String getBehandling(DokumenttypeInfo dokumenttypeInfo) {
-		return format("%s_%s_%s", dokumenttypeInfo.getPortoklasse(), mapKonvoluttvinduType(dokumenttypeInfo), getPlex(dokumenttypeInfo
-				.isTosidigprint()));
+		return format("%s_%s_%s", dokumenttypeInfo.portoklasse(), mapKonvoluttvinduType(dokumenttypeInfo), getPlex(dokumenttypeInfo.tosidigprint()));
 	}
 
 	private String mapKonvoluttvinduType(DokumenttypeInfo dokumenttypeInfo) {
-		return isBlank(dokumenttypeInfo.getKonvoluttvinduType()) ? KONVOLUTT_MED_VINDU : dokumenttypeInfo.getKonvoluttvinduType();
+		return isBlank(dokumenttypeInfo.konvoluttvinduType()) ? KONVOLUTT_MED_VINDU : dokumenttypeInfo.konvoluttvinduType();
 	}
 
 	private String mapDokumentType(String sentralPrintDokumentType) {
