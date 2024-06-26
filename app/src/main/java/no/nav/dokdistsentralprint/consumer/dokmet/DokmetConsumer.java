@@ -31,7 +31,7 @@ public class DokmetConsumer {
 	public DokmetConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
 						  WebClient webClient) {
 		this.webClient = webClient.mutate()
-				.baseUrl(dokdistsentralprintProperties.getEndpoints().getDokmet().getUrl())
+				.baseUrl(dokdistsentralprintProperties.getEndpoints().getDokmetUrl())
 				.filter(new NavHeadersFilter())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.build();
