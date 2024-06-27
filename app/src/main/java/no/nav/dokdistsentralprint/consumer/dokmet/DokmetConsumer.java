@@ -65,7 +65,7 @@ public class DokmetConsumer {
 				response.getDokumentProduksjonsInfo().getDistribusjonInfo().getPortoklasse(),
 				response.getDokumentProduksjonsInfo().getDistribusjonInfo().getKonvoluttvinduType(),
 				response.getDokumentProduksjonsInfo().getDistribusjonInfo().getSentralPrintDokumentType(),
-				response.getDokumentProduksjonsInfo().getDistribusjonInfo().getTosidigPrint()
+				response.getDokumentProduksjonsInfo().getDistribusjonInfo().isTosidigPrint()
 		);
 	}
 
