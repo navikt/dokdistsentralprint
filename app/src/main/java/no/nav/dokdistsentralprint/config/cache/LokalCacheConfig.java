@@ -19,7 +19,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 @EnableCaching
 public class LokalCacheConfig {
 
-	public static final String TKAT020_CACHE = "tkat020Cache";
+	public static final String DOKMET_CACHE = "dokmetCache";
 	public static final String POSTDESTINASJON_CACHE = "postdestinasjonCache";
 
 	@Bean
@@ -28,7 +28,7 @@ public class LokalCacheConfig {
 	CacheManager cacheManager() {
 		SimpleCacheManager manager = new SimpleCacheManager();
 		manager.setCaches(Arrays.asList(
-				new CaffeineCache(TKAT020_CACHE, Caffeine.newBuilder()
+				new CaffeineCache(DOKMET_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(1, DAYS)
 						.build()),
 				new CaffeineCache(POSTDESTINASJON_CACHE, Caffeine.newBuilder()

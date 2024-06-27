@@ -1,0 +1,20 @@
+{
+  "dokumenttypeId": "000073",
+  "dokumentTittel": "Vedtak – omregning til enslig uføretrygdet (automatisk)",
+  "dokumentType": "U",
+  "dokumentKategori": "VB",
+  "sensitivt": true,
+  "utledRegisterInfo": false,
+  "tema": null,
+  "behandlingstema": null,
+  "arkivSystem": "JOARK",
+  "artifaktId": null,
+  "dokumentProduksjonsInfo": null,
+  "dokumentMottakInfo": null,
+  "changeStamp": {
+    "opprettetAv": "srvdokkat",
+    "opprettetDato": "2018-11-29T08:17:56.413",
+    "endretAv": "srvdokkat",
+    "endretDato": "2023-12-11T10:21:21.134493"
+  }
+}

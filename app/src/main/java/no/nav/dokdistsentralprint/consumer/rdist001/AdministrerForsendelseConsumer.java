@@ -8,36 +8,27 @@ import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnic
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
 
-import java.util.Map;
-import java.util.function.Consumer;
-
+import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKDISTADMIN;
-import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.getOAuth2AuthorizeRequestForAzure;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Slf4j
 @Component
 public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	private final WebClient webClient;
-	private final ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
 	public AdministrerForsendelseConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
-										  WebClient webClient,
-										  ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) {
-		this.oAuth2AuthorizedClientManager = oAuth2AuthorizedClientManager;
+										  WebClient webClient) {
 		this.webClient = webClient.mutate()
 				.baseUrl(dokdistsentralprintProperties.getEndpoints().getDokdistadmin().getUrl())
 				.filter(new NavHeadersFilter())
@@ -55,7 +46,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.uri(uriBuilder -> uriBuilder
 						.path("/{forsendelseId}")
 						.build(forsendelseId))
-				.attributes(getOAuth2AuthorizedClient())
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.retrieve()
 				.bodyToMono(HentForsendelseResponse.class)
 				.doOnError(this::handleError)
@@ -72,7 +63,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 		webClient.put()
 				.uri("/oppdaterforsendelse")
-				.attributes(getOAuth2AuthorizedClient())
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.bodyValue(oppdaterForsendelseRequest)
 				.retrieve()
 				.toBodilessEntity()
@@ -91,7 +82,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.uri(uriBuilder -> uriBuilder
 						.path("/hentpostdestinasjon/{landkode}")
 						.build(landkode))
-				.attributes(getOAuth2AuthorizedClient())
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.retrieve()
 				.bodyToMono(HentPostdestinasjonResponse.class)
 				.map(HentPostdestinasjonResponse::postdestinasjon)
@@ -111,7 +102,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 		webClient.put()
 				.uri("/oppdaterpostadresse")
-				.attributes(getOAuth2AuthorizedClient())
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.bodyValue(oppdaterPostadresseRequest)
 				.retrieve()
 				.toBodilessEntity()
@@ -127,7 +118,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 		webClient.put()
 				.uri("/feilregistrerforsendelse")
-				.attributes(getOAuth2AuthorizedClient())
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.bodyValue(feilregistrerForsendelse)
 				.retrieve()
 				.toBodilessEntity()
@@ -140,20 +131,15 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	private void handleError(Throwable error) {
 		if (error instanceof WebClientResponseException response && ((WebClientResponseException) error).getStatusCode().is4xxClientError()) {
 			throw new DokdistsentralprintFunctionalException(
-					String.format("Kall mot rdist001 feilet funksjonelt med status=%s, feilmelding=%s",
+					format("Kall mot rdist001 feilet funksjonelt med status=%s, feilmelding=%s",
 							response.getStatusCode(),
 							response.getMessage()),
 					error);
 		} else {
 			throw new DokdistsentralprintTechnicalException(
-					String.format("Kall mot rdist001 feilet teknisk med feilmelding=%s", error.getMessage()),
+					format("Kall mot rdist001 feilet teknisk med feilmelding=%s", error.getMessage()),
 					error);
 		}
-	}
-
-	private Consumer<Map<String, Object>> getOAuth2AuthorizedClient() {
-		Mono<OAuth2AuthorizedClient> clientMono = oAuth2AuthorizedClientManager.authorize(getOAuth2AuthorizeRequestForAzure(CLIENT_REGISTRATION_DOKDISTADMIN));
-		return ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(clientMono.block());
 	}
 
 }

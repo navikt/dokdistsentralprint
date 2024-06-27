@@ -46,8 +46,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokdistsentralprint.TestUtils.classpathToString;
 import static no.nav.dokdistsentralprint.TestUtils.fileToString;
 import static no.nav.dokdistsentralprint.TestUtils.unzipToDirectory;
+import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.DOKMET_CACHE;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
-import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_REASON_CODE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
 import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
@@ -137,7 +137,7 @@ class Qdist009IT {
 	public void setupBefore() {
 		CALL_ID = UUID.randomUUID().toString();
 
-		cacheManager.getCache(TKAT020_CACHE).clear();
+		cacheManager.getCache(DOKMET_CACHE).clear();
 		cacheManager.getCache(POSTDESTINASJON_CACHE).clear();
 		reset(bucketStorage);
 		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
@@ -404,14 +404,12 @@ class Qdist009IT {
 	}
 
 	@Test
-	void shouldThrowTkat020FunctionalException() throws Exception {
-		stubFor(get(urlMatching(DOKMET_URL))
-				.willReturn(aResponse().withStatus(NOT_FOUND.value())));
+	void shouldPutOnFunksjonellFeilkoeWhenNotFoundFromDokmet() throws Exception {
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
 		stubPutPostadresse(OK.value());
 		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
-
+		stubGetDokumenttypeinfo(NOT_FOUND.value());
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -426,14 +424,32 @@ class Qdist009IT {
 	}
 
 	@Test
-	void shouldThrowTkat020TechicalException() throws Exception {
-		stubFor(get(urlMatching(DOKMET_URL))
-				.willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR.value())));
+	void shouldPutOnFunksjonellFeilkoeWhenMissingDataFromDokmet() throws Exception {
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
 		stubPutPostadresse(OK.value());
 		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubGetDokumenttypeinfoManglendeData();
 
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
+	}
+
+	@Test
+	void shouldPutOnTekniskFeilkoeWhenInternalServerErrorFromDokmet() throws Exception {
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubGetDokumenttypeinfo(INTERNAL_SERVER_ERROR.value());
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -684,7 +700,21 @@ class Qdist009IT {
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("dokumentinfov4/tkat020-happy.json")));
+						.withBodyFile("dokmet/tkat020-happy.json")));
+	}
+
+	private void stubGetDokumenttypeinfo(int status) {
+		stubFor(get(urlMatching(DOKMET_URL))
+				.willReturn(aResponse()
+						.withStatus(status)));
+	}
+
+	private void stubGetDokumenttypeinfoManglendeData() {
+		stubFor(get(urlMatching(DOKMET_URL))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("dokmet/tkat020-missing-dokumentproduksjonsinfo.json")));;
 	}
 
 	private void stubPostHentMottakerOgAdresse(String path, int status) {

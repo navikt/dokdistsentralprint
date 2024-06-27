@@ -3,7 +3,7 @@ package no.nav.dokdistsentralprint;
 import no.nav.dokdistsentralprint.consumer.rdist001.ArkivSystemCode;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostdestinasjonResponse;
-import no.nav.dokdistsentralprint.consumer.tkat020.DokumenttypeInfo;
+import no.nav.dokdistsentralprint.consumer.dokmet.Distribusjonsinfo;
 import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
 
 import java.util.Arrays;
@@ -114,29 +114,28 @@ public class TestData {
 				.build();
 	}
 
-	public static DokumenttypeInfo createDokumenttypeInfoTo(boolean tosidigPrint) {
-		return DokumenttypeInfo.builder()
-				.konvoluttvinduType(KONVOLUTTVINDU_TYPE)
-				.portoklasse(PORTOKLASSE)
-				.sentralPrintDokumentType(SENTRALPRINT_DOKTYPE)
-				.tosidigprint(tosidigPrint)
-				.build();
+	public static Distribusjonsinfo createDokumenttypeInfoTo(boolean tosidigPrint) {
+		return new Distribusjonsinfo(
+				PORTOKLASSE,
+				KONVOLUTTVINDU_TYPE,
+				SENTRALPRINT_DOKTYPE,
+				tosidigPrint);
 	}
 
-	public static DokumenttypeInfo createDokumenttypeInfoUtenKonvoluttvinduType(boolean tosidigPrint) {
-		return DokumenttypeInfo.builder()
-				.portoklasse(PORTOKLASSE)
-				.sentralPrintDokumentType(SENTRALPRINT_DOKTYPE)
-				.tosidigprint(tosidigPrint)
-				.build();
+	public static Distribusjonsinfo createDokumenttypeInfoUtenKonvoluttvinduType(boolean tosidigPrint) {
+		return new Distribusjonsinfo(
+				PORTOKLASSE,
+				null,
+				SENTRALPRINT_DOKTYPE,
+				tosidigPrint);
 	}
 
-	public static DokumenttypeInfo createDokumenttypeInfoToUtenSentralPrintDokumentType(boolean tosidigPrint) {
-		return DokumenttypeInfo.builder()
-				.konvoluttvinduType(KONVOLUTTVINDU_TYPE)
-				.portoklasse(PORTOKLASSE)
-				.tosidigprint(tosidigPrint)
-				.build();
+	public static Distribusjonsinfo createDokumenttypeInfoToUtenSentralPrintDokumentType(boolean tosidigPrint) {
+		return new Distribusjonsinfo(
+				PORTOKLASSE,
+				KONVOLUTTVINDU_TYPE,
+				null,
+				tosidigPrint);
 	}
 
 	public static InternForsendelse.Postadresse createAdresse(String landkode) {
