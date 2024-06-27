@@ -3,7 +3,7 @@ package no.nav.dokdistsentralprint;
 import no.nav.dokdistsentralprint.consumer.rdist001.ArkivSystemCode;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.consumer.rdist001.HentPostdestinasjonResponse;
-import no.nav.dokdistsentralprint.consumer.dokmet.DokumenttypeInfo;
+import no.nav.dokdistsentralprint.consumer.dokmet.Distribusjonsinfo;
 import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
 
 import java.util.Arrays;
@@ -114,24 +114,24 @@ public class TestData {
 				.build();
 	}
 
-	public static DokumenttypeInfo createDokumenttypeInfoTo(boolean tosidigPrint) {
-		return new DokumenttypeInfo(
+	public static Distribusjonsinfo createDokumenttypeInfoTo(boolean tosidigPrint) {
+		return new Distribusjonsinfo(
 				PORTOKLASSE,
 				KONVOLUTTVINDU_TYPE,
 				SENTRALPRINT_DOKTYPE,
 				tosidigPrint);
 	}
 
-	public static DokumenttypeInfo createDokumenttypeInfoUtenKonvoluttvinduType(boolean tosidigPrint) {
-		return new DokumenttypeInfo(
+	public static Distribusjonsinfo createDokumenttypeInfoUtenKonvoluttvinduType(boolean tosidigPrint) {
+		return new Distribusjonsinfo(
 				PORTOKLASSE,
 				null,
 				SENTRALPRINT_DOKTYPE,
 				tosidigPrint);
 	}
 
-	public static DokumenttypeInfo createDokumenttypeInfoToUtenSentralPrintDokumentType(boolean tosidigPrint) {
-		return new DokumenttypeInfo(
+	public static Distribusjonsinfo createDokumenttypeInfoToUtenSentralPrintDokumentType(boolean tosidigPrint) {
+		return new Distribusjonsinfo(
 				PORTOKLASSE,
 				KONVOLUTTVINDU_TYPE,
 				null,

@@ -1,7 +1,7 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistsentralprint.consumer.dokmet.DokumenttypeInfo;
+import no.nav.dokdistsentralprint.consumer.dokmet.Distribusjonsinfo;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.printoppdrag.BestillingsInfo;
 import no.nav.dokdistsentralprint.printoppdrag.Dokument;
@@ -34,7 +34,7 @@ public class BestillingMapper {
 	private static final String NAV_STANDARD = "NAV_STANDARD";
 	private static final int MAKS_ADRESSELINJE_LENGDE = 128;
 
-	public Bestilling createBestilling(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo, String postdestinasjon) {
+	public Bestilling createBestilling(InternForsendelse internForsendelse, Distribusjonsinfo distribusjonsinfo, String postdestinasjon) {
 		Bestilling bestilling = new Bestilling();
 		BestillingsInfo bestillingsInfo = new BestillingsInfo();
 		bestillingsInfo.setModus(internForsendelse.getModus());
@@ -42,16 +42,16 @@ public class BestillingMapper {
 		bestillingsInfo.setBestillingsId(internForsendelse.getBestillingsId());
 		bestillingsInfo.setKundeOpprettet(LocalDate.now().toString());
 		bestillingsInfo.setDokumentInfo(mapDokumentInfo(postdestinasjon));
-		bestillingsInfo.setKanal(mapKanal(dokumenttypeInfo));
+		bestillingsInfo.setKanal(mapKanal(distribusjonsinfo));
 		bestilling.setBestillingsInfo(bestillingsInfo);
-		bestilling.setMailpiece(mapMailpiece(internForsendelse, dokumenttypeInfo));
+		bestilling.setMailpiece(mapMailpiece(internForsendelse, distribusjonsinfo));
 		return bestilling;
 	}
 
-	private Kanal mapKanal(DokumenttypeInfo dokumenttypeInfo) {
+	private Kanal mapKanal(Distribusjonsinfo distribusjonsinfo) {
 		Kanal kanal = new Kanal();
 		kanal.setType(PRINT);
-		kanal.setBehandling(getBehandling(dokumenttypeInfo));
+		kanal.setBehandling(getBehandling(distribusjonsinfo));
 		return kanal;
 	}
 
@@ -62,7 +62,7 @@ public class BestillingMapper {
 		return dokumentInfo;
 	}
 
-	private Mailpiece mapMailpiece(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo) {
+	private Mailpiece mapMailpiece(InternForsendelse internForsendelse, Distribusjonsinfo distribusjonsinfo) {
 		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
 
 		Mailpiece mailpiece = new Mailpiece();
@@ -70,7 +70,7 @@ public class BestillingMapper {
 		mailpiece.setRessurs(mapRessurs(internForsendelse));
 		mailpiece.setLandkode(getLandkode(adresse));
 		mailpiece.setPostnummer(getPostnummer(adresse));
-		mailpiece.getDokument().addAll(mapDokumenter(internForsendelse, dokumenttypeInfo));
+		mailpiece.getDokument().addAll(mapDokumenter(internForsendelse, distribusjonsinfo));
 		return mailpiece;
 	}
 
@@ -80,20 +80,20 @@ public class BestillingMapper {
 		return ressurs;
 	}
 
-	private List<Dokument> mapDokumenter(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo) {
+	private List<Dokument> mapDokumenter(InternForsendelse internForsendelse, Distribusjonsinfo distribusjonsinfo) {
 		return internForsendelse.getDokumenter().stream()
 				.map(dokumentTo ->
 						isMottakerSkattyter(internForsendelse.getMottaker().getMottakerType()) ?
-								mapDokumentSkattyter(internForsendelse, dokumenttypeInfo, dokumentTo) :
-								mapDokumentUtlending(internForsendelse, dokumenttypeInfo, dokumentTo))
+								mapDokumentSkattyter(internForsendelse, distribusjonsinfo, dokumentTo) :
+								mapDokumentUtlending(internForsendelse, distribusjonsinfo, dokumentTo))
 				.collect(Collectors.toList());
 	}
 
-	private Dokument mapDokumentSkattyter(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo, InternForsendelse.Dokument dokumentTo) {
+	private Dokument mapDokumentSkattyter(InternForsendelse internForsendelse, Distribusjonsinfo distribusjonsinfo, InternForsendelse.Dokument dokumentTo) {
 		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
 
 		Dokument dokument = new Dokument();
-		dokument.setDokumentType(mapDokumentType(dokumenttypeInfo.sentralPrintDokumentType()));
+		dokument.setDokumentType(mapDokumentType(distribusjonsinfo.sentralPrintDokumentType()));
 		dokument.setDokumentId(dokumentTo.getDokumentObjektReferanse());
 		dokument.setSkattyternummer(internForsendelse.getMottaker().getMottakerId());
 		dokument.setNavn(addCDataToString(internForsendelse.getMottaker().getMottakerNavn()));
@@ -102,10 +102,10 @@ public class BestillingMapper {
 		return dokument;
 	}
 
-	private Dokument mapDokumentUtlending(InternForsendelse internForsendelse, DokumenttypeInfo dokumenttypeInfo, InternForsendelse.Dokument dokumentTo) {
+	private Dokument mapDokumentUtlending(InternForsendelse internForsendelse, Distribusjonsinfo distribusjonsinfo, InternForsendelse.Dokument dokumentTo) {
 		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
 		Dokument dokument = new Dokument();
-		dokument.setDokumentType(mapDokumentType(dokumenttypeInfo.sentralPrintDokumentType()));
+		dokument.setDokumentType(mapDokumentType(distribusjonsinfo.sentralPrintDokumentType()));
 		dokument.setDokumentId(dokumentTo.getDokumentObjektReferanse());
 		dokument.setNavn(addCDataToString(internForsendelse.getMottaker().getMottakerNavn()));
 		dokument.setLandkode(getLandkode(adresse));
@@ -179,12 +179,12 @@ public class BestillingMapper {
 		return format("<![CDATA[%s]]>", s);
 	}
 
-	private String getBehandling(DokumenttypeInfo dokumenttypeInfo) {
-		return format("%s_%s_%s", dokumenttypeInfo.portoklasse(), mapKonvoluttvinduType(dokumenttypeInfo), getPlex(dokumenttypeInfo.tosidigprint()));
+	private String getBehandling(Distribusjonsinfo distribusjonsinfo) {
+		return format("%s_%s_%s", distribusjonsinfo.portoklasse(), mapKonvoluttvinduType(distribusjonsinfo), getPlex(distribusjonsinfo.tosidigprint()));
 	}
 
-	private String mapKonvoluttvinduType(DokumenttypeInfo dokumenttypeInfo) {
-		return isBlank(dokumenttypeInfo.konvoluttvinduType()) ? KONVOLUTT_MED_VINDU : dokumenttypeInfo.konvoluttvinduType();
+	private String mapKonvoluttvinduType(Distribusjonsinfo distribusjonsinfo) {
+		return isBlank(distribusjonsinfo.konvoluttvinduType()) ? KONVOLUTT_MED_VINDU : distribusjonsinfo.konvoluttvinduType();
 	}
 
 	private String mapDokumentType(String sentralPrintDokumentType) {

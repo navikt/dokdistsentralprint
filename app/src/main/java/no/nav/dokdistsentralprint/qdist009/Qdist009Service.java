@@ -1,9 +1,10 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokdistsentralprint.consumer.dokmet.Distribusjonsinfo;
 import no.nav.dokdistsentralprint.consumer.dokmet.DokmetConsumer;
-import no.nav.dokdistsentralprint.consumer.dokmet.DokumenttypeInfo;
 import no.nav.dokdistsentralprint.exception.functional.KunneIkkeDeserialisereBucketJsonPayloadFunctionalException;
+import no.nav.dokdistsentralprint.exception.functional.ManglerDistribusjonsinfoException;
 import no.nav.dokdistsentralprint.exception.technical.NoDocumentFromBucketTechnicalException;
 import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
 import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
@@ -58,11 +59,14 @@ public class Qdist009Service {
 		String postdestinasjon = postadresseService.hentPostdestinasjon(internForsendelse.getPostadresse());
 
 		final String dokumenttypeIdHoveddokument = getDokumenttypeIdHoveddokument(internForsendelse);
-		DokumenttypeInfo dokumenttypeInfo = dokmetConsumer.hentDokumenttypeInfo(dokumenttypeIdHoveddokument);
+		Distribusjonsinfo distribusjonsinfo = dokmetConsumer.hentDistribusjonsinfo(dokumenttypeIdHoveddokument);
+		if (distribusjonsinfo == null) {
+			throw new ManglerDistribusjonsinfoException(format("Distribusjonsinfo mangler for dokument med dokumenttypeId=%s. Ikke et utgående dokument?", dokumenttypeIdHoveddokument));
+		}
 
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(internForsendelse);
 
-		Bestilling bestilling = bestillingMapper.createBestilling(internForsendelse, dokumenttypeInfo, postdestinasjon);
+		Bestilling bestilling = bestillingMapper.createBestilling(internForsendelse, distribusjonsinfo, postdestinasjon);
 		String kanalbehandling = bestilling.getBestillingsInfo().getKanal().getBehandling();
 		log.info("qdist009 lager bestilling til print med kanalbehandling={}, antall_dokumenter={} for bestillingsId={}, dokumenttypeId={}",
 				kanalbehandling, dokdistDokumentList.size(), bestillingsId, dokumenttypeIdHoveddokument);

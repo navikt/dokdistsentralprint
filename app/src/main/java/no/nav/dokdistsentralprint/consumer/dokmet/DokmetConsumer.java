@@ -39,34 +39,29 @@ public class DokmetConsumer {
 
 	@Cacheable(DOKMET_CACHE)
 	@Retryable(retryFor = DokmetTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
-	public DokumenttypeInfo hentDokumenttypeInfo(final String dokumenttypeId) {
-		log.info("hentDokumenttypeInfo henter dokumenttypeinfo med dokumenttypeId={}", dokumenttypeId);
+	public Distribusjonsinfo hentDistribusjonsinfo(final String dokumenttypeId) {
+		log.info("hentDistribusjonsinfo henter distribusjonsinfo for dokumenttypeId={}", dokumenttypeId);
 
-		DokumenttypeInfoTo result = webClient.get()
+		var result = webClient.get()
 				.uri(uriBuilder -> uriBuilder.path("/{dokumenttypeId}")
 						.build(dokumenttypeId))
 				.retrieve()
 				.bodyToMono(DokumenttypeInfoTo.class)
+				.mapNotNull(this::mapResponse)
 				.doOnError(handleError(dokumenttypeId))
 				.block();
 
-		var dokumenttypeinfo = mapResponse(result);
-		log.info("hentDokumenttypeInfo har hentet dokumenttypeinfo med dokumenttypeId={}", dokumenttypeId);
+		log.info("hentDistribusjonsinfo har hentet distribusjonsinfo for dokumenttypeId={}", dokumenttypeId);
 
-		return dokumenttypeinfo;
+		return result;
 	}
 
-	private DokumenttypeInfo mapResponse(final DokumenttypeInfoTo response) {
-		if (response == null) {
-			throw new DokmetFunctionalException("DokumenttypeInfo er null");
+	private Distribusjonsinfo mapResponse(final DokumenttypeInfoTo response) {
+		if (manglerDistribusjonsinfo(response)) {
+			return null;
 		}
 
-		if (response.getDokumentProduksjonsInfo() == null || response.getDokumentProduksjonsInfo().getDistribusjonInfo() == null) {
-			throw new DokmetFunctionalException(format("DokumentProduksjonsInfo eller DistribusjonInfo er null på dokument med dokumenttypeId=%s og dokumenttype=%s. Ikke et utgående dokument?",
-					response.getDokumenttypeId(), response.getDokumentType()));
-		}
-
-		return new DokumenttypeInfo(
+		return new Distribusjonsinfo(
 				response.getDokumentProduksjonsInfo().getDistribusjonInfo().getPortoklasse(),
 				response.getDokumentProduksjonsInfo().getDistribusjonInfo().getKonvoluttvinduType(),
 				response.getDokumentProduksjonsInfo().getDistribusjonInfo().getSentralPrintDokumentType(),
@@ -91,4 +86,9 @@ public class DokmetConsumer {
 		};
 	}
 
+	private boolean manglerDistribusjonsinfo(DokumenttypeInfoTo response) {
+		return response == null ||
+			   response.getDokumentProduksjonsInfo() == null ||
+			   response.getDokumentProduksjonsInfo().getDistribusjonInfo() == null;
+	}
 }

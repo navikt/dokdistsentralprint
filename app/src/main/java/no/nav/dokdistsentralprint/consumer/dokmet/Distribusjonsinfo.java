@@ -1,6 +1,6 @@
 package no.nav.dokdistsentralprint.consumer.dokmet;
 
-public record DokumenttypeInfo(
+public record Distribusjonsinfo(
 		String portoklasse,
 		String konvoluttvinduType,
 		String sentralPrintDokumentType,
