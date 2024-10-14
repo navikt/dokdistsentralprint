@@ -12,7 +12,6 @@
   "DOKDISTSENTRALPRINT_ENDPOINTS_REGOPPSLAG_URL":"http://regoppslag.teamdokumenthandtering.svc.nais.local",
   "DOKDISTSENTRALPRINT_ENDPOINTS_REGOPPSLAG_SCOPE": "api://prod-fss.teamdokumenthandtering.regoppslag/.default",
   "MQGATEWAY01_CHANNEL_SECURENAME": "P_DOKDISTSPRINT_SEC",
-  "MQGATEWAY01_CHANNEL_ENABLETLS": "true",
   "MQGATEWAY01_HOSTNAME": "mpls01.adeo.no",
   "MQGATEWAY01_PORT": "1414",
   "MQGATEWAY01_NAME": "MPLS01",
