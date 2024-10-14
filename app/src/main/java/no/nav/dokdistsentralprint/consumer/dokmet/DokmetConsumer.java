@@ -40,9 +40,7 @@ public class DokmetConsumer {
 	@Cacheable(DOKMET_CACHE)
 	@Retryable(retryFor = DokmetTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
 	public Distribusjonsinfo hentDistribusjonsinfo(final String dokumenttypeId) {
-		log.info("hentDistribusjonsinfo henter distribusjonsinfo for dokumenttypeId={}", dokumenttypeId);
-
-		var result = webClient.get()
+		return webClient.get()
 				.uri(uriBuilder -> uriBuilder.path("/{dokumenttypeId}")
 						.build(dokumenttypeId))
 				.retrieve()
@@ -50,10 +48,6 @@ public class DokmetConsumer {
 				.mapNotNull(this::mapResponse)
 				.doOnError(handleError(dokumenttypeId))
 				.block();
-
-		log.info("hentDistribusjonsinfo har hentet distribusjonsinfo for dokumenttypeId={}", dokumenttypeId);
-
-		return result;
 	}
 
 	private Distribusjonsinfo mapResponse(final DokumenttypeInfoTo response) {
