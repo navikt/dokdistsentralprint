@@ -1,7 +1,5 @@
 package no.nav.dokdistsentralprint;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 
@@ -16,6 +14,8 @@ import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public final class TestUtils {
 
 	private TestUtils() {
@@ -29,11 +29,9 @@ public final class TestUtils {
 	}
 
 	public static String fileToString(File file) throws IOException {
-		byte[] data = new byte[(int) file.length()];
 		try (FileInputStream fis = new FileInputStream(file)) {
-			fis.read(data);
+			return IOUtils.toString(fis, UTF_8);
 		}
-		return new String(data);
 	}
 
 	public static void unzipToDirectory(String zipFileName, Path outDir) throws IOException {
