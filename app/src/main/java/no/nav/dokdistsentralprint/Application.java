@@ -11,9 +11,6 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.retry.annotation.EnableRetry;
 
-import static java.lang.System.getenv;
-import static java.lang.System.setProperty;
-
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @EnableRetry
 @EnableConfigurationProperties({
@@ -25,7 +22,6 @@ import static java.lang.System.setProperty;
 })
 public class Application {
 	public static void main(String[] args) {
-		setProperty("javax.net.ssl.keyStorePassword", getenv("DOKDISTSENTRALPRINTCERT_PASSWORD"));
 		SpringApplication.run(Application.class, args);
 	}
 }

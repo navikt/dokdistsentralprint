@@ -22,10 +22,7 @@ public class MqGatewayAlias {
 	@Data
 	@Validated
 	public static class MqChannel {
-		@NotEmpty
-		private String name;
 		@NotBlank
 		private String securename;
-		private boolean enabletls;
 	}
 }

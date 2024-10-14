@@ -79,8 +79,6 @@ spec:
     paths:
       - kvPath: {{ SRVDOKDISTSENTRALPRINT }}
         mountPath: /var/run/secrets/nais.io/srvdokdistsentralprint
-      - kvPath: {{ DOKDISTSENTRALPRINTCERT }}
-        mountPath: /var/run/secrets/nais.io/certificate
       - kvPath: {{ APPDYNAMICS }}
         mountPath: /var/run/secrets/nais.io/appdynamics
   webproxy: true
