@@ -41,7 +41,7 @@ public class GoogleCloudStorageConfiguration {
 		KeyTemplate keyTemplate = KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, KeyTemplates.get(KEYTEMPLATE));
 		KeysetHandle handle = KeysetHandle.generateNew(keyTemplate);
 		Aead aead = handle.getPrimitive(Aead.class);
-		log.info("dokdistsentralprint oppstart. Henter aead kryptering nøkkel. primaryKeyId={}", handle.getKeysetInfo().getPrimaryKeyId());
+		log.info("dokdistsentralprint oppstart. Henter aead kryptering nøkkel");
 
 		Storage storage = StorageOptions.newBuilder()
 				.setProjectId(dokdistmellomlagerProperties.getProjectid())
