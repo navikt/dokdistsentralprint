@@ -75,8 +75,6 @@ spec:
     paths:
       - kvPath: {{ SRVDOKDISTSENTRALPRINT }}
         mountPath: /var/run/secrets/nais.io/srvdokdistsentralprint
-      - kvPath: {{ APPDYNAMICS }}
-        mountPath: /var/run/secrets/nais.io/appdynamics
   webproxy: true
   azure:
     application:
