@@ -1,5 +1,6 @@
 {
   "APPNAVN": "dokdistsentralprint-q1",
+  "ENVIRONMENT": "q1",
   "MIN_REPLICAS": "1",
   "MAX_REPLICAS": "2",
   "INGRESSES": [
@@ -19,7 +20,6 @@
   "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.Q1_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
   "DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.Q1_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
   "SRVDOKDISTSENTRALPRINT": "/serviceuser/data/dev/srvdokdistsentralprint",
-  "APPDYNAMICS": "/apikey/appdynamics/dev",
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-dev-2c5a",
   "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-dev",
   "DOKDISTMELLOMLAGER_KEYRING": "dokdistmellomlager-keyring-dev",

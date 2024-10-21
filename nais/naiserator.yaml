@@ -41,6 +41,8 @@ spec:
       value: {{ DOKDISTMELLOMLAGER_KEYRING }}
     - name: DOKDISTMELLOMLAGER_KEYID
       value: {{ DOKDISTMELLOMLAGER_KEYID }}
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: "deployment.environment.name={{ ENVIRONMENT }}"
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -75,9 +77,13 @@ spec:
     paths:
       - kvPath: {{ SRVDOKDISTSENTRALPRINT }}
         mountPath: /var/run/secrets/nais.io/srvdokdistsentralprint
-      - kvPath: {{ APPDYNAMICS }}
-        mountPath: /var/run/secrets/nais.io/appdynamics
   webproxy: true
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+      destinations:
+        - id: "elastic-apm"
   azure:
     application:
       enabled: true
