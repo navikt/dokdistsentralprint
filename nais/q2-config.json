@@ -1,5 +1,6 @@
 {
   "APPNAVN": "dokdistsentralprint",
+  "ENVIRONMENT": "q2",
   "MIN_REPLICAS": "1",
   "MAX_REPLICAS": "2",
   "INGRESSES": [
