@@ -6,11 +6,8 @@
   "sensitivt": true,
   "utledRegisterInfo": false,
   "tema": null,
-  "behandlingstema": null,
   "arkivSystem": "JOARK",
-  "artifaktId": null,
   "dokumentProduksjonsInfo": null,
-  "dokumentMottakInfo": null,
   "changeStamp": {
     "opprettetAv": "srvdokkat",
     "opprettetDato": "2018-11-29T08:17:56.413",
