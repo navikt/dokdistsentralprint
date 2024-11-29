@@ -36,6 +36,14 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-storage</artifactId>
+            <!-- Ekskluderer for å unngå feilmelding 'Standard Commons Logging discovery in action with spring-jcl:
+ please remove commons-logging.jar from classpath in order to avoid potential conflicts' -->
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.crypto.tink</groupId>
