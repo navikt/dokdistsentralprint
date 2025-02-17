@@ -8,6 +8,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.RegistryConfiguration;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
@@ -40,8 +41,7 @@ public class GoogleCloudStorageConfiguration {
 		GcpKmsClient.register(Optional.of(kekUri), Optional.empty());
 		KeyTemplate keyTemplate = KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, KeyTemplates.get(KEYTEMPLATE));
 		KeysetHandle handle = KeysetHandle.generateNew(keyTemplate);
-		Aead aead = handle.getPrimitive(Aead.class);
-		log.info("dokdistsentralprint oppstart. Henter aead kryptering nøkkel");
+		Aead aead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
 
 		Storage storage = StorageOptions.newBuilder()
 				.setProjectId(dokdistmellomlagerProperties.getProjectid())
