@@ -7,8 +7,8 @@
     "https://dokdistsentralprint.dev.intern.nav.no"
   ],
   "SFTP_URL": "b31apvl072.oera-q.local",
-  "DOKDISTSENTRALPRINT_ENDPOINTS_DOKMET_URL": "https://dokmet.dev.intern.nav.no/rest/dokumenttypeinfo",
-  "DOKDISTSENTRALPRINT_ENDPOINTS_DOKDISTADMIN_URL": "https://dokdistadmin.dev.intern.nav.no/rest/v1/administrerforsendelse",
+  "DOKDISTSENTRALPRINT_ENDPOINTS_DOKMET_URL": "http://dokmet.teamdokumenthandtering.svc.nais.local/rest/dokumenttypeinfo",
+  "DOKDISTSENTRALPRINT_ENDPOINTS_DOKDISTADMIN_URL": "http://dokdistadmin.teamdokumenthandtering.svc.nais.local/rest/v1/administrerforsendelse",
   "DOKDISTSENTRALPRINT_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://dev-fss.teamdokumenthandtering.dokdistadmin/.default",
   "DOKDISTSENTRALPRINT_ENDPOINTS_REGOPPSLAG_URL":"http://regoppslag.teamdokumenthandtering.svc.nais.local",
   "DOKDISTSENTRALPRINT_ENDPOINTS_REGOPPSLAG_SCOPE": "api://dev-fss.teamdokumenthandtering.regoppslag/.default",
