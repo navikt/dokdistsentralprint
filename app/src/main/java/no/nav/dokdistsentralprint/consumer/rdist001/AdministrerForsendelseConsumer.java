@@ -5,10 +5,12 @@ import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
 import no.nav.dokdistsentralprint.constants.NavHeadersFilter;
 import no.nav.dokdistsentralprint.exception.functional.DokdistsentralprintFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnicalException;
+import org.springframework.boot.autoconfigure.codec.CodecProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -28,11 +30,16 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	private final WebClient webClient;
 
 	public AdministrerForsendelseConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
-										  WebClient webClient) {
+										  WebClient webClient,
+										  CodecProperties codecProperties) {
 		this.webClient = webClient.mutate()
 				.baseUrl(dokdistsentralprintProperties.getEndpoints().getDokdistadmin().getUrl())
 				.filter(new NavHeadersFilter())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+				.exchangeStrategies(ExchangeStrategies.builder()
+						.codecs(configurer ->
+								configurer.defaultCodecs().maxInMemorySize((int) codecProperties.getMaxInMemorySize().toBytes()))
+						.build())
 				.build();
 	}
 
