@@ -30,9 +30,11 @@ public class LokalCacheConfig {
 		manager.setCaches(Arrays.asList(
 				new CaffeineCache(DOKMET_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(1, DAYS)
+						.recordStats()
 						.build()),
 				new CaffeineCache(POSTDESTINASJON_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(60, MINUTES)
+						.recordStats()
 						.build())
 		));
 		return manager;

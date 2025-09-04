@@ -5,7 +5,7 @@ import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
 import no.nav.dokdistsentralprint.constants.NavHeadersFilter;
 import no.nav.dokdistsentralprint.exception.functional.DokdistsentralprintFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnicalException;
-import org.springframework.boot.autoconfigure.codec.CodecProperties;
+import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -31,14 +31,14 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	public AdministrerForsendelseConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
 										  WebClient webClient,
-										  CodecProperties codecProperties) {
+										  HttpCodecsProperties httpCodecsProperties) {
 		this.webClient = webClient.mutate()
 				.baseUrl(dokdistsentralprintProperties.getEndpoints().getDokdistadmin().getUrl())
 				.filter(new NavHeadersFilter())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.exchangeStrategies(ExchangeStrategies.builder()
 						.codecs(configurer ->
-								configurer.defaultCodecs().maxInMemorySize((int) codecProperties.getMaxInMemorySize().toBytes()))
+								configurer.defaultCodecs().maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
 						.build())
 				.build();
 	}
@@ -136,7 +136,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	}
 
 	private void handleError(Throwable error) {
-		if (error instanceof WebClientResponseException response && ((WebClientResponseException) error).getStatusCode().is4xxClientError()) {
+		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
 			throw new DokdistsentralprintFunctionalException(
 					format("Kall mot rdist001 feilet funksjonelt med status=%s, feilmelding=%s",
 							response.getStatusCode(),
