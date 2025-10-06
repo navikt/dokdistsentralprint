@@ -34,7 +34,7 @@
         <dokmet-api.version>2025.06.30-07.30-22496f8</dokmet-api.version>
         <dok-melding-virksomhet-dokdistfordeling.version>41-d282678</dok-melding-virksomhet-dokdistfordeling.version>
         <opprettoppgave-tjenestespesifikasjon-v1.version>2-3843acc</opprettoppgave-tjenestespesifikasjon-v1.version>
-        <context-propagation.version>1.1.2</context-propagation.version>
+        <context-propagation.version>1.1.3</context-propagation.version>
 
         <!-- Test -->
         <spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
