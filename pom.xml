@@ -30,11 +30,10 @@
         <tink.version>1.18.0</tink.version>
         <tink-gcpkms.version>1.10.0</tink-gcpkms.version>
         <com.ibm.mq.jakarta.client.version>9.4.3.1</com.ibm.mq.jakarta.client.version>
-        
-        <dokmet-api.version>2025.06.30-07.30-22496f8</dokmet-api.version>
-        <dok-melding-virksomhet-dokdistfordeling.version>42-a76dc72</dok-melding-virksomhet-dokdistfordeling.version>
-        <opprettoppgave-tjenestespesifikasjon-v1.version>2-3843acc</opprettoppgave-tjenestespesifikasjon-v1.version>
         <context-propagation.version>1.1.3</context-propagation.version>
+
+        <dokmet-api.version>2025.06.30-07.30-22496f8</dokmet-api.version>
+        <dok-legacy-tjenestespesifikasjoner.version>43-5bca208</dok-legacy-tjenestespesifikasjoner.version>
 
         <!-- Test -->
         <spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
@@ -57,12 +56,12 @@
             <dependency>
                 <groupId>no.nav.meldinger.virksomhet</groupId>
                 <artifactId>dok-melding-virksomhet-dokdistfordeling</artifactId>
-                <version>${dok-melding-virksomhet-dokdistfordeling.version}</version>
+                <version>${dok-legacy-tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.dok</groupId>
-                <artifactId>opprettoppgave-tjenestespesifikasjon-v1</artifactId>
-                <version>${opprettoppgave-tjenestespesifikasjon-v1.version}</version>
+                <groupId>no.nav.tjenester</groupId>
+                <artifactId>opprettoppgave-tjenestespesifikasjon</artifactId>
+                <version>${dok-legacy-tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.dokmet</groupId>

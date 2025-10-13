@@ -121,8 +121,8 @@
             <artifactId>dok-melding-virksomhet-dokdistfordeling</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.dok</groupId>
-            <artifactId>opprettoppgave-tjenestespesifikasjon-v1</artifactId>
+            <groupId>no.nav.tjenester</groupId>
+            <artifactId>opprettoppgave-tjenestespesifikasjon</artifactId>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
