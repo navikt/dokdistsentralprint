@@ -1,7 +1,7 @@
 package no.nav.dokdistsentralprint.qdist009;
 
 import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
-import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
+import no.nav.opprettoppgave.tjenestespesifikasjon.OpprettOppgave;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
