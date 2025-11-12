@@ -30,7 +30,7 @@
         <tink.version>1.19.0</tink.version>
         <tink-gcpkms.version>1.10.0</tink-gcpkms.version>
         <com.ibm.mq.jakarta.client.version>9.4.4.0</com.ibm.mq.jakarta.client.version>
-        <context-propagation.version>1.1.3</context-propagation.version>
+        <context-propagation.version>1.2.0</context-propagation.version>
 
         <dokmet-api.version>2025.06.30-07.30-22496f8</dokmet-api.version>
         <dok-legacy-tjenestespesifikasjoner.version>43-5bca208</dok-legacy-tjenestespesifikasjoner.version>
