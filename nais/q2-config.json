@@ -7,6 +7,7 @@
     "https://dokdistsentralprint.dev.intern.nav.no"
   ],
   "SFTP_URL": "b31apvl072.oera-q.local",
+  "DOKDISTSENTRALPRINT_SECRET": "dokdistsentralprint",
   "DOKDISTSENTRALPRINT_ENDPOINTS_DOKMET_URL": "http://dokmet.teamdokumenthandtering.svc.nais.local/rest/dokumenttypeinfo",
   "DOKDISTSENTRALPRINT_ENDPOINTS_DOKDISTADMIN_URL": "http://dokdistadmin.teamdokumenthandtering.svc.nais.local/rest/v1/administrerforsendelse",
   "DOKDISTSENTRALPRINT_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://dev-fss.teamdokumenthandtering.dokdistadmin/.default",
@@ -19,7 +20,6 @@
   "DOKDISTSENTRALPRINT_QDIST009_FUNK_FEIL_QUEUENAME": "QA.Q2_DOKDISTSENTRALPRINT.QDIST009_FUNK_FEIL",
   "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.Q2_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
   "DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
-  "SRVDOKDISTSENTRALPRINT": "/serviceuser/data/dev/srvdokdistsentralprint",
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-dev-2c5a",
   "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-dev",
   "DOKDISTMELLOMLAGER_KEYRING": "dokdistmellomlager-keyring-dev",
