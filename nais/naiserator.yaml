@@ -6,7 +6,21 @@ metadata:
   labels:
     team: teamdokumenthandtering
 spec:
+  envFrom:
+    - secret: {{ DOKDISTSENTRALPRINT_SECRET }}
+  filesFrom:
+    - secret: {{ DOKDISTSENTRALPRINT_SECRET }}
+      mountPath: "/var/run/secrets/nais_secrets"
   env:
+    - name: JAVA_TRUSTSTORE_OPTIONS
+      value: "-Djavax.net.ssl.trustStore=$(NAV_TRUSTSTORE_PATH)
+              -Djavax.net.ssl.trustStorePassword=$(NAV_TRUSTSTORE_PASSWORD)"
+    - name: JDK_JAVA_OPTIONS
+      value: "-Djavax.net.ssl.keyStore=$(NAV_TRUSTSTORE_PATH)
+              -Djavax.net.ssl.keyStorePassword=$(NAV_TRUSTSTORE_PASSWORD)
+              -Djavax.net.ssl.keyStoreType=jks
+              -XX:MaxRAMPercentage=75
+              $(JAVA_PROXY_OPTIONS) $(JAVA_TRUSTSTORE_OPTIONS)"
     - name: SFTP_URL
       value: {{ SFTP_URL }}
     - name: DOKDISTSENTRALPRINT_ENDPOINTS_DOKMET_URL
@@ -43,6 +57,10 @@ spec:
       value: {{ DOKDISTMELLOMLAGER_KEYID }}
     - name: OTEL_RESOURCE_ATTRIBUTES
       value: "deployment.environment.name={{ ENVIRONMENT }}"
+    - name: SFTP_PRIVATE_KEY_FILE
+      value: "/var/run/secrets/nais_secrets/sftp_privatekey_file"
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: "/var/run/secrets/nais_secrets/gcloud_serviceaccount.json"
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -72,11 +90,6 @@ spec:
     requests:
       cpu: 100m
       memory: 1024Mi
-  vault:
-    enabled: true
-    paths:
-      - kvPath: {{ SRVDOKDISTSENTRALPRINT }}
-        mountPath: /var/run/secrets/nais.io/srvdokdistsentralprint
   webproxy: true
   observability:
     autoInstrumentation:
