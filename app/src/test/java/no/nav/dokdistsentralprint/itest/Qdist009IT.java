@@ -90,7 +90,6 @@ class Qdist009IT {
 	private static final String FEILREGISTRER_FORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
 	private static final String REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL = "/regoppslag/rest/hentMottakerOgAdresse";
 
-
 	@TempDir
 	static Path tempDir;
 	private static String CALL_ID;
@@ -332,7 +331,6 @@ class Qdist009IT {
 		verify(1, putRequestedFor(urlEqualTo(FEILREGISTRER_FORSENDELSE_URL)));
 	}
 
-
 	@Test
 	void shouldThrowForsendelseManglerForsendelseIdFunctionalExceptionManglerForsendelseId() throws Exception {
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-feilId.xml"));
@@ -468,7 +466,6 @@ class Qdist009IT {
 		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
 		stubPostHentMottakerOgAdresse(null, NOT_FOUND.value());
-
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -714,7 +711,7 @@ class Qdist009IT {
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("dokmet/tkat020-missing-dokumentproduksjonsinfo.json")));;
+						.withBodyFile("dokmet/tkat020-missing-dokumentproduksjonsinfo.json")));
 	}
 
 	private void stubPostHentMottakerOgAdresse(String path, int status) {
@@ -733,7 +730,5 @@ class Qdist009IT {
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody("{\"status\":\"404 \",\"message\":\"Fant ikke adresse for personen i PDL\"}")));
 	}
+
 }
-
-
-
