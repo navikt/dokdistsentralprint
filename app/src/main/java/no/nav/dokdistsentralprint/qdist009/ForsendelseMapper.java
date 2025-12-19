@@ -26,7 +26,7 @@ public class ForsendelseMapper {
 				.postadresse(mapPostadresse(hentForsendelseResponse.getPostadresse()).orElse(null))
 				.arkivInformasjon(mapArkivInformasjon(hentForsendelseResponse.getArkivInformasjon()).orElse(null))
 				.mottaker(mapMottaker(hentForsendelseResponse.getMottaker()))
-				.dokumenter(hentForsendelseResponse.getDokumenter().stream().map(dokument -> mapDokument(dokument)).toList())
+				.dokumenter(hentForsendelseResponse.getDokumenter().stream().map(this::mapDokument).toList())
 				.build();
 	}
 

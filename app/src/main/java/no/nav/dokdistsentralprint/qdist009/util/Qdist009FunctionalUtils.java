@@ -29,7 +29,7 @@ public final class Qdist009FunctionalUtils {
 		return internForsendelse.getDokumenter().stream()
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
 				.map(InternForsendelse.Dokument::getDokumenttypeId).toList()
-				.get(0);
+				.getFirst();
 	}
 
 	public static List<BestillingEntity> createBestillingEntities(String bestillingId, String bestillingXml, List<DokdistDokument> dokdistDokumentList) {
