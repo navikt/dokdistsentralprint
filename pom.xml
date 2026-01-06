@@ -26,7 +26,7 @@
         <camel.version>4.16.0</camel.version>
         <logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
         <httpclient.version>4.5.14</httpclient.version>
-        <google-cloud.version>26.72.0</google-cloud.version>
+        <google-cloud.version>26.73.0</google-cloud.version>
         <tink.version>1.20.0</tink.version>
         <tink-gcpkms.version>1.10.0</tink-gcpkms.version>
         <com.ibm.mq.jakarta.client.version>9.4.4.1</com.ibm.mq.jakarta.client.version>
