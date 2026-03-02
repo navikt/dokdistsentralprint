@@ -36,7 +36,7 @@
         <dok-legacy-tjenestespesifikasjoner.version>43-5bca208</dok-legacy-tjenestespesifikasjoner.version>
 
         <!-- Test -->
-        <spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
+        <spring-cloud-contract-wiremock.version>5.0.2</spring-cloud-contract-wiremock.version>
         <commons-io.version>2.21.0</commons-io.version>
         <sshd-sftp.version>2.17.1</sshd-sftp.version>
 
