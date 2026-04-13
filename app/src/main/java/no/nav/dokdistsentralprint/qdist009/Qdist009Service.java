@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static no.nav.dokdistsentralprint.qdist009.PdfA4Validator.loggDokumenterSomErStoerreEnnA4;
 import static no.nav.dokdistsentralprint.qdist009.Qdist009Route.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistsentralprint.qdist009.util.BestillingZipUtil.zipPrintbestillingToBytes;
 import static no.nav.dokdistsentralprint.qdist009.util.Qdist009FunctionalUtils.createBestillingEntities;
@@ -65,6 +66,7 @@ public class Qdist009Service {
 		}
 
 		List<DokdistDokument> dokdistDokumentList = getDocumentsFromBucket(internForsendelse);
+		loggDokumenterSomErStoerreEnnA4(dokdistDokumentList, bestillingsId);
 
 		Bestilling bestilling = bestillingMapper.createBestilling(internForsendelse, distribusjonsinfo, postdestinasjon);
 		String kanalbehandling = bestilling.getBestillingsInfo().getKanal().getBehandling();
