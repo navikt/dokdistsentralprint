@@ -547,7 +547,11 @@ class Qdist009IT {
 	void shouldThrowKunneIkkeDeserialisereBucketPayloadFunctionalException() throws Exception {
 		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString())).thenReturn("notJsonSerializedString");
 
+		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_withAdresse-CorruptInBucket-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -557,12 +561,21 @@ class Qdist009IT {
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
 
+
+		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
+		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
 	}
 
 	@Test
 	void shouldThrowDokumentIkkeFunnetIBucketException() throws Exception {
+		stubGetDokumenttype();
 		stubGetForsendelse("__files/rdist001/getForsendelse_withAdresse-NotInBucket-happy.json", OK.value());
+		stubGetPostdestinasjon("NO", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
 
 		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
 
@@ -572,6 +585,7 @@ class Qdist009IT {
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
 
+		verify(1, getRequestedFor(urlEqualTo("/rest/dokumenttypeinfo/dokumenttypeIdHoveddokNotInBucket")));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 	}
 
