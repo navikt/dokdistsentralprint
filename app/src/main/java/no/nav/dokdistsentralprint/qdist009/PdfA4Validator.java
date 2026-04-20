@@ -18,8 +18,7 @@ public class PdfA4Validator {
 	private static final float A4_TOLERANCE = 1.0f;
 
 	public static void loggDokumenterSomErStoerreEnnA4(List<DokdistDokument> dokumentListe, String bestillingsId) {
-		dokumentListe.forEach(DokdistDokument -> loggDokumenterSomErStoerreEnnA4(DokdistDokument, bestillingsId));
-
+		dokumentListe.forEach(dokdistDokument -> loggDokumenterSomErStoerreEnnA4(dokdistDokument, bestillingsId));
 	}
 
 	private static void loggDokumenterSomErStoerreEnnA4(DokdistDokument dokdistDokument, String bestillingsId) {
