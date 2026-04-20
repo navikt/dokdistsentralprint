@@ -34,6 +34,12 @@ public final class TestUtils {
 		}
 	}
 
+	public static byte[] fileToBytes(File file) throws IOException {
+		try (FileInputStream fis = new FileInputStream(file)) {
+			return IOUtils.toByteArray(fis);
+		}
+	}
+
 	public static void unzipToDirectory(String zipFileName, Path outDir) throws IOException {
 		byte[] buffer = new byte[2048];
 		try (FileInputStream fis = new FileInputStream(zipFileName);

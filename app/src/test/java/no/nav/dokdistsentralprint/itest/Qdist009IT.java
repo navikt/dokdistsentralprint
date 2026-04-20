@@ -8,6 +8,9 @@ import no.nav.dokdistsentralprint.itest.config.ApplicationTestConfig;
 import no.nav.dokdistsentralprint.storage.BucketStorage;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.sshd.server.SshServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -44,6 +48,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokdistsentralprint.TestUtils.classpathToString;
+import static no.nav.dokdistsentralprint.TestUtils.fileToBytes;
 import static no.nav.dokdistsentralprint.TestUtils.fileToString;
 import static no.nav.dokdistsentralprint.TestUtils.unzipToDirectory;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.DOKMET_CACHE;
@@ -53,6 +58,7 @@ import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_S
 import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,9 +82,7 @@ class Qdist009IT {
 	private static final String DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK = "dokumentObjektReferanseHoveddok";
 	private static final String DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 = "dokumentObjektReferanseVedlegg1";
 	private static final String DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 = "dokumentObjektReferanseVedlegg2";
-	private static final String HOVEDDOK_TEST_CONTENT = "HOVEDDOK_TEST_CONTENT";
-	private static final String VEDLEGG1_TEST_CONTENT = "VEDLEGG1_TEST_CONTENT";
-	private static final String VEDLEGG2_TEST_CONTENT = "VEDLEGG2_TEST_CONTENT";
+	private static final byte[] A4_PDF_BYTES = createA4PdfBytes();
 	private static final String LANDKODE_TR = "TR";
 	private static final String LANDKODE_XX = "XX";
 
@@ -139,9 +143,9 @@ class Qdist009IT {
 		cacheManager.getCache(DOKMET_CACHE).clear();
 		cacheManager.getCache(POSTDESTINASJON_CACHE).clear();
 		reset(bucketStorage);
-		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
-		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build()));
-		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build()));
+		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(A4_PDF_BYTES).build()));
+		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(A4_PDF_BYTES).build()));
+		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(A4_PDF_BYTES).build()));
 
 		stubFor(post("/azure_token")
 				.willReturn(aResponse()
@@ -170,14 +174,14 @@ class Qdist009IT {
 		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
 		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml.xml").replaceAll("insertCallIdHere",
 				CALL_ID);
-		String hoveddokContent = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
-		String vedlegg1Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
-		String vedlegg2Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+		byte[] hoveddokContent = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		byte[] vedlegg1Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		byte[] vedlegg2Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
 
 		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
-		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
-		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
-		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+		assertArrayEquals(A4_PDF_BYTES, hoveddokContent);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg1Content);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg2Content);
 
 		verifyAllStubs(LANDKODE_TR);
 	}
@@ -202,14 +206,14 @@ class Qdist009IT {
 		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
 		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_ukjent_landkode.xml").replaceAll("insertCallIdHere",
 				CALL_ID);
-		String hoveddokContent = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
-		String vedlegg1Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
-		String vedlegg2Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+		byte[] hoveddokContent = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		byte[] vedlegg1Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		byte[] vedlegg2Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
 
 		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
-		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
-		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
-		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+		assertArrayEquals(A4_PDF_BYTES, hoveddokContent);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg1Content);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg2Content);
 
 		verifyAllStubs(LANDKODE_XX);
 	}
@@ -234,14 +238,14 @@ class Qdist009IT {
 		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
 		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml.xml").replaceAll("insertCallIdHere",
 				CALL_ID);
-		String hoveddokContent = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
-		String vedlegg1Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
-		String vedlegg2Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+		byte[] hoveddokContent = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		byte[] vedlegg1Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		byte[] vedlegg2Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
 
 		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
-		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
-		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
-		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+		assertArrayEquals(A4_PDF_BYTES, hoveddokContent);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg1Content);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg2Content);
 
 		verifyAllStubs(LANDKODE_TR);
 	}
@@ -265,14 +269,14 @@ class Qdist009IT {
 		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_utenRegoppslag_xml.xml").replaceAll(
 				"insertCallIdHere",
 				CALL_ID);
-		String hoveddokContent = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
-		String vedlegg1Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
-		String vedlegg2Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+		byte[] hoveddokContent = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		byte[] vedlegg1Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		byte[] vedlegg2Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
 
 		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
-		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
-		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
-		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+		assertArrayEquals(A4_PDF_BYTES, hoveddokContent);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg1Content);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg2Content);
 
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
@@ -300,14 +304,14 @@ class Qdist009IT {
 		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
 		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml_uten_skattyternummer.xml").replaceAll("insertCallIdHere",
 				CALL_ID);
-		String hoveddokContent = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
-		String vedlegg1Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
-		String vedlegg2Content = fileToString(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+		byte[] hoveddokContent = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		byte[] vedlegg1Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		byte[] vedlegg2Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
 
 		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
-		assertEquals(HOVEDDOK_TEST_CONTENT, hoveddokContent);
-		assertEquals(VEDLEGG1_TEST_CONTENT, vedlegg1Content);
-		assertEquals(VEDLEGG2_TEST_CONTENT, vedlegg2Content);
+		assertArrayEquals(A4_PDF_BYTES, hoveddokContent);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg1Content);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg2Content);
 
 		verifyAllStubs(LANDKODE_TR);
 	}
@@ -557,6 +561,7 @@ class Qdist009IT {
 			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
 
+
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
@@ -729,6 +734,17 @@ class Qdist009IT {
 						.withHeader(NAV_REASON_CODE, "ukjent_adresse")
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody("{\"status\":\"404 \",\"message\":\"Fant ikke adresse for personen i PDL\"}")));
+	}
+
+	private static byte[] createA4PdfBytes() {
+		try (PDDocument doc = new PDDocument()) {
+			doc.addPage(new PDPage(PDRectangle.A4));
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			doc.save(out);
+			return out.toByteArray();
+		} catch (IOException e) {
+			throw new RuntimeException("Kunne ikke opprette test-PDF", e);
+		}
 	}
 
 }
