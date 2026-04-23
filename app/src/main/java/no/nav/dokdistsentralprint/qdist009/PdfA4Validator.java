@@ -26,7 +26,8 @@ public class PdfA4Validator {
 			for (PDPage page : pdDocument.getPages()) {
 				PDRectangle mediaBox = page.getMediaBox();
 				if (dokumentErStoerreEnnA4(mediaBox)) {
-					log.error("Dokumentet tilhørende bestillingsId:{} er ikke A4. Dokumentobjektreferanse: {}", bestillingsId, dokdistDokument.getDokumentObjektReferanse());
+					log.error("Dokumentet tilhørende bestillingsId:{} er større enn A4. Dokumentobjektreferanse: {}", bestillingsId, dokdistDokument.getDokumentObjektReferanse());
+					return;
 				}
 			}
 		} catch (IOException e) {
