@@ -17,11 +17,11 @@ public class PdfA4Validator {
 
 	private static final float A4_TOLERANCE = 1.0f;
 
-	public static void loggDokumenterSomErStoerreEnnA4(List<DokdistDokument> dokumentListe, String bestillingsId) {
-		dokumentListe.forEach(dokdistDokument -> loggDokumenterSomErStoerreEnnA4(dokdistDokument, bestillingsId));
+	public static void loggHvisDetFinnesPagesSomErStoerreEnnA4(List<DokdistDokument> dokumentListe, String bestillingsId) {
+		dokumentListe.forEach(dokdistDokument -> loggHvisDetFinnesPagesSomErStoerreEnnA4(dokdistDokument, bestillingsId));
 	}
 
-	private static void loggDokumenterSomErStoerreEnnA4(DokdistDokument dokdistDokument, String bestillingsId) {
+	private static void loggHvisDetFinnesPagesSomErStoerreEnnA4(DokdistDokument dokdistDokument, String bestillingsId) {
 		try (PDDocument pdDocument = Loader.loadPDF(dokdistDokument.getPdf())) {
 			for (PDPage page : pdDocument.getPages()) {
 				PDRectangle mediaBox = page.getMediaBox();

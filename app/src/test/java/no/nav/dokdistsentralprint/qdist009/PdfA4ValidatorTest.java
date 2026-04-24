@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import static no.nav.dokdistsentralprint.qdist009.PdfA4Validator.loggDokumenterSomErStoerreEnnA4;
+import static no.nav.dokdistsentralprint.qdist009.PdfA4Validator.loggHvisDetFinnesPagesSomErStoerreEnnA4;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PdfA4ValidatorTest {
@@ -42,14 +42,14 @@ class PdfA4ValidatorTest {
 	@ParameterizedTest
 	@ValueSource(strings = {"__files/pdf/A4_portrett.pdf", "__files/pdf/A4.pdf", "__files/pdf/A5.pdf"})
 	void skalIkkeLoggeErrorForGyldigStorrelse(String ressurssti) throws IOException {
-		loggDokumenterSomErStoerreEnnA4(lagDokumentListe(ressurssti), BESTILLINGS_ID);
+		loggHvisDetFinnesPagesSomErStoerreEnnA4(lagDokumentListe(ressurssti), BESTILLINGS_ID);
 
 		assertThat(logAppender.list).noneMatch(e -> e.getLevel() == Level.ERROR);
 	}
 
 	@Test
 	void skalLoggeErrorForA3() throws IOException {
-		loggDokumenterSomErStoerreEnnA4(lagDokumentListe("__files/pdf/A3.pdf"), BESTILLINGS_ID);
+		loggHvisDetFinnesPagesSomErStoerreEnnA4(lagDokumentListe("__files/pdf/A3.pdf"), BESTILLINGS_ID);
 
 		assertThat(logAppender.list)
 				.anyMatch(e -> e.getLevel() == Level.ERROR
@@ -64,7 +64,7 @@ class PdfA4ValidatorTest {
 				.dokumentObjektReferanse(DOKUMENT_OBJEKT_REFERANSE)
 				.build();
 
-		loggDokumenterSomErStoerreEnnA4(List.of(ugyldigDokument), BESTILLINGS_ID);
+		loggHvisDetFinnesPagesSomErStoerreEnnA4(List.of(ugyldigDokument), BESTILLINGS_ID);
 
 		assertThat(logAppender.list)
 				.anyMatch(e -> e.getLevel() == Level.WARN
