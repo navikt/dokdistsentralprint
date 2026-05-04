@@ -19,7 +19,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
@@ -27,6 +26,8 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,6 +42,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.removeAllMappings;
+import static com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
@@ -54,7 +57,6 @@ import static no.nav.dokdistsentralprint.TestUtils.unzipToDirectory;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.DOKMET_CACHE;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
 import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_REASON_CODE;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.MAX_ATTEMPTS_SHORT;
 import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -74,7 +76,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @SpringBootTest(classes = Application.class, webEnvironment = NONE)
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock(@ConfigureWireMock(name = "server", port = 0))
 @ActiveProfiles("itest")
 class Qdist009IT {
 
@@ -140,6 +142,8 @@ class Qdist009IT {
 	public void setupBefore() {
 		CALL_ID = UUID.randomUUID().toString();
 
+		removeAllMappings();
+		resetAllRequests();
 		cacheManager.getCache(DOKMET_CACHE).clear();
 		cacheManager.getCache(POSTDESTINASJON_CACHE).clear();
 		reset(bucketStorage);
@@ -387,7 +391,7 @@ class Qdist009IT {
 			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
 
-		verify(MAX_ATTEMPTS_SHORT, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(4, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 	}
 
 	@Test
@@ -461,7 +465,7 @@ class Qdist009IT {
 			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
 		});
 
-		verify(MAX_ATTEMPTS_SHORT, getRequestedFor(urlEqualTo(DOKMET_URL)));
+		verify(4, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 	}
 
@@ -498,7 +502,7 @@ class Qdist009IT {
 		});
 
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(MAX_ATTEMPTS_SHORT, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
+		verify(4, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
 	}
 
 	@Test
@@ -539,7 +543,7 @@ class Qdist009IT {
 		});
 
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(MAX_ATTEMPTS_SHORT, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
+		verify(4, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
 		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
 	}
 
@@ -627,8 +631,7 @@ class Qdist009IT {
 		});
 		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(MAX_ATTEMPTS_SHORT,
-				putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
+		verify(4, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
 		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
 	}

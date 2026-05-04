@@ -1,27 +1,25 @@
 package no.nav.dokdistsentralprint.storage;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.json.JsonMapper;
 
-import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static tools.jackson.core.json.JsonReadFeature.ALLOW_JAVA_COMMENTS;
 
 public class JsonSerializer {
 
-	private static final ObjectMapper objectMapper = new ObjectMapper();
+	private static final JsonMapper jsonMapper = JsonMapper.builder()
+			.enable(ALLOW_JAVA_COMMENTS)
+			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+			.build();
 
-	static {
-		objectMapper.configure(ALLOW_COMMENTS, true);
-		objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
-	}
-
-	private static final ObjectWriter writer = objectMapper.writer();
+	private static final ObjectWriter writer = jsonMapper.writer();
 
 	public static String serialize(Object object) {
 		try {
 			return writer.writeValueAsString(object);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -31,8 +29,8 @@ public class JsonSerializer {
 			if (jsonPayload == null) {
 				throw new IllegalStateException("jsonPayload er null.");
 			}
-			return objectMapper.readValue(jsonPayload, tClass);
-		} catch (JsonProcessingException e) {
+			return jsonMapper.readValue(jsonPayload, tClass);
+		} catch (JacksonException e) {
 			throw new IllegalStateException(e);
 		}
 	}

@@ -7,8 +7,7 @@ import no.nav.dokdistsentralprint.exception.functional.DokmetFunctionalException
 import no.nav.dokdistsentralprint.exception.technical.DokmetTechnicalException;
 import no.nav.dokmet.api.tkat020.DokumenttypeInfoTo;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -17,7 +16,6 @@ import java.util.function.Consumer;
 
 import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.DOKMET_CACHE;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -38,7 +36,7 @@ public class DokmetConsumer {
 	}
 
 	@Cacheable(DOKMET_CACHE)
-	@Retryable(retryFor = DokmetTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(includes = DokmetTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public Distribusjonsinfo hentDistribusjonsinfo(final String dokumenttypeId) {
 		return webClient.get()
 				.uri(uriBuilder -> uriBuilder.path("/{dokumenttypeId}")
