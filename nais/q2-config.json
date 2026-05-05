@@ -4,7 +4,7 @@
   "MIN_REPLICAS": "1",
   "MAX_REPLICAS": "2",
   "INGRESSES": [
-    "https://dokdistsentralprint.dev.intern.nav.no"
+    "https://dokdistsentralprint.intern.dev.nav.no"
   ],
   "SFTP_URL": "b31apvl072.oera-q.local",
   "DOKDISTSENTRALPRINT_SECRET": "dokdistsentralprint",

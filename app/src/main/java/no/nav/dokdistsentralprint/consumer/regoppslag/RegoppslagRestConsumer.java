@@ -8,8 +8,7 @@ import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentAdresseRequestTo;
 import no.nav.dokdistsentralprint.consumer.regoppslag.to.HentMottakerOgAdresseResponseTo;
 import no.nav.dokdistsentralprint.exception.functional.RegoppslagHentAdresseFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseTechnicalException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -19,7 +18,6 @@ import java.util.function.Consumer;
 
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_REGOPPSLAG;
 import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_REASON_CODE;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -44,7 +42,7 @@ public class RegoppslagRestConsumer {
 				.build();
 	}
 
-	@Retryable(retryFor = RegoppslagHentAdresseTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(includes = RegoppslagHentAdresseTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
 
 		return webClient.post()

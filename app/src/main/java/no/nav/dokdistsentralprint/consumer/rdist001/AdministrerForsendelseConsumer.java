@@ -5,19 +5,16 @@ import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
 import no.nav.dokdistsentralprint.constants.NavHeadersFilter;
 import no.nav.dokdistsentralprint.exception.functional.DokdistsentralprintFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnicalException;
-import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
+import org.springframework.boot.http.codec.autoconfigure.HttpCodecsProperties;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKDISTADMIN;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
-import static no.nav.dokdistsentralprint.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -36,15 +33,13 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.baseUrl(dokdistsentralprintProperties.getEndpoints().getDokdistadmin().getUrl())
 				.filter(new NavHeadersFilter())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-				.exchangeStrategies(ExchangeStrategies.builder()
-						.codecs(configurer ->
-								configurer.defaultCodecs().maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
-						.build())
+				.codecs(configurer ->
+						configurer.defaultCodecs().maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
 				.build();
 	}
 
 	@Override
-	@Retryable(retryFor = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
 
 		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
@@ -65,7 +60,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	}
 
 	@Override
-	@Retryable(retryFor = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
 
 		webClient.put()
@@ -80,7 +75,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 
 	@Override
 	@Cacheable(POSTDESTINASJON_CACHE)
-	@Retryable(retryFor = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public String hentPostdestinasjon(String landkode) {
 
 		log.info("hentPostdestinasjon henter postdestinasjon for landkode={}", landkode);
@@ -102,7 +97,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 	}
 
 	@Override
-	@Retryable(retryFor = DokdistsentralprintTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterPostadresse(OppdaterPostadresseRequest oppdaterPostadresseRequest) {
 
 		log.info("oppdaterPostadresse skal oppdatere postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
@@ -119,7 +114,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 		log.info("oppdaterPostadresse har oppdatert postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
 	}
 
-	@Retryable(retryFor = DokdistsentralprintTechnicalException.class,  backoff = @Backoff(delay = DELAY_SHORT, multiplier = MULTIPLIER_SHORT))
+	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public void feilregistrerForsendelse(FeilregistrerForsendelseRequest feilregistrerForsendelse) {
 		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 

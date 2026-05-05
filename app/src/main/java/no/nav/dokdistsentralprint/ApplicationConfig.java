@@ -7,9 +7,9 @@ import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
 import no.nav.dokdistsentralprint.config.azure.AzureTokenProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 
-@EnableRetry
+@EnableResilientMethods
 @EnableConfigurationProperties({
 		ServiceuserAlias.class,
 		MqGatewayAlias.class,
