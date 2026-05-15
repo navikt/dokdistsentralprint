@@ -29,7 +29,7 @@
 		<google-cloud.version>26.79.0</google-cloud.version>
 		<tink.version>1.21.0</tink.version>
 		<tink-gcpkms.version>1.10.0</tink-gcpkms.version>
-		<com.ibm.mq.jakarta.client.version>9.4.5.0</com.ibm.mq.jakarta.client.version>
+		<com.ibm.mq.jakarta.client.version>9.4.5.1</com.ibm.mq.jakarta.client.version>
 		<context-propagation.version>1.2.1</context-propagation.version>
 		<apache-pdfbox.version>3.0.7</apache-pdfbox.version>
 		<dokmet-api.version>2025.06.30-07.30-22496f8</dokmet-api.version>
