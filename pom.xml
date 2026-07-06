@@ -23,7 +23,7 @@
 	<properties>
 		<java.version>25</java.version>
 
-		<camel.version>4.20.0</camel.version>
+		<camel.version>4.21.0</camel.version>
 		<logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
 		<httpclient.version>4.5.14</httpclient.version>
 		<google-cloud.version>26.84.0</google-cloud.version>
