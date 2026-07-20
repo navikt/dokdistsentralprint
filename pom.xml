@@ -31,7 +31,7 @@
 		<tink-gcpkms.version>1.11.0</tink-gcpkms.version>
 		<com.ibm.mq.jakarta.client.version>10.0.0.0</com.ibm.mq.jakarta.client.version>
 		<context-propagation.version>1.2.1</context-propagation.version>
-		<apache-pdfbox.version>3.0.7</apache-pdfbox.version>
+		<apache-pdfbox.version>3.0.8</apache-pdfbox.version>
 		<dokmet-api.version>2025.06.30-07.30-22496f8</dokmet-api.version>
 		<dok-legacy-tjenestespesifikasjoner.version>43-5bca208</dok-legacy-tjenestespesifikasjoner.version>
 
