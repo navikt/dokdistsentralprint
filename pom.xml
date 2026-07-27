@@ -36,7 +36,7 @@
 		<dok-legacy-tjenestespesifikasjoner.version>43-5bca208</dok-legacy-tjenestespesifikasjoner.version>
 
 		<!-- Test -->
-		<wiremock-spring-boot.version>4.2.1</wiremock-spring-boot.version>
+		<wiremock-spring-boot.version>4.2.2</wiremock-spring-boot.version>
 		<commons-io.version>2.22.0</commons-io.version>
 		<sshd-sftp.version>2.19.0</sshd-sftp.version>
 
