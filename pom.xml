@@ -10,6 +10,8 @@
 	<version>1.0-SNAPSHOT</version>
 
 	<modules>
+		<module>core</module>
+		<module>qdist009</module>
 		<module>app</module>
 		<module>schemas</module>
 	</modules>
@@ -51,6 +53,16 @@
 			<dependency>
 				<groupId>no.nav.dokdistsentralprint</groupId>
 				<artifactId>schemas</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.dokdistsentralprint</groupId>
+				<artifactId>core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.dokdistsentralprint</groupId>
+				<artifactId>qdist009</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

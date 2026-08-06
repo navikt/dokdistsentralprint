@@ -1,0 +1,201 @@
+package no.nav.dokdistsentralprint.qdist009;
+
+import lombok.extern.slf4j.Slf4j;
+import no.nav.dokdistsentralprint.consumer.dokmet.Distribusjonsinfo;
+import no.nav.dokdistsentralprint.printoppdrag.Bestilling;
+import no.nav.dokdistsentralprint.printoppdrag.BestillingsInfo;
+import no.nav.dokdistsentralprint.printoppdrag.Dokument;
+import no.nav.dokdistsentralprint.printoppdrag.DokumentInfo;
+import no.nav.dokdistsentralprint.printoppdrag.Kanal;
+import no.nav.dokdistsentralprint.printoppdrag.Mailpiece;
+import no.nav.dokdistsentralprint.printoppdrag.Ressurs;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
+import no.nav.dokdistsentralprint.qdist009.util.Landkoder;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+@Slf4j
+@Component
+public class BestillingMapper {
+
+	public static final String KUNDE_ID_NAV_IKT = "NAV_IKT";
+	public static final String USORTERT = "USORTERT";
+	public static final String PRINT = "PRINT";
+	private static final String LANDKODE_NO = "NO";
+	private static final String MOTTAKERTYPE_PERSON = "PERSON";
+	private static final String MOTTAKERTYPE_ORGANISASJON = "ORGANISASJON";
+	private static final String KONVOLUTT_MED_VINDU = "X";
+	private static final String NAV_STANDARD = "NAV_STANDARD";
+	private static final int MAKS_ADRESSELINJE_LENGDE = 128;
+
+	public Bestilling createBestilling(InternForsendelse internForsendelse, Distribusjonsinfo distribusjonsinfo, String postdestinasjon) {
+		Bestilling bestilling = new Bestilling();
+		BestillingsInfo bestillingsInfo = new BestillingsInfo();
+		bestillingsInfo.setModus(internForsendelse.getModus());
+		bestillingsInfo.setKundeId(KUNDE_ID_NAV_IKT);
+		bestillingsInfo.setBestillingsId(internForsendelse.getBestillingsId());
+		bestillingsInfo.setKundeOpprettet(LocalDate.now().toString());
+		bestillingsInfo.setDokumentInfo(mapDokumentInfo(postdestinasjon));
+		bestillingsInfo.setKanal(mapKanal(distribusjonsinfo));
+		bestilling.setBestillingsInfo(bestillingsInfo);
+		bestilling.setMailpiece(mapMailpiece(internForsendelse, distribusjonsinfo));
+		return bestilling;
+	}
+
+	private Kanal mapKanal(Distribusjonsinfo distribusjonsinfo) {
+		Kanal kanal = new Kanal();
+		kanal.setType(PRINT);
+		kanal.setBehandling(getBehandling(distribusjonsinfo));
+		return kanal;
+	}
+
+	private static DokumentInfo mapDokumentInfo(String postdestinasjon) {
+		DokumentInfo dokumentInfo = new DokumentInfo();
+		dokumentInfo.setSorteringsfelt(USORTERT);
+		dokumentInfo.setDestinasjon(postdestinasjon);
+		return dokumentInfo;
+	}
+
+	private Mailpiece mapMailpiece(InternForsendelse internForsendelse, Distribusjonsinfo distribusjonsinfo) {
+		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
+
+		Mailpiece mailpiece = new Mailpiece();
+		mailpiece.setMailpieceId(internForsendelse.getBestillingsId());
+		mailpiece.setRessurs(mapRessurs(internForsendelse));
+		mailpiece.setLandkode(getLandkode(adresse));
+		mailpiece.setPostnummer(getPostnummer(adresse));
+		mailpiece.getDokument().addAll(mapDokumenter(internForsendelse, distribusjonsinfo));
+		return mailpiece;
+	}
+
+	private Ressurs mapRessurs(InternForsendelse internForsendelse) {
+		Ressurs ressurs = new Ressurs();
+		ressurs.setAdresse(addCDataToString(getAdresse(internForsendelse.getPostadresse(), internForsendelse.getMottaker().getMottakerNavn())));
+		return ressurs;
+	}
+
+	private List<Dokument> mapDokumenter(InternForsendelse internForsendelse, Distribusjonsinfo distribusjonsinfo) {
+		return internForsendelse.getDokumenter().stream()
+				.map(dokumentTo ->
+						isMottakerSkattyter(internForsendelse.getMottaker().getMottakerType()) ?
+								mapDokumentSkattyter(internForsendelse, distribusjonsinfo, dokumentTo) :
+								mapDokumentUtlending(internForsendelse, distribusjonsinfo, dokumentTo))
+				.toList();
+	}
+
+	private Dokument mapDokumentSkattyter(InternForsendelse internForsendelse, Distribusjonsinfo distribusjonsinfo, InternForsendelse.Dokument dokumentTo) {
+		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
+
+		Dokument dokument = new Dokument();
+		dokument.setDokumentType(mapDokumentType(distribusjonsinfo.sentralPrintDokumentType()));
+		dokument.setDokumentId(dokumentTo.getDokumentObjektReferanse());
+		dokument.setSkattyternummer(internForsendelse.getMottaker().getMottakerId());
+		dokument.setNavn(addCDataToString(internForsendelse.getMottaker().getMottakerNavn()));
+		dokument.setLandkode(getLandkode(adresse));
+		dokument.setPostnummer(getPostnummer(adresse));
+		return dokument;
+	}
+
+	private Dokument mapDokumentUtlending(InternForsendelse internForsendelse, Distribusjonsinfo distribusjonsinfo, InternForsendelse.Dokument dokumentTo) {
+		InternForsendelse.Postadresse adresse = internForsendelse.getPostadresse();
+		Dokument dokument = new Dokument();
+		dokument.setDokumentType(mapDokumentType(distribusjonsinfo.sentralPrintDokumentType()));
+		dokument.setDokumentId(dokumentTo.getDokumentObjektReferanse());
+		dokument.setNavn(addCDataToString(internForsendelse.getMottaker().getMottakerNavn()));
+		dokument.setLandkode(getLandkode(adresse));
+		dokument.setPostnummer(getPostnummer(adresse));
+		return dokument;
+	}
+
+	public boolean isMottakerSkattyter(String mottakerType) {
+		return MOTTAKERTYPE_PERSON.equals(mottakerType) || MOTTAKERTYPE_ORGANISASJON.equals(mottakerType);
+	}
+
+	private String getLandkode(InternForsendelse.Postadresse adresse) {
+		if (LANDKODE_NO.equals(adresse.getLandkode())) {
+			return null;
+		} else {
+			return adresse.getLandkode();
+		}
+	}
+
+	private String getPostnummer(InternForsendelse.Postadresse adresse) {
+		if (LANDKODE_NO.equals(adresse.getLandkode())) {
+			return adresse.getPostnummer();
+		} else {
+			return null;
+		}
+	}
+
+	private String getAdresse(InternForsendelse.Postadresse adresse, String mottakerNavn) {
+		return formatAdresseEntity(mottakerNavn) +
+				formatAdresseEntity(adresse.getAdresselinje1()) +
+				formatAdresseEntity(adresse.getAdresselinje2()) +
+				formatAdresseEntity(adresse.getAdresselinje3()) +
+				formatPostnummerAndPoststed(adresse.getPostnummer(), adresse.getPoststed()) +
+				formatLandkode(adresse.getLandkode());
+	}
+
+	private String formatAdresseEntity(String entity) {
+		if (entity == null || entity.isEmpty()) {
+			return "";
+		} else {
+			if (entity.length() > MAKS_ADRESSELINJE_LENGDE) {
+				return format("%s...\r", entity.substring(0, 125));
+			}
+			return format("%s\r", entity);
+		}
+	}
+
+	private String formatPostnummerAndPoststed(String postnummer, String poststed) {
+		if (postnummer == null || postnummer.isEmpty() || poststed == null || poststed.isEmpty()) {
+			return "";
+		} else {
+			return format("%s %s\r", postnummer, poststed);
+		}
+	}
+
+	private String formatLandkode(String landkode) {
+		if (landkode == null || LANDKODE_NO.equals(landkode)) {
+			return "";
+		} else {
+			try {
+				return Landkoder.valueOf(landkode).getLandnavn();
+			} catch (IllegalArgumentException e) {
+				log.error("Mapping av landkode={} til landnavn feilet, da landkoden ikke ligger i Landkoder-enumen. " +
+						"Hør med teamet om landkoden bør legges inn.", landkode, e);
+				return landkode;
+			}
+		}
+	}
+
+	private String addCDataToString(String s) {
+		return format("<![CDATA[%s]]>", s);
+	}
+
+	private String getBehandling(Distribusjonsinfo distribusjonsinfo) {
+		return format("%s_%s_%s", distribusjonsinfo.portoklasse(), mapKonvoluttvinduType(distribusjonsinfo), getPlex(distribusjonsinfo.tosidigprint()));
+	}
+
+	private String mapKonvoluttvinduType(Distribusjonsinfo distribusjonsinfo) {
+		return isBlank(distribusjonsinfo.konvoluttvinduType()) ? KONVOLUTT_MED_VINDU : distribusjonsinfo.konvoluttvinduType();
+	}
+
+	private String mapDokumentType(String sentralPrintDokumentType) {
+		return isBlank(sentralPrintDokumentType) ? NAV_STANDARD : sentralPrintDokumentType;
+	}
+
+	private String getPlex(boolean tosidigPrint) {
+		if (tosidigPrint) {
+			return "D";
+		} else {
+			return "S";
+		}
+	}
+
+}
