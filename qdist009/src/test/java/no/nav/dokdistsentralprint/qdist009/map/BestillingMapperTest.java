@@ -139,7 +139,7 @@ class BestillingMapperTest {
 		assertNull(bestilling.getMailpiece().getLandkode());
 		assertEquals(POSTNUMMER, bestilling.getMailpiece().getPostnummer());
 
-		bestilling.getMailpiece().getDokument().forEach(dokument -> {);
+		bestilling.getMailpiece().getDokument().forEach(dokument -> {
 			assertEquals(NAV_STANDARD, dokument.getDokumentType());
 			assertEquals(CDATA_MOTTAKER_NAVN, dokument.getNavn());
 			assertEquals(MOTTAKER_ID, dokument.getSkattyternummer());
@@ -189,29 +189,22 @@ class BestillingMapperTest {
 		assertNull(bestilling.getMailpiece().getLandkode());
 		assertEquals(POSTNUMMER, bestilling.getMailpiece().getPostnummer());
 
+		bestilling.getMailpiece().getDokument().forEach(dokument -> {
+			assertEquals(SENTRALPRINT_DOKTYPE, dokument.getDokumentType());
+			assertEquals(CDATA_MOTTAKER_NAVN, dokument.getNavn());
+			assertEquals(MOTTAKER_ID, dokument.getSkattyternummer());
+			assertNull(dokument.getLandkode());
+			assertEquals(POSTNUMMER, dokument.getPostnummer());
+		});
+
 		Dokument hoveddokument = bestilling.getMailpiece().getDokument().getFirst();
-		assertEquals(SENTRALPRINT_DOKTYPE, hoveddokument.getDokumentType());
-		assertEquals(CDATA_MOTTAKER_NAVN, hoveddokument.getNavn());
 		assertEquals(OBJEKT_REFERANSE_HOVEDDOK, hoveddokument.getDokumentId());
-		assertEquals(MOTTAKER_ID, hoveddokument.getSkattyternummer());
-		assertNull(hoveddokument.getLandkode());
-		assertEquals(POSTNUMMER, hoveddokument.getPostnummer());
 
 		Dokument vedlegg1 = bestilling.getMailpiece().getDokument().get(1);
-		assertEquals(SENTRALPRINT_DOKTYPE, vedlegg1.getDokumentType());
-		assertEquals(CDATA_MOTTAKER_NAVN, vedlegg1.getNavn());
 		assertEquals(OBJEKT_REFERANSE_VEDLEGG1, vedlegg1.getDokumentId());
-		assertEquals(MOTTAKER_ID, vedlegg1.getSkattyternummer());
-		assertNull(vedlegg1.getLandkode());
-		assertEquals(POSTNUMMER, vedlegg1.getPostnummer());
 
 		Dokument vedlegg2 = bestilling.getMailpiece().getDokument().get(2);
-		assertEquals(SENTRALPRINT_DOKTYPE, vedlegg2.getDokumentType());
-		assertEquals(CDATA_MOTTAKER_NAVN, vedlegg2.getNavn());
 		assertEquals(OBJEKT_REFERANSE_VEDLEGG2, vedlegg2.getDokumentId());
-		assertEquals(MOTTAKER_ID, vedlegg2.getSkattyternummer());
-		assertNull(vedlegg2.getLandkode());
-		assertEquals(POSTNUMMER, vedlegg2.getPostnummer());
 	}
 
 	@Test
@@ -334,7 +327,8 @@ class BestillingMapperTest {
 						.mottakerNavn(MOTTAKER_NAVN_LANG)
 						.mottakerType(MOTTAKERTYPE_PERSON)
 						.build());
-		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseToBuilder.build(),
+		Bestilling bestilling = bestillingMapper.createBestilling(hentForsendelseResponseToBuilder
+						.forsendelseId(3333).build(),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
 				createHentPostdestinasjon());
 
