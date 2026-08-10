@@ -1,0 +1,752 @@
+package no.nav.dokdistsentralprint.itest;
+
+import jakarta.jms.Queue;
+import jakarta.jms.TextMessage;
+import jakarta.xml.bind.JAXBElement;
+import no.nav.dokdistsentralprint.itest.config.ApplicationTestConfig;
+import no.nav.dokdistsentralprint.storage.BucketStorage;
+import no.nav.dokdistsentralprint.storage.DokdistDokument;
+import no.nav.dokdistsentralprint.storage.JsonSerializer;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.sshd.server.SshServer;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.UUID;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.removeAllMappings;
+import static com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static no.nav.dokdistsentralprint.TestUtils.classpathToString;
+import static no.nav.dokdistsentralprint.TestUtils.fileToBytes;
+import static no.nav.dokdistsentralprint.TestUtils.fileToString;
+import static no.nav.dokdistsentralprint.TestUtils.unzipToDirectory;
+import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.DOKMET_CACHE;
+import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
+import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_REASON_CODE;
+import static no.nav.dokdistsentralprint.itest.config.SftpConfig.startSshServer;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
+@SpringBootTest(classes = ApplicationTestConfig.class, webEnvironment = NONE)
+@EnableWireMock(@ConfigureWireMock(name = "server", port = 0))
+@ActiveProfiles("itest")
+class Qdist009IT {
+
+	private static final String FORSENDELSE_ID = "33333";
+	private static final String DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK = "dokumentObjektReferanseHoveddok";
+	private static final String DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 = "dokumentObjektReferanseVedlegg1";
+	private static final String DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 = "dokumentObjektReferanseVedlegg2";
+	private static final byte[] A4_PDF_BYTES = createA4PdfBytes();
+	private static final String LANDKODE_TR = "TR";
+	private static final String LANDKODE_XX = "XX";
+
+	private static final String HENTFORSENDELSE_URL = format("/rest/v1/administrerforsendelse/%s", FORSENDELSE_ID);
+	private static final String DOKMET_URL = "/rest/dokumenttypeinfo/dokumenttypeIdHoveddok";
+	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
+	private static final String HENTPOSTDESTINASJON_URL = "/rest/v1/administrerforsendelse/hentpostdestinasjon/";
+	private static final String OPPDATERPOSTADRESSE_URL = "/rest/v1/administrerforsendelse/oppdaterpostadresse";
+	private static final String FEILREGISTRER_FORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
+	private static final String REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL = "/regoppslag/rest/hentMottakerOgAdresse";
+
+	@TempDir
+	static Path tempDir;
+	private static String CALL_ID;
+	private static SshServer sshServer;
+	@Autowired
+	public CacheManager cacheManager;
+	@Autowired
+	private JmsTemplate jmsTemplate;
+	@Autowired
+	private Queue qdist009;
+	@Autowired
+	private Queue qdist009FunksjonellFeil;
+	@Autowired
+	private Queue backoutQueue;
+	@Autowired
+	private Queue qopp001;
+	@Autowired
+	private BucketStorage bucketStorage;
+
+	@Import(ApplicationTestConfig.class)
+	@Configuration
+	static class Config {
+	}
+
+	@DynamicPropertySource
+	static void registerSftpProperties(DynamicPropertyRegistry registry) {
+		sshServer = startSshServer(tempDir);
+		registry.add("sftp.privateKeyFile", () -> {
+			try {
+				return new ClassPathResource("ssh/id_rsa").getURL().getPath();
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e);
+			}
+		});
+		registry.add("sftp.port", () -> sshServer.getPort());
+	}
+
+	@AfterAll
+	static void stopServer() throws Exception {
+		sshServer.stop(true);
+	}
+
+	@BeforeEach
+	void setupBefore() {
+		CALL_ID = UUID.randomUUID().toString();
+
+		removeAllMappings();
+		resetAllRequests();
+		cacheManager.getCache(DOKMET_CACHE).clear();
+		cacheManager.getCache(POSTDESTINASJON_CACHE).clear();
+		reset(bucketStorage);
+		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(A4_PDF_BYTES).build()));
+		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(A4_PDF_BYTES).build()));
+		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(A4_PDF_BYTES).build()));
+
+		stubFor(post("/azure_token")
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("azure/token_response_dummy.json")));
+	}
+
+	@Test
+	void shouldProcessForsendelse() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPutOppdaterForsendelse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
+		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
+
+		String bestillingXmlPath = tempDir.toString() + "/" + CALL_ID + ".xml";
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(bestillingXmlPath).exists())); // Test sometimes get FileNotFound. This check prevents it
+		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
+		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml.xml").replaceAll("insertCallIdHere",
+				CALL_ID);
+		byte[] hoveddokContent = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		byte[] vedlegg1Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		byte[] vedlegg2Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+
+		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
+		assertArrayEquals(A4_PDF_BYTES, hoveddokContent);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg1Content);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg2Content);
+
+		verifyAllStubs(LANDKODE_TR);
+	}
+
+	@Test
+	void shouldProcessForsendelseMedUkjentEllerNullLandkode() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPutOppdaterForsendelse(OK.value());
+		stubGetPostdestinasjon("XX", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy-landkode-ukjent.json", OK.value());
+		stubPutPostadresse(OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
+		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
+
+		String bestillingXmlPath = tempDir.toString() + "/" + CALL_ID + ".xml";
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(bestillingXmlPath).exists())); // Test sometimes get FileNotFound. This check prevents it
+		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
+		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_ukjent_landkode.xml").replaceAll("insertCallIdHere",
+				CALL_ID);
+		byte[] hoveddokContent = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		byte[] vedlegg1Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		byte[] vedlegg2Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+
+		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
+		assertArrayEquals(A4_PDF_BYTES, hoveddokContent);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg1Content);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg2Content);
+
+		verifyAllStubs(LANDKODE_XX);
+	}
+
+	@Test
+	void shouldSendTemaRequestTilRegoppslagOgProcessForsendelse() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/forsendelse_med_tema.json", OK.value());
+		stubPutOppdaterForsendelse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
+		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
+
+		String bestillingXmlPath = tempDir.toString() + "/" + CALL_ID + ".xml";
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(bestillingXmlPath).exists())); // Test sometimes get FileNotFound. This check prevents it
+		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
+		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml.xml").replaceAll("insertCallIdHere",
+				CALL_ID);
+		byte[] hoveddokContent = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		byte[] vedlegg1Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		byte[] vedlegg2Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+
+		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
+		assertArrayEquals(A4_PDF_BYTES, hoveddokContent);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg1Content);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg2Content);
+
+		verifyAllStubs(LANDKODE_TR);
+	}
+
+	@Test
+	void shouldProcessForsendelseWithoutCallingRegoppslag() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_withAdresse-happy.json", OK.value());
+		stubPutOppdaterForsendelse(OK.value());
+		stubGetPostdestinasjon("NO", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
+		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
+
+		String bestillingXmlPath = tempDir.toString() + "/" + CALL_ID + ".xml";
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(bestillingXmlPath).exists())); // Test sometimes get FileNotFound. This check prevents it
+		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
+		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_utenRegoppslag_xml.xml").replaceAll(
+				"insertCallIdHere",
+				CALL_ID);
+		byte[] hoveddokContent = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		byte[] vedlegg1Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		byte[] vedlegg2Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+
+		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
+		assertArrayEquals(A4_PDF_BYTES, hoveddokContent);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg1Content);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg2Content);
+
+		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "NO")));
+	}
+
+	@Test
+	void shouldProcessForsendelseWithoutInkludertSkatteyternummerIXml() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_withUkjent_motakertype-happy.json", OK.value());
+		stubPutOppdaterForsendelse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		String zippedFilePath = tempDir.toString() + "/outbound/dokdistsentralprint/" + CALL_ID + ".zip";
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(zippedFilePath).exists()));
+		unzipToDirectory(zippedFilePath, new File(tempDir.toString()).toPath());
+
+		String bestillingXmlPath = tempDir.toString() + "/" + CALL_ID + ".xml";
+		await().atMost(10, SECONDS).untilAsserted(() -> assertTrue(new File(bestillingXmlPath).exists())); // Test sometimes get FileNotFound. This check prevents it
+		String actualBestillingXmlString = fileToString(new File(bestillingXmlPath));
+		String expectedBestillingXmlString = classpathToString("/qdist009/bestilling_xml_uten_skattyternummer.xml").replaceAll("insertCallIdHere",
+				CALL_ID);
+		byte[] hoveddokContent = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK + ".pdf"));
+		byte[] vedlegg1Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 + ".pdf"));
+		byte[] vedlegg2Content = fileToBytes(new File(tempDir.toString() + "/" + DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2 + ".pdf"));
+
+		assertEquals(expectedBestillingXmlString, actualBestillingXmlString.replaceAll("<KundeOpprettet.*KundeOpprettet>", ""));
+		assertArrayEquals(A4_PDF_BYTES, hoveddokContent);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg1Content);
+		assertArrayEquals(A4_PDF_BYTES, vedlegg2Content);
+
+		verifyAllStubs(LANDKODE_TR);
+	}
+
+	@Test
+	void shouldSendMeldingToQopp001QueueWhenPostadresseIsNull() throws IOException {
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubFeilPostHentMottakerOgAdresse();
+		stubPutFeilregistrerForsendelse();
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String qopp001Receive = receive(qopp001);
+			assertNotNull(qopp001Receive);
+			assertThat(qopp001Receive).isEqualToIgnoringWhitespace(classpathToString("__files/qopp001/qopp001-happy-melding.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
+		verify(1, putRequestedFor(urlEqualTo(FEILREGISTRER_FORSENDELSE_URL)));
+	}
+
+	@Test
+	void shouldThrowForsendelseManglerForsendelseIdFunctionalExceptionManglerForsendelseId() throws Exception {
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-feilId.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-feilId.xml"));
+		});
+	}
+
+	@Test
+	void shouldThrowForsendelseManglerForsendelseIdFunctionalExceptionTomForsendelseId() throws Exception {
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-tom-forsendelseId.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-tom-forsendelseId.xml"));
+		});
+	}
+
+	@Test
+	void shouldThrowRdist001HentForsendelseFunctionalException() throws Exception {
+
+		stubFor(get(HENTFORSENDELSE_URL)
+				.willReturn(aResponse().withStatus(NOT_FOUND.value())));
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+	}
+
+	@Test
+	void shouldThrowRdist001HentForsendelseTechnicalException() throws Exception {
+		stubFor(get(HENTFORSENDELSE_URL)
+				.willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR.value())));
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009BackoutQueue = receive(backoutQueue);
+			assertNotNull(resultOnQdist009BackoutQueue);
+			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(4, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+	}
+
+	@Test
+	void shouldThrowInvalidForsendelseStatusException() throws Exception {
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresseBekreftetForsendelseStatus.json", OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+	}
+
+	@Test
+	void shouldPutOnFunksjonellFeilkoeWhenNotFoundFromDokmet() throws Exception {
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubGetDokumenttypeinfo(NOT_FOUND.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
+	}
+
+	@Test
+	void shouldPutOnFunksjonellFeilkoeWhenMissingDataFromDokmet() throws Exception {
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubGetDokumenttypeinfoManglendeData();
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
+	}
+
+	@Test
+	void shouldPutOnTekniskFeilkoeWhenInternalServerErrorFromDokmet() throws Exception {
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubGetDokumenttypeinfo(INTERNAL_SERVER_ERROR.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009BackoutQueue = receive(backoutQueue);
+			assertNotNull(resultOnQdist009BackoutQueue);
+			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(4, getRequestedFor(urlEqualTo(DOKMET_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+	}
+
+	@Test
+	void shouldThrowRegoppslagHentAdresseFunctionalException() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse(null, NOT_FOUND.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
+	}
+
+	@Test
+	void shouldThrowRegoppslagHentAdresseTechnicalException() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", INTERNAL_SERVER_ERROR.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009BackoutQueue = receive(backoutQueue);
+			assertNotNull(resultOnQdist009BackoutQueue);
+			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(4, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
+	}
+
+	@Test
+	void shouldThrowRdist001GetPostDestinasjonFunctionalException() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubGetPostdestinasjon("TR", null, NOT_FOUND.value());
+		stubPutPostadresse(OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
+		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
+	}
+
+	@Test
+	void shouldThrowRdist001GetPostDestinasjonTechnicalException() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+		stubGetPostdestinasjon("TR", null, INTERNAL_SERVER_ERROR.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009BackoutQueue = receive(backoutQueue);
+			assertNotNull(resultOnQdist009BackoutQueue);
+			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(4, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
+		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
+	}
+
+	@Test
+	void shouldThrowKunneIkkeDeserialisereBucketPayloadFunctionalException() throws Exception {
+		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString())).thenReturn("notJsonSerializedString");
+
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_withAdresse-CorruptInBucket-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+
+		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
+		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
+	}
+
+	@Test
+	void shouldThrowDokumentIkkeFunnetIBucketException() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_withAdresse-NotInBucket-happy.json", OK.value());
+		stubGetPostdestinasjon("NO", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo("/rest/dokumenttypeinfo/dokumenttypeIdHoveddokNotInBucket")));
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+	}
+
+	@Test
+	void shouldPutMessageOnFunksjonellFeilkoeIfNotFoundFromRdist001() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPutOppdaterForsendelse(NOT_FOUND.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009FunksjonellFeilQueue = receive(qdist009FunksjonellFeil);
+			assertNotNull(resultOnQdist009FunksjonellFeilQueue);
+			assertEquals(resultOnQdist009FunksjonellFeilQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+
+		verifyAllStubs(LANDKODE_TR);
+	}
+
+	@Test
+	void shouldPutMessageOnBackoutkoeIfInternalServerErrorFromRdist001() throws Exception {
+		stubGetDokumenttype();
+		stubGetForsendelse("__files/rdist001/getForsendelse_noAdresse-happy.json", OK.value());
+		stubPutOppdaterForsendelse(INTERNAL_SERVER_ERROR.value());
+		stubGetPostdestinasjon("TR", "rdist001/hentPostdestinasjon-happy.json", OK.value());
+		stubPostHentMottakerOgAdresse("regoppslag/treg002-happy.json", OK.value());
+		stubPutPostadresse(OK.value());
+
+		sendStringMessage(qdist009, classpathToString("qdist009/qdist009-happy.xml"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String resultOnQdist009BackoutQueue = receive(backoutQueue);
+			assertNotNull(resultOnQdist009BackoutQueue);
+			assertEquals(resultOnQdist009BackoutQueue, classpathToString("qdist009/qdist009-happy.xml"));
+		});
+		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(4, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + "TR")));
+		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
+	}
+
+	private void sendStringMessage(Queue queue, final String message) {
+		jmsTemplate.send(queue, session -> {
+			TextMessage textMessage = session.createTextMessage();
+			textMessage.setText(message);
+			textMessage.setStringProperty("callId", CALL_ID);
+			return textMessage;
+		});
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T receive(Queue queue) {
+		Object response = jmsTemplate.receiveAndConvert(queue);
+		if (response instanceof JAXBElement) {
+			response = ((JAXBElement<?>) response).getValue();
+		}
+		return (T) response;
+	}
+
+	private void verifyAllStubs(String landkode) {
+		verify(1, getRequestedFor(urlEqualTo(DOKMET_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+		verify(1,
+				putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
+		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + landkode)));
+		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
+	}
+
+	private void stubPutOppdaterForsendelse(int status) {
+		stubFor(put(OPPDATERFORSENDELSE_URL)
+				.willReturn(aResponse()
+						.withStatus(status)));
+	}
+
+	private void stubGetForsendelse(String path, int status) throws IOException {
+		stubFor(get(HENTFORSENDELSE_URL)
+				.willReturn(aResponse()
+						.withStatus(status)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody(classpathToString(path).replace(
+								"insertCallIdHere",
+								CALL_ID))));
+	}
+
+	private void stubPutFeilregistrerForsendelse() {
+		stubFor(put(urlEqualTo(FEILREGISTRER_FORSENDELSE_URL))
+				.willReturn(aResponse()
+						.withStatus(OK.value())));
+	}
+
+	private void stubPutPostadresse(int status) {
+		stubFor(put(OPPDATERPOSTADRESSE_URL)
+				.willReturn(aResponse()
+						.withStatus(status)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
+	}
+
+	private void stubGetPostdestinasjon(String landkode, String path, int status) {
+		stubFor(get(HENTPOSTDESTINASJON_URL + landkode)
+				.willReturn(aResponse()
+						.withStatus(status)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile(path)));
+	}
+
+	private void stubGetDokumenttype() {
+		stubFor(get(urlMatching(DOKMET_URL))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("dokmet/tkat020-happy.json")));
+	}
+
+	private void stubGetDokumenttypeinfo(int status) {
+		stubFor(get(urlMatching(DOKMET_URL))
+				.willReturn(aResponse()
+						.withStatus(status)));
+	}
+
+	private void stubGetDokumenttypeinfoManglendeData() {
+		stubFor(get(urlMatching(DOKMET_URL))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("dokmet/tkat020-missing-dokumentproduksjonsinfo.json")));
+	}
+
+	private void stubPostHentMottakerOgAdresse(String path, int status) {
+		stubFor(post(urlMatching(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL))
+				.willReturn(aResponse()
+						.withStatus(status)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile(path)));
+	}
+
+	private void stubFeilPostHentMottakerOgAdresse() {
+		stubFor(post(urlMatching(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL))
+				.willReturn(aResponse()
+						.withStatus(NOT_FOUND.value())
+						.withHeader(NAV_REASON_CODE, "ukjent_adresse")
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody("{\"status\":\"404 \",\"message\":\"Fant ikke adresse for personen i PDL\"}")));
+	}
+
+	private static byte[] createA4PdfBytes() {
+		try (PDDocument doc = new PDDocument()) {
+			doc.addPage(new PDPage(PDRectangle.A4));
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			doc.save(out);
+			return out.toByteArray();
+		} catch (IOException e) {
+			throw new RuntimeException("Kunne ikke opprette test-PDF", e);
+		}
+	}
+
+}

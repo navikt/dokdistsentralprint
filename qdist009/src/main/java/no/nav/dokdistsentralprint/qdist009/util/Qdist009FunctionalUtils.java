@@ -1,0 +1,59 @@
+package no.nav.dokdistsentralprint.qdist009.util;
+
+import no.nav.dokdistsentralprint.exception.functional.UgyldigForsendelsestatusException;
+import no.nav.dokdistsentralprint.qdist009.domain.BestillingEntity;
+import no.nav.dokdistsentralprint.qdist009.domain.InternForsendelse;
+import no.nav.dokdistsentralprint.storage.DokdistDokument;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.lang.String.format;
+import static no.nav.dokdistsentralprint.qdist009.domain.Forsendelsestatus.KLAR_FOR_DIST;
+
+public final class Qdist009FunctionalUtils {
+
+	private Qdist009FunctionalUtils() {
+	}
+
+	private static final String HOVEDDOKUMENT = "HOVEDDOKUMENT";
+
+	public static void validateForsendelsestatus(String forsendelsestatus) {
+		if (!KLAR_FOR_DIST.name().equals(forsendelsestatus)) {
+			throw new UgyldigForsendelsestatusException(format("Forsendelsestatus må være %s. Fant forsendelsestatus=%s", KLAR_FOR_DIST, forsendelsestatus));
+		}
+	}
+
+	public static String getDokumenttypeIdHoveddokument(InternForsendelse internForsendelse) {
+		return internForsendelse.getDokumenter().stream()
+				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
+				.map(InternForsendelse.Dokument::getDokumenttypeId).toList()
+				.getFirst();
+	}
+
+	public static List<BestillingEntity> createBestillingEntities(String bestillingId, String bestillingXml, List<DokdistDokument> dokdistDokumentList) {
+		List<BestillingEntity> bestillingEntities = new ArrayList<>();
+		BestillingEntity bestillingXmlEntity = createBestillingXmlEntity(bestillingId, bestillingXml);
+		List<BestillingEntity> documentEntities = createDocumentEntities(dokdistDokumentList);
+		bestillingEntities.add(bestillingXmlEntity);
+		bestillingEntities.addAll(documentEntities);
+		return bestillingEntities;
+	}
+
+	private static BestillingEntity createBestillingXmlEntity(String bestillingId, String bestillingXml) {
+		return BestillingEntity.builder()
+				.fileName(format("%s.xml", bestillingId))
+				.entity(bestillingXml.getBytes())
+				.build();
+	}
+
+	private static List<BestillingEntity> createDocumentEntities(List<DokdistDokument> dokdistDokumentList) {
+		return dokdistDokumentList.stream()
+				.map(dokdistDokument -> (BestillingEntity.builder()
+						.fileName(format("%s.pdf", dokdistDokument.getDokumentObjektReferanse()))
+						.entity(dokdistDokument.getPdf())
+						.build()))
+				.toList();
+	}
+
+}
