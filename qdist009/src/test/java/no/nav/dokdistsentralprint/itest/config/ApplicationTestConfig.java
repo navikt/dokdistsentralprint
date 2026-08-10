@@ -27,7 +27,7 @@ import static org.mockito.Mockito.mock;
 })
 @Import({
 		JmsItestConfig.class,
-		CacheManagerTest.class
+		ItestCacheConfig.class
 })
 @Profile("itest")
 public class ApplicationTestConfig {

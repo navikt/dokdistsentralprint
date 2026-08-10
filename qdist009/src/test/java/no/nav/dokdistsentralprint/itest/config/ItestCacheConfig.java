@@ -16,7 +16,7 @@ import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTI
 
 @Profile("itest")
 @Configuration
-public class CacheManagerTest {
+public class ItestCacheConfig {
 
 	@Bean
 	CacheManager cacheManager() {

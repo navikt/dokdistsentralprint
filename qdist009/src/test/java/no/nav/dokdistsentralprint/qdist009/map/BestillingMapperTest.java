@@ -61,8 +61,7 @@ class BestillingMapperTest {
 
 	@Test
 	void shouldMap() {
-		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(
-						createAdresse(LAND_NO), MOTTAKERTYPE_PERSON),
+		Bestilling bestilling = bestillingMapper.createBestilling(createHentForsendelseResponseTo(createAdresse(LAND_NO), MOTTAKERTYPE_PERSON),
 				createDokumenttypeInfoTo(TOSIDIG_PRINT_TRUE),
 				createHentPostdestinasjon()
 		);
