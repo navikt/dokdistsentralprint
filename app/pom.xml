@@ -25,6 +25,10 @@
             <groupId>no.nav.dokdistsentralprint</groupId>
             <artifactId>qdist009</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.dokdistsentralprint</groupId>
+            <artifactId>sdist009</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -22,7 +22,7 @@ public class Qdist009Route extends RouteBuilder {
     public static final String SERVICE_ID = "qdist009";
     static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";
     static final String PROPERTY_FORSENDELSE_ID = "forsendelseId";
-    private static final String SFTP_SERVER = "sftp://{{sftp.url}}:{{sftp.port}}/{{sftp.remote-file-path}}" +
+    private static final String SFTP_SERVER = "sftp://{{sftp.url}}:{{sftp.port}}/{{sftp.outbound-file-path}}" +
             "?username={{sftp.username}}" +
             "&password=" +
             "&binary=true" +

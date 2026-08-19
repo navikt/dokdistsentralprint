@@ -8,6 +8,7 @@ metadata:
 spec:
   envFrom:
     - secret: {{ DOKDISTSENTRALPRINT_SECRET }}
+    - configmap: dokdistsentralprint
   filesFrom:
     - secret: {{ DOKDISTSENTRALPRINT_SECRET }}
       mountPath: "/var/run/secrets/nais_secrets"
