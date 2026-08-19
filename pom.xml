@@ -14,6 +14,7 @@
 		<module>qdist009</module>
 		<module>app</module>
 		<module>schemas</module>
+		<module>sdist009</module>
 	</modules>
 
 	<parent>
@@ -63,6 +64,11 @@
 			<dependency>
 				<groupId>no.nav.dokdistsentralprint</groupId>
 				<artifactId>qdist009</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.dokdistsentralprint</groupId>
+				<artifactId>sdist009</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

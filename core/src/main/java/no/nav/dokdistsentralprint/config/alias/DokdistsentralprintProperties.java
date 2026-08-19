@@ -1,5 +1,7 @@
 package no.nav.dokdistsentralprint.config.alias;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -11,7 +13,10 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("dokdistsentralprint")
 public class DokdistsentralprintProperties {
 
+	@Valid
 	private final Endpoints endpoints = new Endpoints();
+	@Valid
+	private final Sdist009Properties sdist009 = new Sdist009Properties();
 
 	@Data
 	public static class Endpoints {
@@ -33,4 +38,11 @@ public class DokdistsentralprintProperties {
 		@NotEmpty
 		private String scope;
 	}
+
+	@Data
+	public static class Sdist009Properties {
+		@NotBlank
+		private String cron;
+	}
+
 }
