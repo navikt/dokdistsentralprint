@@ -6,7 +6,6 @@
   "INGRESSES": [
     "https://dokdistsentralprint.intern.nav.no"
   ],
-  "SFTP_URL": "a30apvl041.oera.no",
   "DOKDISTSENTRALPRINT_SECRET": "dokdistsentralprint",
   "DOKDISTSENTRALPRINT_ENDPOINTS_DOKMET_URL": "http://dokmet.teamdokumenthandtering.svc.nais.local/rest/dokumenttypeinfo",
   "DOKDISTSENTRALPRINT_ENDPOINTS_DOKDISTADMIN_URL": "http://dokdistadmin.teamdokumenthandtering.svc.nais.local/rest/v1/administrerforsendelse",
