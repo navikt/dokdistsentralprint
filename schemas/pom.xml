@@ -70,6 +70,25 @@
 							</args>
 						</configuration>
 					</execution>
+					<execution>
+						<id>generate-jaxb-kvittering</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<generatePackage>no.nav.dokdistsentralprint.kvittering</generatePackage>
+							<schemaDirectory>src/main/resources/no/nav/dokdistsentralprint/kvittering</schemaDirectory>
+							<generateDirectory>${project.basedir}/target/generated-sources/kvittering
+							</generateDirectory>
+							<plugins>
+								<dependency>
+									<groupId>org.patrodyne.jvnet</groupId>
+									<artifactId>hisrc-basicjaxb-plugins</artifactId>
+									<version>${hisrc-jaxb.version}</version>
+								</dependency>
+							</plugins>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
