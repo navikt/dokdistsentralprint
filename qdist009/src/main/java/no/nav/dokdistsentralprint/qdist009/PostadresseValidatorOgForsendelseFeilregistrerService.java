@@ -29,22 +29,23 @@ public class PostadresseValidatorOgForsendelseFeilregistrerService {
 	public static final String XX_LANDKODE = "XX";
 	private static final String FORSENDELSE_FEIL_TYPE = "MELDINGSFEIL";
 	private static final String FEIL_MELDING_DETALJER = "Manglende adresse";
+
 	private final RegoppslagRestConsumer regoppslagRestConsumer;
-	private final AdministrerForsendelseConsumer administrerForsendelse;
+	private final AdministrerForsendelseConsumer administrerForsendelseConsumer;
 	private final ForsendelseMapper forsendelseMapper;
 
 	public PostadresseValidatorOgForsendelseFeilregistrerService(RegoppslagRestConsumer regoppslagRestConsumer,
 																 ForsendelseMapper forsendelseMapper,
-																 AdministrerForsendelseConsumer administrerForsendelse) {
+																 AdministrerForsendelseConsumer administrerForsendelseConsumer) {
 		this.regoppslagRestConsumer = regoppslagRestConsumer;
-		this.administrerForsendelse = administrerForsendelse;
+		this.administrerForsendelseConsumer = administrerForsendelseConsumer;
 		this.forsendelseMapper = forsendelseMapper;
 	}
 
 	@Handler
 	public InternForsendelse hentForsendelse(DistribuerForsendelseTilSentralPrintTo distribuerForsendelseTilSentralPrintTo, Exchange exchange) {
 		final String forsendelseId = distribuerForsendelseTilSentralPrintTo.getForsendelseId();
-		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(forsendelseId);
+		HentForsendelseResponse hentForsendelseResponse = administrerForsendelseConsumer.hentForsendelse(forsendelseId);
 		validateForsendelsestatus(hentForsendelseResponse.getForsendelseStatus());
 
 		final String bestillingsId = hentForsendelseResponse.getBestillingsId();
@@ -61,7 +62,7 @@ public class PostadresseValidatorOgForsendelseFeilregistrerService {
 	}
 
 	public String hentPostdestinasjon(Postadresse adresse) {
-		return administrerForsendelse.hentPostdestinasjon(adresse.getLandkode());
+		return administrerForsendelseConsumer.hentPostdestinasjon(adresse.getLandkode());
 	}
 
 	private InternForsendelse mapPostadresseAndForsendelse(HentForsendelseResponse hentForsendelseResponse) {
@@ -69,7 +70,7 @@ public class PostadresseValidatorOgForsendelseFeilregistrerService {
 		HentForsendelseResponse.Postadresse regoppslagPostadresse = getAdresseFromRegoppslag(hentForsendelseResponse);
 
 		if (regoppslagPostadresse == null) {
-			administrerForsendelse.feilregistrerForsendelse(mapFeilregistrerForsendelse(hentForsendelseResponse));
+			administrerForsendelseConsumer.feilregistrerForsendelse(mapFeilregistrerForsendelse(hentForsendelseResponse));
 			return forsendelseMapper.mapForsendelse(hentForsendelseResponse);
 		}
 
@@ -97,7 +98,7 @@ public class PostadresseValidatorOgForsendelseFeilregistrerService {
 
 	private void oppdaterPostadresse(Long forsendelseId, HentForsendelseResponse.Postadresse postadresse) {
 		if (postadresse != null) {
-			administrerForsendelse.oppdaterPostadresse(mapOppdaterPostadresse(forsendelseId, postadresse));
+			administrerForsendelseConsumer.oppdaterPostadresse(mapOppdaterPostadresse(forsendelseId, postadresse));
 		}
 	}
 

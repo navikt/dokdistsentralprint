@@ -22,7 +22,7 @@ import static org.springframework.security.oauth2.client.web.reactive.function.c
 
 @Slf4j
 @Component
-public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
+public class AdministrerForsendelseConsumer {
 
 	private final WebClient webClient;
 
@@ -38,10 +38,28 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.build();
 	}
 
-	@Override
+	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	public Long finnForsendelse(String bestillingsId) {
+		log.info("finnForsendelse henter forsendelse med bestillingsId={}", bestillingsId);
+
+		Long forsendelseId = webClient.get()
+				.uri(uriBuilder -> uriBuilder
+						.path("/finnforsendelse/bestillingsId/{bestillingsId}")
+						.build(bestillingsId))
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
+				.retrieve()
+				.bodyToMono(FinnForsendelseResponse.class)
+				.map(FinnForsendelseResponse::forsendelseId)
+				.onErrorMap(this::mapError)
+				.block();
+
+		log.info("finnForsendelse har hentet forsendelse med forsendelseId={} og bestillingsId={}", forsendelseId, bestillingsId);
+
+		return forsendelseId;
+	}
+
 	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
-
 		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
 
 		var response = webClient.get()
@@ -51,7 +69,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.retrieve()
 				.bodyToMono(HentForsendelseResponse.class)
-				.doOnError(this::handleError)
+				.onErrorMap(this::mapError)
 				.block();
 
 		log.info("hentForsendelse har hentet forsendelse med forsendelseId={}", forsendelseId);
@@ -59,25 +77,21 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 		return response;
 	}
 
-	@Override
 	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
-
 		webClient.put()
 				.uri("/oppdaterforsendelse")
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.bodyValue(oppdaterForsendelseRequest)
 				.retrieve()
 				.toBodilessEntity()
-				.doOnError(this::handleError)
+				.onErrorMap(this::mapError)
 				.block();
 	}
 
-	@Override
 	@Cacheable(POSTDESTINASJON_CACHE)
 	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public String hentPostdestinasjon(String landkode) {
-
 		log.info("hentPostdestinasjon henter postdestinasjon for landkode={}", landkode);
 
 		var postdestinasjon = webClient.get()
@@ -88,7 +102,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.retrieve()
 				.bodyToMono(HentPostdestinasjonResponse.class)
 				.map(HentPostdestinasjonResponse::postdestinasjon)
-				.doOnError(this::handleError)
+				.onErrorMap(this::mapError)
 				.block();
 
 		log.info("hentPostdestinasjon har hentet postdestinasjon={} for landkode={}", postdestinasjon, landkode);
@@ -96,10 +110,8 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 		return postdestinasjon;
 	}
 
-	@Override
 	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterPostadresse(OppdaterPostadresseRequest oppdaterPostadresseRequest) {
-
 		log.info("oppdaterPostadresse skal oppdatere postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
 
 		webClient.put()
@@ -108,7 +120,7 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.bodyValue(oppdaterPostadresseRequest)
 				.retrieve()
 				.toBodilessEntity()
-				.doOnError(this::handleError)
+				.onErrorMap(this::mapError)
 				.block();
 
 		log.info("oppdaterPostadresse har oppdatert postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
@@ -124,21 +136,48 @@ public class AdministrerForsendelseConsumer implements AdministrerForsendelse {
 				.bodyValue(feilregistrerForsendelse)
 				.retrieve()
 				.toBodilessEntity()
-				.doOnError(this::handleError)
+				.onErrorMap(this::mapError)
 				.block();
 
 		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 	}
 
-	private void handleError(Throwable error) {
+	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	public Long oppdaterFilinformasjon(OppdaterFilinformasjonRequest oppdaterFilinformasjonRequest) {
+		loggOpprettingEllerOppdateringAvFilinformasjon(oppdaterFilinformasjonRequest);
+
+		Long filInfoId = webClient.put()
+				.uri("/oppdaterfilinformasjon")
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
+				.bodyValue(oppdaterFilinformasjonRequest)
+				.retrieve()
+				.bodyToMono(OppdaterFilinformasjonResponse.class)
+				.map(OppdaterFilinformasjonResponse::filInfoId)
+				.onErrorMap(this::mapError)
+				.block();
+
+		log.info("oppdaterFilinformasjon har opprettet/oppdatert forsendelse med filInfoId={}", filInfoId);
+
+		return filInfoId;
+	}
+
+	private void loggOpprettingEllerOppdateringAvFilinformasjon(OppdaterFilinformasjonRequest oppdaterFilinformasjonRequest) {
+		if (oppdaterFilinformasjonRequest.filInfoId() == null) {
+			log.info("oppdaterFilinformasjon skal opprette filinformasjon for fil med filnavn={}", oppdaterFilinformasjonRequest.filnavn());
+		} else {
+			log.info("oppdaterFilinformasjon skal oppdatere filinformasjon for fil med filInfoId={}", oppdaterFilinformasjonRequest.filInfoId());
+		}
+	}
+
+	private Throwable mapError(Throwable error) {
 		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
-			throw new DokdistsentralprintFunctionalException(
+			return new DokdistsentralprintFunctionalException(
 					format("Kall mot rdist001 feilet funksjonelt med status=%s, feilmelding=%s",
 							response.getStatusCode(),
 							response.getMessage()),
 					error);
 		} else {
-			throw new DokdistsentralprintTechnicalException(
+			return new DokdistsentralprintTechnicalException(
 					format("Kall mot rdist001 feilet teknisk med feilmelding=%s", error.getMessage()),
 					error);
 		}
