@@ -1,6 +1,6 @@
 package no.nav.dokdistsentralprint.qdist009;
 
-import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelse;
+import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistsentralprint.consumer.rdist001.OppdaterForsendelseRequest;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
@@ -13,17 +13,17 @@ import static no.nav.dokdistsentralprint.qdist009.domain.Forsendelsestatus.OVERS
 @Component
 public class DokdistStatusUpdater {
 
-	private final AdministrerForsendelse administrerForsendelse;
+	private final AdministrerForsendelseConsumer administrerForsendelseConsumer;
 
-	public DokdistStatusUpdater(AdministrerForsendelse administrerForsendelse) {
-		this.administrerForsendelse = administrerForsendelse;
+	public DokdistStatusUpdater(AdministrerForsendelseConsumer administrerForsendelseConsumer) {
+		this.administrerForsendelseConsumer = administrerForsendelseConsumer;
 	}
 
 	@Handler
 	public void doUpdate(Exchange exchange) {
 		final String forsendelseId = exchange.getProperty(PROPERTY_FORSENDELSE_ID, String.class);
 
-		administrerForsendelse.oppdaterForsendelseStatus(
+		administrerForsendelseConsumer.oppdaterForsendelseStatus(
 				new OppdaterForsendelseRequest(valueOf(forsendelseId), OVERSENDT.name())
 		);
 	}
