@@ -36,7 +36,7 @@ public class Sdist009Route extends RouteBuilder {
 		from(INBOUND_SFTP_FOLDER)
 				.routeId(SERVICE_ID)
 				.autoStartup(false)
-				.to("validate:no/nav/dokdistsentralprint/kvittering/mailpiece.xsd")
+				.to("validator:no/nav/dokdistsentralprint/kvittering/mailpiece.xsd")
 				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(StatusRapport.class)))
 				.log("Har startet sdist009")
 				.end();

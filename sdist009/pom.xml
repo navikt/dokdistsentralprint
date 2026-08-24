@@ -21,9 +21,5 @@
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-cron-starter</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.camel.springboot</groupId>
-			<artifactId>camel-validator-starter</artifactId>
-		</dependency>
 	</dependencies>
 </project>
