@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+	<!-- I forbindelse med flytting av bdist002 til Nais har XSD-skjemaet blitt forenklet og tilpasset
+	at RapportTypeKode alltid har verdien 'Mailpiece'.
+	- Fjern verdiene 'Printoppdrag' og 'Dokument' fra RapportTypeKode
+	- Fjern verdiene 'SPORDOK_RELEASE', 'ETTERBEHANDLER', 'POSTLAGT', 'MOTTATT' fra LePuKode
+	- Fjern alt tilknyttet PO (PoStatus, PoRapport)
+	- Fjern extensions og legg inn attributtene direkte
+	-->
+
 	<xs:simpleType name="RapportTypeKode">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="Mailpiece"/>
