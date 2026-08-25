@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<StatusRapport Type="Mailpiece">
+	<Rapport Id="MVA-P405-IN200C5-121127-0019">
+		<Status Status="OK" Id="37890663" LePu="POSTLAGT" Tidspunkt="07/05/2013 10:43:05"/>
+	</Rapport>
+	<Rapport Id="MVA-P405-IN200C5-121127-0019">
+		<Status Status="OK" Id="37890667" LePu="ETTERBEHANDLER" Tidspunkt="07/05/2013 10:43:06"/>
+	</Rapport>
+	<Rapport Id="MVA-P405-IN200C5-121127-0019">
+		<Status Status="OK" Id="37890668" LePu="RETURPOST" Tidspunkt="07/05/2013 10:43:07"/>
+	</Rapport>
+	<Rapport Id="MVA-P405-IN200C5-121127-00119">
+		<Status Status="OK" Id="37890672" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:05"/>
+	</Rapport>
+	<Rapport Id="MVA-P405-IN200C5-121127-00119">
+		<Status Status="OK" Id="37890673" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:46:05"/>
+	</Rapport>
+</StatusRapport>

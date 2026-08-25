@@ -43,6 +43,8 @@ public class DokdistsentralprintProperties {
 	public static class Sdist009Properties {
 		@NotBlank
 		private String cron;
+
+		private boolean enabled;
 	}
 
 }
