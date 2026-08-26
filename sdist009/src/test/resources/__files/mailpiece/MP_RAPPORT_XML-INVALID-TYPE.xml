@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<StatusRapport Type="Printoppdrag">
+	<Rapport Id="MVA-P405-IN200C5-121127-0019">
+		<Status Status="OK" Id="37890663" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
+	</Rapport>
+	<Rapport Id="MVA-P405-IN200C5-121127-0019">
+		<Status Status="OK" Id="37890664" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
+	</Rapport>
+</StatusRapport>

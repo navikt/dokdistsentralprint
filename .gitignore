@@ -6,4 +6,4 @@ target
 *.iml
 
 # Generated SSH
-/app/hostkey.ser
+*/hostkey.ser
