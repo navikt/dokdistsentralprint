@@ -16,8 +16,6 @@
 			<groupId>no.nav.dokdistsentralprint</groupId>
 			<artifactId>core</artifactId>
 		</dependency>
-
-		<!-- Camel -->
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-cron-starter</artifactId>
@@ -31,12 +29,27 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.sshd</groupId>
-			<artifactId>sshd-scp</artifactId>
+			<artifactId>sshd-sftp</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.sshd</groupId>
-			<artifactId>sshd-sftp</artifactId>
+			<artifactId>sshd-scp</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wiremock.integrations</groupId>
+			<artifactId>wiremock-spring-boot</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>artemis-jakarta-client</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>artemis-jakarta-server</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
