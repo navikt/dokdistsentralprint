@@ -11,12 +11,14 @@ import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKDISTADMIN;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
@@ -49,17 +51,25 @@ public class AdministrerForsendelseConsumer {
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.retrieve()
 				.bodyToMono(FinnForsendelseResponse.class)
+				.onErrorResume(e -> {
+					if (e instanceof WebClientResponseException response && NOT_FOUND.equals(response.getStatusCode())) {
+						log.error("finnForsendelse fant ikke forsendelse med bestillingsId={}", bestillingsId);
+						return Mono.empty();
+					}
+					return Mono.error(mapError(e));
+				})
 				.map(FinnForsendelseResponse::forsendelseId)
-				.onErrorMap(this::mapError)
 				.block();
 
-		log.info("finnForsendelse har hentet forsendelse med forsendelseId={} og bestillingsId={}", forsendelseId, bestillingsId);
+		if (forsendelseId != null) {
+			log.info("finnForsendelse har hentet forsendelse med forsendelseId={} og bestillingsId={}", forsendelseId, bestillingsId);
+		}
 
 		return forsendelseId;
 	}
 
 	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
-	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
+	public HentForsendelseResponse hentForsendelse(String forsendelseId) {
 		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
 
 		var response = webClient.get()

@@ -2,7 +2,7 @@ package no.nav.dokdistsentralprint.sdist009.itest.config;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
-import no.nav.dokdistsentralprint.sdist009.Sdist009Route;
+import no.nav.dokdistsentralprint.config.azure.AzureTokenProperties;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
@@ -15,8 +15,11 @@ import org.apache.sshd.sftp.server.SftpSubsystemFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,17 +30,20 @@ import static java.nio.file.Path.of;
 import static java.util.Collections.singletonList;
 
 @Slf4j
+@ComponentScan("no.nav.dokdistsentralprint")
+@EnableResilientMethods
 @EnableConfigurationProperties({
-		DokdistsentralprintProperties.class}
-)
+		DokdistsentralprintProperties.class,
+		AzureTokenProperties.class
+})
 @Import({
 		Sdist009TestConfig.SshdSftpServerConfig.class,
 		Sdist009TestConfig.CamelTestStartupConfig.class,
-		Sdist009Route.class
+		JmsItestConfig.class
 })
 @EnableAutoConfiguration
+@Profile("itest")
 public class Sdist009TestConfig {
-
 
 	@Configuration
 	static class CamelTestStartupConfig {
