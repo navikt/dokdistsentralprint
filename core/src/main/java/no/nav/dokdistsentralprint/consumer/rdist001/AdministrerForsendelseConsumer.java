@@ -53,7 +53,7 @@ public class AdministrerForsendelseConsumer {
 				.bodyToMono(FinnForsendelseResponse.class)
 				.onErrorResume(e -> {
 					if (e instanceof WebClientResponseException response && NOT_FOUND.equals(response.getStatusCode())) {
-						log.error("finnForsendelse fant ikke forsendelse med bestillingsId={}", bestillingsId);
+						log.warn("finnForsendelse fant ikke forsendelse med bestillingsId={}", bestillingsId);
 						return Mono.empty();
 					}
 					return Mono.error(mapError(e));

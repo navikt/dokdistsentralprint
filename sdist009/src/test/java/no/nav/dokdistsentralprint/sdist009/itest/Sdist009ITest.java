@@ -377,6 +377,24 @@ class Sdist009ITest {
 	}
 
 	@Test
+	void skalFlytteKvitteringsfilTilFeiletHvisForsendelsestatusErUkjent() throws IOException {
+		stubFinnForsendelse(OK);
+		stubHentForsendelse("hentforsendelse_status_ukjent.json");
+		stubOppdaterFilinformasjon();
+
+		String filnavn = "MP_RAPPORT_XML-MAILPIECE_MOTTAK.xml";
+		kopierFilTilInngaaende(filnavn);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			verify(0, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL)));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATER_FILINFORMASJON_URL)));
+
+			assertThat(feilet.resolve(filnavn))
+					.exists().isRegularFile();
+		});
+	}
+
+	@Test
 	void skalFlytteKvitteringsfilTilFeiletHvisOppdaterFilinformasjonReturnerInternalServerError() throws IOException {
 		stubOppdaterFilinformasjon(INTERNAL_SERVER_ERROR);
 

@@ -5,6 +5,7 @@ import no.nav.dokdistsentralprint.consumer.rdist001.AdministrerForsendelseConsum
 import no.nav.dokdistsentralprint.consumer.rdist001.HentForsendelseResponse;
 import no.nav.dokdistsentralprint.consumer.rdist001.OppdaterFilinformasjonRequest;
 import no.nav.dokdistsentralprint.consumer.rdist001.OppdaterForsendelseRequest;
+import no.nav.dokdistsentralprint.exception.functional.UkjentForsendelsestatusException;
 import no.nav.dokdistsentralprint.kvittering.LePuKode;
 import no.nav.dokdistsentralprint.kvittering.Rapport;
 import no.nav.dokdistsentralprint.kvittering.StatusKode;
@@ -170,6 +171,11 @@ public class Sdist009Service {
 	}
 
 	private ForsendelseStatus mapForsendelseStatus(String forsendelseStatus) {
-		return ForsendelseStatus.valueOf(forsendelseStatus);
+		try {
+			return ForsendelseStatus.valueOf(forsendelseStatus);
+		} catch (IllegalArgumentException e) {
+			log.error("Forsendelse har ukjent forsendelseStatus={}. Oppdater forsendelseStatus-enum i dokdistsentralprint med ny verdi", forsendelseStatus);
+			throw new UkjentForsendelsestatusException("Forsendelse har ukjent forsendelseStatus=%s. Oppdater forsendelseStatus-enum i dokdistsentralprint med ny verdi".formatted(forsendelseStatus), e);
+		}
 	}
 }

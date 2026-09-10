@@ -18,6 +18,7 @@ public class Sdist009Route extends RouteBuilder {
 
 	private static final String SERVICE_ID = "sdist009";
 	public static final String MAILPIECE_FILE_NAME = "MailpieceFileName";
+	private static final long ANTALL_SEKUNDER_MELLOM_POLL = SECONDS.toMillis(60);
 
 	private static final String INBOUND_SFTP_FOLDER =
 			"sftp://{{sftp.url}}:{{sftp.port}}/{{sftp.inbound-file-path}}" +
@@ -26,7 +27,7 @@ public class Sdist009Route extends RouteBuilder {
 					"&privateKeyPassphrase={{sftp.private-key-passphrase}}" +
 					"&preferredAuthentications=publickey" +
 					"&include=^MP_RAPPORT_XML-.*\\.xml$" +
-					"&delay=" + SECONDS.toMillis(60) +
+					"&delay=" + ANTALL_SEKUNDER_MELLOM_POLL +
 					"&maxMessagesPerPoll=5" +
 					"&binary=true" +
 					"&move=ferdig" +
