@@ -7,6 +7,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
@@ -18,17 +20,22 @@ public class NaisTexasTokenConsumer {
 	public static final Pattern TARGET_PATTERN = Pattern.compile("api://[^.]+\\.[^.]+\\.[^.]+/\\.default");
 
 	private final RestClient restClient;
+	private final Set<String> approvedScopes;
 
 	public NaisTexasTokenConsumer(RestClient restClient,
 								  NaisProperties naisProperties) {
 		this.restClient = restClient.mutate()
 				.baseUrl(naisProperties.tokenEndpoint())
 				.build();
+		this.approvedScopes = new HashSet<>();
 	}
 
 	public String getSystemToken(String targetScope) {
-		if (isBlank(targetScope) || !TARGET_PATTERN.matcher(targetScope).matches()) {
-			throw new IllegalArgumentException("Ugyldig targetScope. Må være på format api://<cluster>.<namespace>.<other-api-app-name>/.default");
+		if (!approvedScopes.contains(targetScope)) {
+			if (isBlank(targetScope) || !TARGET_PATTERN.matcher(targetScope).matches()) {
+				throw new IllegalArgumentException("Ugyldig targetScope. Må være på format api://<cluster>.<namespace>.<other-api-app-name>/.default");
+			}
+			approvedScopes.add(targetScope);
 		}
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
