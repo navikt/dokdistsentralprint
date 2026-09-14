@@ -14,27 +14,30 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 
 import static java.lang.String.format;
-import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_DOKDISTADMIN;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
+import static no.nav.dokdistsentralprint.consumer.naistoken.NaisTexasWebClientRequestInterceptor.TARGET_SCOPE;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Slf4j
 @Component
 public class AdministrerForsendelseConsumer {
 
 	private final WebClient webClient;
+	private final DokdistsentralprintProperties.Endpoints dokdistadminEndpoint;
 
 	public AdministrerForsendelseConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
 										  WebClient webClient,
 										  HttpCodecsProperties httpCodecsProperties) {
+		this.dokdistadminEndpoint = dokdistsentralprintProperties.getEndpoints();
 		this.webClient = webClient.mutate()
-				.baseUrl(dokdistsentralprintProperties.getEndpoints().getDokdistadmin().getUrl())
+				.baseUrl(dokdistadminEndpoint.getDokdistadmin().getUrl())
 				.filter(new NavHeadersFilter())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+				.defaultRequest(spec ->
+						spec.attribute(TARGET_SCOPE, dokdistadminEndpoint.getDokdistadmin().getScope()))
 				.codecs(configurer ->
 						configurer.defaultCodecs().maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
 				.build();
@@ -48,7 +51,6 @@ public class AdministrerForsendelseConsumer {
 				.uri(uriBuilder -> uriBuilder
 						.path("/finnforsendelse/bestillingsId/{bestillingsId}")
 						.build(bestillingsId))
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.retrieve()
 				.bodyToMono(FinnForsendelseResponse.class)
 				.onErrorResume(e -> {
@@ -76,7 +78,6 @@ public class AdministrerForsendelseConsumer {
 				.uri(uriBuilder -> uriBuilder
 						.path("/{forsendelseId}")
 						.build(forsendelseId))
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.retrieve()
 				.bodyToMono(HentForsendelseResponse.class)
 				.onErrorMap(this::mapError)
@@ -91,7 +92,6 @@ public class AdministrerForsendelseConsumer {
 	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
 		webClient.put()
 				.uri("/oppdaterforsendelse")
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.bodyValue(oppdaterForsendelseRequest)
 				.retrieve()
 				.toBodilessEntity()
@@ -108,7 +108,6 @@ public class AdministrerForsendelseConsumer {
 				.uri(uriBuilder -> uriBuilder
 						.path("/hentpostdestinasjon/{landkode}")
 						.build(landkode))
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.retrieve()
 				.bodyToMono(HentPostdestinasjonResponse.class)
 				.map(HentPostdestinasjonResponse::postdestinasjon)
@@ -126,7 +125,6 @@ public class AdministrerForsendelseConsumer {
 
 		webClient.put()
 				.uri("/oppdaterpostadresse")
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.bodyValue(oppdaterPostadresseRequest)
 				.retrieve()
 				.toBodilessEntity()
@@ -142,7 +140,6 @@ public class AdministrerForsendelseConsumer {
 
 		webClient.put()
 				.uri("/feilregistrerforsendelse")
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.bodyValue(feilregistrerForsendelse)
 				.retrieve()
 				.toBodilessEntity()
@@ -158,7 +155,6 @@ public class AdministrerForsendelseConsumer {
 
 		Long filInfoId = webClient.put()
 				.uri("/oppdaterfilinformasjon")
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKDISTADMIN))
 				.bodyValue(oppdaterFilinformasjonRequest)
 				.retrieve()
 				.bodyToMono(OppdaterFilinformasjonResponse.class)

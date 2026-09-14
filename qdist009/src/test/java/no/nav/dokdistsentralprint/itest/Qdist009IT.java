@@ -7,6 +7,7 @@ import no.nav.dokdistsentralprint.itest.config.ApplicationTestConfig;
 import no.nav.dokdistsentralprint.storage.BucketStorage;
 import no.nav.dokdistsentralprint.storage.DokdistDokument;
 import no.nav.dokdistsentralprint.storage.JsonSerializer;
+import org.apache.http.HttpHeaders;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -150,11 +151,7 @@ class Qdist009IT {
 		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(A4_PDF_BYTES).build()));
 		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString())).thenReturn(JsonSerializer.serialize(DokdistDokument.builder().pdf(A4_PDF_BYTES).build()));
 
-		stubFor(post("/azure_token")
-				.willReturn(aResponse()
-						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("azure/token_response_dummy.json")));
+		stubNaisTexasToken();
 	}
 
 	@Test
@@ -660,6 +657,14 @@ class Qdist009IT {
 				putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo(HENTPOSTDESTINASJON_URL + landkode)));
 		verify(1, postRequestedFor(urlEqualTo(REGOPPSLAG_HENTMOTTAKEROGADRESSE_URL)));
+	}
+
+	void stubNaisTexasToken() {
+		stubFor(post("/texastoken")
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("nais-texas/texas_response.json")));
 	}
 
 	private void stubPutOppdaterForsendelse(int status) {

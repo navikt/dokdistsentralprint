@@ -2,7 +2,7 @@ package no.nav.dokdistsentralprint.sdist009.itest.config;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
-import no.nav.dokdistsentralprint.config.azure.AzureTokenProperties;
+import no.nav.dokdistsentralprint.config.alias.NaisProperties;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
@@ -34,7 +34,7 @@ import static java.util.Collections.singletonList;
 @EnableResilientMethods
 @EnableConfigurationProperties({
 		DokdistsentralprintProperties.class,
-		AzureTokenProperties.class
+		NaisProperties.class
 })
 @Import({
 		Sdist009TestConfig.SshdSftpServerConfig.class,

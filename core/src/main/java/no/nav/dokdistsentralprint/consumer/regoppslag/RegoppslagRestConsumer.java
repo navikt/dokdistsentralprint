@@ -16,13 +16,12 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
-import static no.nav.dokdistsentralprint.config.azure.AzureTokenProperties.CLIENT_REGISTRATION_REGOPPSLAG;
 import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_REASON_CODE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
+import static no.nav.dokdistsentralprint.consumer.naistoken.NaisTexasWebClientRequestInterceptor.TARGET_SCOPE;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Slf4j
 @Component
@@ -32,12 +31,16 @@ public class RegoppslagRestConsumer {
 	private static final String UKJENT_ADRESSE_REASON_CODE = "ukjent_adresse";
 
 	private final WebClient webClient;
+	private final DokdistsentralprintProperties.Endpoints regoppslagEndpoint;
 
 	public RegoppslagRestConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
 								  WebClient webClient) {
+		this.regoppslagEndpoint = dokdistsentralprintProperties.getEndpoints();
 		this.webClient = webClient.mutate()
-				.baseUrl(dokdistsentralprintProperties.getEndpoints().getRegoppslag().getUrl())
+				.baseUrl(regoppslagEndpoint.getRegoppslag().getUrl())
 				.filter(new NavHeadersFilter())
+				.defaultRequest(spec ->
+						spec.attribute(TARGET_SCOPE, regoppslagEndpoint.getRegoppslag().getScope()))
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.build();
 	}
@@ -48,7 +51,6 @@ public class RegoppslagRestConsumer {
 		return webClient.post()
 				.uri(uriBuilder -> uriBuilder.path(HENT_MOTTAKER_OG_ADRESSE_PATH).build())
 				.bodyValue(request)
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_REGOPPSLAG))
 				.retrieve()
 				.bodyToMono(HentMottakerOgAdresseResponseTo.class)
 				.map(HentMottakerOgAdresseResponseTo::getAdresse)
