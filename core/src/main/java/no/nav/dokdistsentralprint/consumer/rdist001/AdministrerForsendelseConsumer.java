@@ -25,14 +25,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Component
 public class AdministrerForsendelseConsumer {
 
-	private final WebClient webClient;
+	private final WebClient texasAuthorizedWebClient;
 	private final DokdistsentralprintProperties.Endpoints dokdistadminEndpoint;
 
 	public AdministrerForsendelseConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
-										  WebClient webClient,
+										  WebClient texasAuthorizedWebClient,
 										  HttpCodecsProperties httpCodecsProperties) {
 		this.dokdistadminEndpoint = dokdistsentralprintProperties.getEndpoints();
-		this.webClient = webClient.mutate()
+		this.texasAuthorizedWebClient = texasAuthorizedWebClient.mutate()
 				.baseUrl(dokdistadminEndpoint.getDokdistadmin().getUrl())
 				.filter(new NavHeadersFilter())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -47,7 +47,7 @@ public class AdministrerForsendelseConsumer {
 	public Long finnForsendelse(String bestillingsId) {
 		log.info("finnForsendelse henter forsendelse med bestillingsId={}", bestillingsId);
 
-		Long forsendelseId = webClient.get()
+		Long forsendelseId = texasAuthorizedWebClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.path("/finnforsendelse/bestillingsId/{bestillingsId}")
 						.build(bestillingsId))
@@ -74,7 +74,7 @@ public class AdministrerForsendelseConsumer {
 	public HentForsendelseResponse hentForsendelse(String forsendelseId) {
 		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
 
-		var response = webClient.get()
+		var response = texasAuthorizedWebClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.path("/{forsendelseId}")
 						.build(forsendelseId))
@@ -90,7 +90,7 @@ public class AdministrerForsendelseConsumer {
 
 	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
-		webClient.put()
+		texasAuthorizedWebClient.put()
 				.uri("/oppdaterforsendelse")
 				.bodyValue(oppdaterForsendelseRequest)
 				.retrieve()
@@ -104,7 +104,7 @@ public class AdministrerForsendelseConsumer {
 	public String hentPostdestinasjon(String landkode) {
 		log.info("hentPostdestinasjon henter postdestinasjon for landkode={}", landkode);
 
-		var postdestinasjon = webClient.get()
+		var postdestinasjon = texasAuthorizedWebClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.path("/hentpostdestinasjon/{landkode}")
 						.build(landkode))
@@ -123,7 +123,7 @@ public class AdministrerForsendelseConsumer {
 	public void oppdaterPostadresse(OppdaterPostadresseRequest oppdaterPostadresseRequest) {
 		log.info("oppdaterPostadresse skal oppdatere postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
 
-		webClient.put()
+		texasAuthorizedWebClient.put()
 				.uri("/oppdaterpostadresse")
 				.bodyValue(oppdaterPostadresseRequest)
 				.retrieve()
@@ -138,7 +138,7 @@ public class AdministrerForsendelseConsumer {
 	public void feilregistrerForsendelse(FeilregistrerForsendelseRequest feilregistrerForsendelse) {
 		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 
-		webClient.put()
+		texasAuthorizedWebClient.put()
 				.uri("/feilregistrerforsendelse")
 				.bodyValue(feilregistrerForsendelse)
 				.retrieve()
@@ -153,7 +153,7 @@ public class AdministrerForsendelseConsumer {
 	public Long oppdaterFilinformasjon(OppdaterFilinformasjonRequest oppdaterFilinformasjonRequest) {
 		loggOpprettingEllerOppdateringAvFilinformasjon(oppdaterFilinformasjonRequest);
 
-		Long filInfoId = webClient.put()
+		Long filInfoId = texasAuthorizedWebClient.put()
 				.uri("/oppdaterfilinformasjon")
 				.bodyValue(oppdaterFilinformasjonRequest)
 				.retrieve()

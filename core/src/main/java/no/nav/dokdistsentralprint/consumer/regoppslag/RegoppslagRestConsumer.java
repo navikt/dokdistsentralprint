@@ -30,13 +30,13 @@ public class RegoppslagRestConsumer {
 	private static final String HENT_MOTTAKER_OG_ADRESSE_PATH = "/rest/hentMottakerOgAdresse";
 	private static final String UKJENT_ADRESSE_REASON_CODE = "ukjent_adresse";
 
-	private final WebClient webClient;
+	private final WebClient texasAuthorizedWebClient;
 	private final DokdistsentralprintProperties.Endpoints regoppslagEndpoint;
 
 	public RegoppslagRestConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
-								  WebClient webClient) {
+								  WebClient texasAuthorizedWebClient) {
 		this.regoppslagEndpoint = dokdistsentralprintProperties.getEndpoints();
-		this.webClient = webClient.mutate()
+		this.texasAuthorizedWebClient = texasAuthorizedWebClient.mutate()
 				.baseUrl(regoppslagEndpoint.getRegoppslag().getUrl())
 				.filter(new NavHeadersFilter())
 				.defaultRequest(spec ->
@@ -48,7 +48,7 @@ public class RegoppslagRestConsumer {
 	@Retryable(includes = RegoppslagHentAdresseTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
 
-		return webClient.post()
+		return texasAuthorizedWebClient.post()
 				.uri(uriBuilder -> uriBuilder.path(HENT_MOTTAKER_OG_ADRESSE_PATH).build())
 				.bodyValue(request)
 				.retrieve()

@@ -1,5 +1,7 @@
 package no.nav.dokdistsentralprint;
 
+import no.nav.dokdistsentralprint.consumer.naistoken.NaisTexasTokenConsumer;
+import no.nav.dokdistsentralprint.consumer.naistoken.NaisTexasWebClientRequestInterceptor;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,13 +20,18 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 public class CoreConfig {
 
 	@Bean
-	WebClient webClient() {
-		var nettyHttpClient = HttpClient.create()
-				.responseTimeout(Duration.of(20, SECONDS));
-		var clientHttpConnector = new ReactorClientHttpConnector(nettyHttpClient);
-
+	WebClient texasAuthorizedWebClient(NaisTexasTokenConsumer naisTexasTokenConsumer,
+									   HttpClient httpClient) {
 		return WebClient.builder()
-				.clientConnector(clientHttpConnector)
+				.clientConnector(new ReactorClientHttpConnector(httpClient))
+				.filter(new NaisTexasWebClientRequestInterceptor(naisTexasTokenConsumer))
+				.build();
+	}
+
+	@Bean
+	WebClient webClient(HttpClient httpClient) {
+		return WebClient.builder()
+				.clientConnector(new ReactorClientHttpConnector(httpClient))
 				.build();
 	}
 
@@ -41,5 +48,12 @@ public class CoreConfig {
 						jdkClientHttpRequestFactory.setReadTimeout(ofSeconds(20))
 				)
 				.build();
+	}
+
+	@Bean
+	public HttpClient httpClient() {
+		return HttpClient.create()
+				.proxyWithSystemProperties()
+				.responseTimeout(Duration.of(20, SECONDS));
 	}
 }
