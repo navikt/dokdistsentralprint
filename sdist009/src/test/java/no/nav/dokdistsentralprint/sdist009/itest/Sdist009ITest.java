@@ -6,6 +6,7 @@ import no.nav.dokdistsentralprint.sdist009.ForsendelseStatus;
 import no.nav.dokdistsentralprint.sdist009.itest.config.Sdist009TestConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,7 +94,7 @@ class Sdist009ITest {
 		ferdig = inbound.resolve("ferdig");
 		feilet = inbound.resolve("feilet");
 
-		stubAzureToken();
+		stubNaisTexasToken();
 	}
 
 	@AfterEach
@@ -504,6 +505,14 @@ class Sdist009ITest {
 		return (T) response;
 	}
 
+	void stubNaisTexasToken() {
+		stubFor(post("/texastoken")
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("nais-texas/texas_response.json")));
+	}
+
 	void stubOppdaterFilinformasjon() {
 		stubFor(put(urlEqualTo(OPPDATER_FILINFORMASJON_URL))
 				.willReturn(aResponse()
@@ -547,14 +556,6 @@ class Sdist009ITest {
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
-	}
-
-	void stubAzureToken() {
-		stubFor(post("/azure_token")
-				.willReturn(aResponse()
-						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("azure/azure-token.json")));
 	}
 
 	private void kopierFilTilInngaaende(String filnavn) throws IOException {

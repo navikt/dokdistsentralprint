@@ -3,8 +3,8 @@ package no.nav.dokdistsentralprint.itest.config;
 import no.nav.dokdistsentralprint.config.alias.DokdistmellomlagerProperties;
 import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
 import no.nav.dokdistsentralprint.config.alias.MqGatewayAlias;
+import no.nav.dokdistsentralprint.config.alias.NaisProperties;
 import no.nav.dokdistsentralprint.config.alias.ServiceuserAlias;
-import no.nav.dokdistsentralprint.config.azure.AzureTokenProperties;
 import no.nav.dokdistsentralprint.storage.BucketStorage;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,8 +22,8 @@ import static org.mockito.Mockito.mock;
 		ServiceuserAlias.class,
 		MqGatewayAlias.class,
 		DokdistmellomlagerProperties.class,
-		AzureTokenProperties.class,
-		DokdistsentralprintProperties.class
+		DokdistsentralprintProperties.class,
+		NaisProperties.class
 })
 @Import({
 		JmsItestConfig.class,

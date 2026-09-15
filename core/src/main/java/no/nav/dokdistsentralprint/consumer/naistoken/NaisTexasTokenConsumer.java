@@ -1,0 +1,52 @@
+package no.nav.dokdistsentralprint.consumer.naistoken;
+
+import no.nav.dokdistsentralprint.config.alias.NaisProperties;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+@Component
+public class NaisTexasTokenConsumer {
+
+	public static final Pattern TARGET_PATTERN = Pattern.compile("api://[^.]+\\.[^.]+\\.[^.]+/\\.default");
+
+	private final RestClient restClient;
+	private final Set<String> approvedScopes;
+
+	public NaisTexasTokenConsumer(RestClient restClient,
+								  NaisProperties naisProperties) {
+		this.restClient = restClient.mutate()
+				.baseUrl(naisProperties.tokenEndpoint())
+				.build();
+		this.approvedScopes = new HashSet<>();
+	}
+
+	public String getSystemToken(String targetScope) {
+		if (!approvedScopes.contains(targetScope)) {
+			if (isBlank(targetScope) || !TARGET_PATTERN.matcher(targetScope).matches()) {
+				throw new IllegalArgumentException("Ugyldig targetScope. Må være på format api://<cluster>.<namespace>.<other-api-app-name>/.default");
+			}
+			approvedScopes.add(targetScope);
+		}
+
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("identity_provider", "azuread");
+		formData.add("target", targetScope);
+
+		return requireNonNull(restClient.post()
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body(formData)
+				.retrieve()
+				.body(NaisTexasToken.class))
+				.accessToken();
+	}
+}
