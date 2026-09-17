@@ -3,7 +3,7 @@
                xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                jaxb:extensionBindingPrefixes="annox"
-               xmlns:annox="http://jvnet.org/basicjaxb/xjc/annox">
+               xmlns:annox="urn:jvnet.org:basicjaxb:xjc:annox">
 	<!-- Annotate the following classes with XmlRootElement -->
 	<jaxb:bindings schemaLocation="../xsd/printoppdrag-2_2.xsd" node="/xsd:schema">
 		<jaxb:bindings node="xsd:complexType[@name='Bestilling']">
