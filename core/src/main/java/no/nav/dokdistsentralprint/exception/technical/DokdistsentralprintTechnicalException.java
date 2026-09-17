@@ -5,4 +5,8 @@ public class DokdistsentralprintTechnicalException extends AbstractDokdistsentra
 	public DokdistsentralprintTechnicalException(String message, Throwable cause) {
 		super(message, cause);
 	}
+
+	public DokdistsentralprintTechnicalException(String message) {
+		super(message);
+	}
 }
