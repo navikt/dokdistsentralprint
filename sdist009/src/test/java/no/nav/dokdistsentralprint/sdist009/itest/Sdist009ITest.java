@@ -90,7 +90,7 @@ class Sdist009ITest {
 
 	@BeforeEach
 	void setup() {
-		inbound = sshdPath.resolve("inbound/dokdistsentralprint");
+		inbound = sshdPath.resolve("nav-t");
 		ferdig = inbound.resolve("ferdig");
 		feilet = inbound.resolve("feilet");
 

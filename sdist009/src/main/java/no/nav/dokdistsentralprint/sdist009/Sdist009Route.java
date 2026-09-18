@@ -21,7 +21,7 @@ public class Sdist009Route extends RouteBuilder {
 	private static final long ANTALL_SEKUNDER_MELLOM_POLL = SECONDS.toMillis(60);
 
 	private static final String INBOUND_SFTP_FOLDER =
-			"sftp://{{sftp.url}}:{{sftp.port}}/{{sftp.inbound-file-path}}" +
+			"sftp://{{sftp.url}}:{{sftp.port}}/{{dokdistsentralprint.sdist009.inbound-file-path}}" +
 					"?username={{sftp.username}}" +
 					"&privateKeyFile={{sftp.private-key-file}}" +
 					"&privateKeyPassphrase={{sftp.private-key-passphrase}}" +
