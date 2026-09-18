@@ -96,20 +96,19 @@ public class AdministrerForsendelseConsumer {
 
 	@Cacheable(POSTDESTINASJON_CACHE)
 	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
-	public String hentPostdestinasjon(String landkode) {
+	public HentPostdestinasjonResponse hentPostdestinasjon(String landkode) {
 		log.info("hentPostdestinasjon henter postdestinasjon for landkode={}", landkode);
 
-		var postdestinasjon = texasAuthorizedRestClient.get()
+		var hentPostdestinasjonResponse = texasAuthorizedRestClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.path("/hentpostdestinasjon/{landkode}")
 						.build(landkode))
 				.retrieve()
-				.body(HentPostdestinasjonResponse.class)
-				.postdestinasjon();
+				.body(HentPostdestinasjonResponse.class);
 
-		log.info("hentPostdestinasjon har hentet postdestinasjon={} for landkode={}", postdestinasjon, landkode);
+		log.info("hentPostdestinasjon har hentet postdestinasjon={} for landkode={}", hentPostdestinasjonResponse, landkode);
 
-		return postdestinasjon;
+		return hentPostdestinasjonResponse;
 	}
 
 	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
