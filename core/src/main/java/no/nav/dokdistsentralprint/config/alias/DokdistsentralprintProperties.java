@@ -45,6 +45,9 @@ public class DokdistsentralprintProperties {
 		private String cron;
 
 		private boolean enabled;
+
+		@NotBlank
+		private String inboundFilePath;
 	}
 
 }
