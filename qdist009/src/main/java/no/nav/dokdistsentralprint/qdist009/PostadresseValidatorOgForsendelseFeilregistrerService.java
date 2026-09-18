@@ -62,7 +62,8 @@ public class PostadresseValidatorOgForsendelseFeilregistrerService {
 	}
 
 	public String hentPostdestinasjon(Postadresse adresse) {
-		return administrerForsendelseConsumer.hentPostdestinasjon(adresse.getLandkode());
+		var hentPostdestinasjon = administrerForsendelseConsumer.hentPostdestinasjon(adresse.getLandkode());
+		return hentPostdestinasjon == null ? null : hentPostdestinasjon.postdestinasjon();
 	}
 
 	private InternForsendelse mapPostadresseAndForsendelse(HentForsendelseResponse hentForsendelseResponse) {
