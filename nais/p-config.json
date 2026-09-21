@@ -7,6 +7,7 @@
     "https://dokdistsentralprint.intern.nav.no"
   ],
   "DOKDISTSENTRALPRINT_SECRET": "dokdistsentralprint",
+  "DOKDISTSENTRALPRINT_CONFIGMAP": "dokdistsentralprint",
   "DOKDISTSENTRALPRINT_ENDPOINTS_DOKMET_URL": "http://dokmet.teamdokumenthandtering.svc.nais.local/rest/dokumenttypeinfo",
   "DOKDISTSENTRALPRINT_ENDPOINTS_DOKDISTADMIN_URL": "http://dokdistadmin.teamdokumenthandtering.svc.nais.local/rest/v1/administrerforsendelse",
   "DOKDISTSENTRALPRINT_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://prod-fss.teamdokumenthandtering.dokdistadmin/.default",
