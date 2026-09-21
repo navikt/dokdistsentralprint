@@ -22,7 +22,7 @@ public class Sdist009Route extends RouteBuilder {
 
 	private static final String INBOUND_SFTP_FOLDER =
 			"sftp://{{sftp.url}}:{{sftp.port}}/{{dokdistsentralprint.sdist009.inbound-file-path}}" +
-					"?username={{sftp.username}}" +
+					"?username={{dokdistsentralprint.sdist009.sftp-username}}" +
 					"&privateKeyFile={{sftp.private-key-file}}" +
 					"&privateKeyPassphrase={{sftp.private-key-passphrase}}" +
 					"&preferredAuthentications=publickey" +

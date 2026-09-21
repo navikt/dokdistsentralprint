@@ -48,6 +48,9 @@ public class DokdistsentralprintProperties {
 
 		@NotBlank
 		private String inboundFilePath;
+
+		@NotBlank
+		private String sftpUsername;
 	}
 
 }
