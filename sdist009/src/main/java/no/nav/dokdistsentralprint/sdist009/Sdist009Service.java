@@ -63,7 +63,7 @@ public class Sdist009Service {
 		Long filInfoId = opprettFilinformasjon(filnavn);
 
 		kvitteringer.forEach(this::behandleKvittering);
-		log.info("Har behandlet alle kvitteringer for fil med filnavn={} og filinfoId={}", filnavn, filInfoId);
+		log.info("Sdist009 har behandlet alle kvitteringer for fil med filnavn={} og filinfoId={}", filnavn, filInfoId);
 
 		oppdaterFilinformasjon(filInfoId);
 	}

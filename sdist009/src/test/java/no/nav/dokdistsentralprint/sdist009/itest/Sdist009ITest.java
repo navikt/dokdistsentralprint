@@ -39,6 +39,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -529,7 +530,7 @@ class Sdist009ITest {
 	}
 
 	void stubFinnForsendelse(HttpStatus status) {
-		stubFor(get(urlEqualTo(FINN_FORSENDELSE_URL + BESTILLINGS_ID))
+		stubFor(get(urlPathTemplate(FINN_FORSENDELSE_URL + "{bestillingsId}"))
 				.willReturn(aResponse()
 						.withStatus(status.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
