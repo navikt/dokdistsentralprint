@@ -2,10 +2,13 @@ package no.nav.dokdistsentralprint;
 
 import no.nav.dokdistsentralprint.consumer.naistoken.NaisTexasRequestInterceptor;
 import no.nav.dokdistsentralprint.consumer.naistoken.NaisTexasTokenConsumer;
+import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnicalException;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import java.net.ProxySelector;
@@ -19,6 +22,7 @@ public class CoreConfig {
 	public RestClient restClient() {
 		return RestClient.builder()
 				.requestFactory(jdkClientHttpRequestFactory())
+				.requestInterceptor(resourceAccessInterceptor())
 				.build();
 	}
 
@@ -26,7 +30,8 @@ public class CoreConfig {
 	public RestClient texasAuthorizedRestClient(NaisTexasTokenConsumer naisTexasTokenConsumer) {
 		return RestClient.builder()
 				.requestFactory(jdkClientHttpRequestFactory())
-				.requestInterceptor(new NaisTexasRequestInterceptor(naisTexasTokenConsumer))
+				.requestInterceptor(
+						new NaisTexasRequestInterceptor(naisTexasTokenConsumer))
 				.build();
 	}
 
@@ -39,4 +44,13 @@ public class CoreConfig {
 				.build();
 	}
 
+	private ClientHttpRequestInterceptor resourceAccessInterceptor() {
+		return (request, body, execution) -> {
+			try {
+				return execution.execute(request, body);
+			} catch (ResourceAccessException e) {
+				throw new DokdistsentralprintTechnicalException("Ressursen er utilgjengelig. Feilmelding=%s".formatted(e.getMessage()), e);
+			}
+		};
+	}
 }
