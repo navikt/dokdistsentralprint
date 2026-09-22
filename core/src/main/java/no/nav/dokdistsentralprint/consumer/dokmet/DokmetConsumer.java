@@ -8,13 +8,17 @@ import no.nav.dokdistsentralprint.exception.technical.DokmetTechnicalException;
 import no.nav.dokmet.api.tkat020.DokumenttypeInfoTo;
 import org.slf4j.MDC;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.DOKMET_CACHE;
 import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
@@ -34,26 +38,19 @@ public class DokmetConsumer {
 					headers.set(NavHeaders.NAV_CALLID, MDC.get(CALL_ID));
 					headers.setContentType(APPLICATION_JSON);
 				})
+				.defaultStatusHandler(HttpStatusCode::isError, (_, res) -> handleError(res))
 				.build();
 	}
 
 	@Cacheable(DOKMET_CACHE)
 	@Retryable(includes = DokmetTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public Distribusjonsinfo hentDistribusjonsinfo(final String dokumenttypeId) {
-		try {
-			DokumenttypeInfoTo response = restClient.get()
-					.uri(uriBuilder -> uriBuilder.path("/{dokumenttypeId}")
-							.build(dokumenttypeId))
-					.retrieve()
-					.body(DokumenttypeInfoTo.class);
-			return mapResponse(response);
-		} catch (HttpClientErrorException e) {
-			throw new DokmetFunctionalException(format("Dokmet feilet funksjonelt for dokumenttypeId=%s med statuskode=%s, feilmelding=%s",
-					dokumenttypeId, e.getStatusCode(), e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			throw new DokmetTechnicalException(format("Dokmet feilet teknisk for dokumenttypeId=%s med feilmelding=%s",
-					dokumenttypeId, e.getMessage()), e);
-		}
+		DokumenttypeInfoTo dokumenttypeInfo = restClient.get()
+				.uri(uriBuilder -> uriBuilder.path("/{dokumenttypeId}")
+						.build(dokumenttypeId))
+				.retrieve()
+				.body(DokumenttypeInfoTo.class);
+		return mapResponse(dokumenttypeInfo);
 	}
 
 	private Distribusjonsinfo mapResponse(final DokumenttypeInfoTo response) {
@@ -67,6 +64,15 @@ public class DokmetConsumer {
 				response.getDokumentProduksjonsInfo().getDistribusjonInfo().getSentralPrintDokumentType(),
 				response.getDokumentProduksjonsInfo().getDistribusjonInfo().getTosidigPrint()
 		);
+	}
+
+	private void handleError(ClientHttpResponse response) throws IOException {
+		String body = StreamUtils.copyToString(response.getBody(), UTF_8);
+		if (response.getStatusCode().is4xxClientError()) {
+			throw new DokmetFunctionalException(format("Dokmet feilet funksjonelt med statuskode=%s. Feilmelding=%s",
+					response.getStatusCode(), body));
+		}
+		throw new DokmetTechnicalException(format("Dokmet feilet teknisk med feilmelding=%s", body));
 	}
 
 	private boolean manglerDistribusjonsinfo(DokumenttypeInfoTo response) {
