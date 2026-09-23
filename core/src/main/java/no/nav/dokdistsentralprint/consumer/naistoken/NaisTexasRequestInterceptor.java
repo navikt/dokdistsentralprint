@@ -1,12 +1,10 @@
 package no.nav.dokdistsentralprint.consumer.naistoken;
 
-import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnicalException;
 import org.slf4j.MDC;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.web.client.ResourceAccessException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -27,16 +25,12 @@ public class NaisTexasRequestInterceptor implements ClientHttpRequestInterceptor
 	@Override
 	public ClientHttpResponse intercept(HttpRequest request, byte[] body,
 										ClientHttpRequestExecution execution) throws IOException {
-		try {
-			Map<String, Object> attributes = request.getAttributes();
-			if (attributes.containsKey(TARGET_SCOPE)) {
-				String scopeAttribute = (String) attributes.get(TARGET_SCOPE);
-				request.getHeaders().setBearerAuth(naisTexasTokenConsumer.getSystemToken(scopeAttribute));
-			}
-			request.getHeaders().set(NAV_CALLID, MDC.get(CALL_ID));
-			return execution.execute(request, body);
-		} catch (ResourceAccessException e) {
-			throw new DokdistsentralprintTechnicalException("Ressursen er utilgjengelig. Feilmelding=%s".formatted(e.getMessage()), e);
+		Map<String, Object> attributes = request.getAttributes();
+		if (attributes.containsKey(TARGET_SCOPE)) {
+			String scopeAttribute = (String) attributes.get(TARGET_SCOPE);
+			request.getHeaders().setBearerAuth(naisTexasTokenConsumer.getSystemToken(scopeAttribute));
 		}
+		request.getHeaders().set(NAV_CALLID, MDC.get(CALL_ID));
+		return execution.execute(request, body);
 	}
 }

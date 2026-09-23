@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class AdministrerForsendelseConsumer {
 				.build();
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public Long finnForsendelse(String bestillingsId) {
 		log.info("finnForsendelse henter forsendelse med bestillingsId={}", bestillingsId);
 
@@ -69,7 +70,7 @@ public class AdministrerForsendelseConsumer {
 		return finnForsendelse.forsendelseId();
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public HentForsendelseResponse hentForsendelse(String forsendelseId) {
 		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
 
@@ -85,7 +86,7 @@ public class AdministrerForsendelseConsumer {
 		return response;
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
 		texasAuthorizedRestClient.put()
 				.uri("/oppdaterforsendelse")
@@ -95,7 +96,7 @@ public class AdministrerForsendelseConsumer {
 	}
 
 	@Cacheable(POSTDESTINASJON_CACHE)
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public HentPostdestinasjonResponse hentPostdestinasjon(String landkode) {
 		log.info("hentPostdestinasjon henter postdestinasjon for landkode={}", landkode);
 
@@ -111,7 +112,7 @@ public class AdministrerForsendelseConsumer {
 		return hentPostdestinasjonResponse;
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterPostadresse(OppdaterPostadresseRequest oppdaterPostadresseRequest) {
 		log.info("oppdaterPostadresse skal oppdatere postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
 
@@ -124,7 +125,7 @@ public class AdministrerForsendelseConsumer {
 		log.info("oppdaterPostadresse har oppdatert postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public void feilregistrerForsendelse(FeilregistrerForsendelseRequest feilregistrerForsendelse) {
 		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 
@@ -137,7 +138,7 @@ public class AdministrerForsendelseConsumer {
 		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public Long oppdaterFilinformasjon(OppdaterFilinformasjonRequest oppdaterFilinformasjonRequest) {
 		loggOpprettingEllerOppdateringAvFilinformasjon(oppdaterFilinformasjonRequest);
 
