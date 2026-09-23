@@ -10,7 +10,7 @@ import no.nav.dokdistsentralprint.exception.technical.RegoppslagHentAdresseTechn
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StreamUtils;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class RegoppslagRestConsumer {
 				.build();
 	}
 
-	@Retryable(includes = RegoppslagHentAdresseTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {RegoppslagHentAdresseTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public AdresseTo treg002HentAdresse(HentAdresseRequestTo request) {
 
 		return texasAuthorizedRestClient.post()

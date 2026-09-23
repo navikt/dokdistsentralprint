@@ -2,17 +2,16 @@ package no.nav.dokdistsentralprint.consumer.dokmet;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
-import no.nav.dokdistsentralprint.constants.NavHeaders;
 import no.nav.dokdistsentralprint.exception.functional.DokmetFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.DokmetTechnicalException;
 import no.nav.dokmet.api.tkat020.DokumenttypeInfoTo;
-import org.slf4j.MDC;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
@@ -20,9 +19,9 @@ import java.io.IOException;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.DOKMET_CACHE;
-import static no.nav.dokdistsentralprint.constants.MdcConstants.CALL_ID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @Component
@@ -34,16 +33,13 @@ public class DokmetConsumer {
 						  RestClient restClient) {
 		this.restClient = restClient.mutate()
 				.baseUrl(dokdistsentralprintProperties.getEndpoints().getDokmetUrl())
-				.defaultHeaders(headers -> {
-					headers.set(NavHeaders.NAV_CALLID, MDC.get(CALL_ID));
-					headers.setContentType(APPLICATION_JSON);
-				})
+				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.defaultStatusHandler(HttpStatusCode::isError, (_, res) -> handleError(res))
 				.build();
 	}
 
 	@Cacheable(DOKMET_CACHE)
-	@Retryable(includes = DokmetTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokmetTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public Distribusjonsinfo hentDistribusjonsinfo(final String dokumenttypeId) {
 		DokumenttypeInfoTo dokumenttypeInfo = restClient.get()
 				.uri(uriBuilder -> uriBuilder.path("/{dokumenttypeId}")
