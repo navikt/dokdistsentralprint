@@ -55,7 +55,6 @@ public class AdministrerForsendelseConsumer {
 				.bodyToMono(FinnForsendelseResponse.class)
 				.onErrorResume(e -> {
 					if (e instanceof WebClientResponseException response && NOT_FOUND.equals(response.getStatusCode())) {
-						log.warn("finnForsendelse fant ikke forsendelse med bestillingsId={}", bestillingsId);
 						return Mono.empty();
 					}
 					return Mono.error(mapError(e));
@@ -90,6 +89,8 @@ public class AdministrerForsendelseConsumer {
 
 	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
+		log.info("oppdaterForsendelseStatus oppdaterer forsendelse med forsendelseId={}", oppdaterForsendelseRequest.forsendelseId());
+
 		texasAuthorizedWebClient.put()
 				.uri("/oppdaterforsendelse")
 				.bodyValue(oppdaterForsendelseRequest)
@@ -97,6 +98,9 @@ public class AdministrerForsendelseConsumer {
 				.toBodilessEntity()
 				.onErrorMap(this::mapError)
 				.block();
+
+		log.info("oppdaterForsendelseStatus har oppdatert forsendelse med forsendelseId={} til forsendelsestatus={}",
+				oppdaterForsendelseRequest.forsendelseId(), oppdaterForsendelseRequest.forsendelseStatus());
 	}
 
 	@Cacheable(POSTDESTINASJON_CACHE)
