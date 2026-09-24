@@ -14,6 +14,8 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -82,7 +84,7 @@ public class Sdist009Service {
 
 			switch (rapport.getStatus().getLePu()) {
 				case MAILPIECE_MOTTAK -> behandleMailpieceMottak(forsendelse);
-				case KONVOLUTTERT -> behandleKonvoluttert(forsendelse);
+				case KONVOLUTTERT -> behandleKonvoluttert(forsendelse, rapport.getStatus().getTidspunkt());
 				case RETURPOST -> behandleReturpost(forsendelse);
 			}
 		} else {
@@ -111,10 +113,11 @@ public class Sdist009Service {
 		}
 	}
 
-	private void behandleKonvoluttert(HentForsendelseResponse forsendelse) {
+	private void behandleKonvoluttert(HentForsendelseResponse forsendelse, String tidspunkt) {
 		ForsendelseStatus forsendelseStatus = mapForsendelseStatus(forsendelse.getForsendelseStatus());
 		switch (forsendelseStatus) {
-			case BEKREFTET -> oppdaterForsendelseStatus(forsendelse.getForsendelseId(), EKSPEDERT);
+			case BEKREFTET ->
+					oppdaterForsendelseStatusOgEkspedertDato(forsendelse.getForsendelseId(), mapEkspedertDato(tidspunkt));
 			case EKSPEDERT -> loggKvitteringAlleredeBehandlet(forsendelse, KONVOLUTTERT, forsendelseStatus);
 			default -> loggForsendelseHarUventetStatus(forsendelse, KONVOLUTTERT, FORVENTET_KONVOLUTTERT_STATUS);
 		}
@@ -143,11 +146,15 @@ public class Sdist009Service {
 		);
 	}
 
+	private void oppdaterForsendelseStatusOgEkspedertDato(Long forsendelseId, LocalDateTime tidspunkt) {
+		administrerForsendelseConsumer.oppdaterForsendelseStatus(
+				new OppdaterForsendelseRequest(forsendelseId, EKSPEDERT.name(), tidspunkt)
+		);
+	}
+
 	private void oppdaterForsendelseStatus(Long forsendelseId, ForsendelseStatus forsendelseStatus) {
 		administrerForsendelseConsumer.oppdaterForsendelseStatus(
-				new OppdaterForsendelseRequest(
-						forsendelseId,
-						forsendelseStatus.name()
+				new OppdaterForsendelseRequest(forsendelseId, forsendelseStatus.name()
 				)
 		);
 	}
@@ -179,5 +186,10 @@ public class Sdist009Service {
 			log.error("Forsendelse har ukjent forsendelseStatus={}. Oppdater forsendelseStatus-enum i dokdistsentralprint med ny verdi", forsendelseStatus);
 			throw new UkjentForsendelsestatusException("Forsendelse har ukjent forsendelseStatus=%s. Oppdater forsendelseStatus-enum i dokdistsentralprint med ny verdi".formatted(forsendelseStatus), e);
 		}
+	}
+
+	private LocalDateTime mapEkspedertDato(String tidspunkt) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+		return LocalDateTime.parse(tidspunkt, formatter);
 	}
 }

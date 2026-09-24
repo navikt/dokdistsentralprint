@@ -26,7 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Service
 public class ReturpostOppgaveService {
 
-	public static final String BEHANDLE_RETURPOST = "BEHANDLE RETURPOST";
+	public static final String BEHANDLE_RETURPOST = "BEHANDLE_RETURPOST";
 
 	private final Queue qopp001;
 	private final JAXBContext jaxbContext;
