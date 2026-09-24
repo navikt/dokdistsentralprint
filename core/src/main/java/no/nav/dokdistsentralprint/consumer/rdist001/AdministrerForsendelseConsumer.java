@@ -2,169 +2,152 @@ package no.nav.dokdistsentralprint.consumer.rdist001;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
-import no.nav.dokdistsentralprint.constants.NavHeadersFilter;
 import no.nav.dokdistsentralprint.exception.functional.DokdistsentralprintFunctionalException;
 import no.nav.dokdistsentralprint.exception.technical.DokdistsentralprintTechnicalException;
-import org.springframework.boot.http.codec.autoconfigure.HttpCodecsProperties;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClient;
 
-import static java.lang.String.format;
+import java.io.IOException;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
-import static no.nav.dokdistsentralprint.consumer.naistoken.NaisTexasWebClientRequestInterceptor.TARGET_SCOPE;
+import static no.nav.dokdistsentralprint.consumer.naistoken.NaisTexasRequestInterceptor.TARGET_SCOPE;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.util.StreamUtils.copyToString;
 
 @Slf4j
 @Component
 public class AdministrerForsendelseConsumer {
 
-	private final WebClient texasAuthorizedWebClient;
+	private final RestClient texasAuthorizedRestClient;
 	private final DokdistsentralprintProperties.Endpoints dokdistadminEndpoint;
 
 	public AdministrerForsendelseConsumer(DokdistsentralprintProperties dokdistsentralprintProperties,
-										  WebClient texasAuthorizedWebClient,
-										  HttpCodecsProperties httpCodecsProperties) {
+										  RestClient texasAuthorizedRestClient) {
 		this.dokdistadminEndpoint = dokdistsentralprintProperties.getEndpoints();
-		this.texasAuthorizedWebClient = texasAuthorizedWebClient.mutate()
+		this.texasAuthorizedRestClient = texasAuthorizedRestClient.mutate()
 				.baseUrl(dokdistadminEndpoint.getDokdistadmin().getUrl())
-				.filter(new NavHeadersFilter())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.defaultRequest(spec ->
 						spec.attribute(TARGET_SCOPE, dokdistadminEndpoint.getDokdistadmin().getScope()))
-				.codecs(configurer ->
-						configurer.defaultCodecs().maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
+				.defaultStatusHandler(HttpStatusCode::isError, (_, res) -> handleError(res))
 				.build();
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public Long finnForsendelse(String bestillingsId) {
 		log.info("finnForsendelse henter forsendelse med bestillingsId={}", bestillingsId);
 
-		Long forsendelseId = texasAuthorizedWebClient.get()
+		FinnForsendelseResponse finnForsendelse = texasAuthorizedRestClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.path("/finnforsendelse/bestillingsId/{bestillingsId}")
 						.build(bestillingsId))
-				.retrieve()
-				.bodyToMono(FinnForsendelseResponse.class)
-				.onErrorResume(e -> {
-					if (e instanceof WebClientResponseException response && NOT_FOUND.equals(response.getStatusCode())) {
-						return Mono.empty();
+				.exchange((request, response) -> {
+					if (response.getStatusCode().isError()) {
+						if (NOT_FOUND.isSameCodeAs(response.getStatusCode())) {
+							log.warn("finnForsendelse fant ikke forsendelse med bestillingsId={}", bestillingsId);
+							return null;
+						}
+						handleError(response);
 					}
-					return Mono.error(mapError(e));
-				})
-				.map(FinnForsendelseResponse::forsendelseId)
-				.block();
+					return response.bodyTo(FinnForsendelseResponse.class);
+				});
 
-		if (forsendelseId != null) {
-			log.info("finnForsendelse har hentet forsendelse med forsendelseId={} og bestillingsId={}", forsendelseId, bestillingsId);
+		if (finnForsendelse == null) {
+			return null;
 		}
 
-		return forsendelseId;
+		log.info("finnForsendelse har hentet forsendelse med forsendelseId={} og bestillingsId={}", finnForsendelse.forsendelseId(), bestillingsId);
+
+		return finnForsendelse.forsendelseId();
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public HentForsendelseResponse hentForsendelse(String forsendelseId) {
 		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
 
-		var response = texasAuthorizedWebClient.get()
+		var response = texasAuthorizedRestClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.path("/{forsendelseId}")
 						.build(forsendelseId))
 				.retrieve()
-				.bodyToMono(HentForsendelseResponse.class)
-				.onErrorMap(this::mapError)
-				.block();
+				.body(HentForsendelseResponse.class);
 
 		log.info("hentForsendelse har hentet forsendelse med forsendelseId={}", forsendelseId);
 
 		return response;
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
-		log.info("oppdaterForsendelseStatus oppdaterer forsendelse med forsendelseId={}", oppdaterForsendelseRequest.forsendelseId());
-
-		texasAuthorizedWebClient.put()
+		texasAuthorizedRestClient.put()
 				.uri("/oppdaterforsendelse")
-				.bodyValue(oppdaterForsendelseRequest)
+				.body(oppdaterForsendelseRequest)
 				.retrieve()
-				.toBodilessEntity()
-				.onErrorMap(this::mapError)
-				.block();
-
-		log.info("oppdaterForsendelseStatus har oppdatert forsendelse med forsendelseId={} til forsendelsestatus={}",
-				oppdaterForsendelseRequest.forsendelseId(), oppdaterForsendelseRequest.forsendelseStatus());
+				.toBodilessEntity();
 	}
 
 	@Cacheable(POSTDESTINASJON_CACHE)
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
-	public String hentPostdestinasjon(String landkode) {
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
+	public HentPostdestinasjonResponse hentPostdestinasjon(String landkode) {
 		log.info("hentPostdestinasjon henter postdestinasjon for landkode={}", landkode);
 
-		var postdestinasjon = texasAuthorizedWebClient.get()
+		var hentPostdestinasjonResponse = texasAuthorizedRestClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.path("/hentpostdestinasjon/{landkode}")
 						.build(landkode))
 				.retrieve()
-				.bodyToMono(HentPostdestinasjonResponse.class)
-				.map(HentPostdestinasjonResponse::postdestinasjon)
-				.onErrorMap(this::mapError)
-				.block();
+				.body(HentPostdestinasjonResponse.class);
 
-		log.info("hentPostdestinasjon har hentet postdestinasjon={} for landkode={}", postdestinasjon, landkode);
+		log.info("hentPostdestinasjon har hentet postdestinasjon={} for landkode={}", hentPostdestinasjonResponse, landkode);
 
-		return postdestinasjon;
+		return hentPostdestinasjonResponse;
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterPostadresse(OppdaterPostadresseRequest oppdaterPostadresseRequest) {
 		log.info("oppdaterPostadresse skal oppdatere postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
 
-		texasAuthorizedWebClient.put()
+		texasAuthorizedRestClient.put()
 				.uri("/oppdaterpostadresse")
-				.bodyValue(oppdaterPostadresseRequest)
+				.body(oppdaterPostadresseRequest)
 				.retrieve()
-				.toBodilessEntity()
-				.onErrorMap(this::mapError)
-				.block();
+				.toBodilessEntity();
 
 		log.info("oppdaterPostadresse har oppdatert postadresse på forsendelse med forsendelseId={}", oppdaterPostadresseRequest.getForsendelseId());
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public void feilregistrerForsendelse(FeilregistrerForsendelseRequest feilregistrerForsendelse) {
 		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 
-		texasAuthorizedWebClient.put()
+		texasAuthorizedRestClient.put()
 				.uri("/feilregistrerforsendelse")
-				.bodyValue(feilregistrerForsendelse)
+				.body(feilregistrerForsendelse)
 				.retrieve()
-				.toBodilessEntity()
-				.onErrorMap(this::mapError)
-				.block();
+				.toBodilessEntity();
 
 		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 	}
 
-	@Retryable(includes = DokdistsentralprintTechnicalException.class, multiplier = MULTIPLIER_SHORT)
+	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public Long oppdaterFilinformasjon(OppdaterFilinformasjonRequest oppdaterFilinformasjonRequest) {
 		loggOpprettingEllerOppdateringAvFilinformasjon(oppdaterFilinformasjonRequest);
 
-		Long filInfoId = texasAuthorizedWebClient.put()
+		Long filInfoId = texasAuthorizedRestClient.put()
 				.uri("/oppdaterfilinformasjon")
-				.bodyValue(oppdaterFilinformasjonRequest)
+				.body(oppdaterFilinformasjonRequest)
 				.retrieve()
-				.bodyToMono(OppdaterFilinformasjonResponse.class)
-				.map(OppdaterFilinformasjonResponse::filInfoId)
-				.onErrorMap(this::mapError)
-				.block();
+				.body(OppdaterFilinformasjonResponse.class)
+				.filInfoId();
 
 		log.info("oppdaterFilinformasjon har opprettet/oppdatert forsendelse med filInfoId={}", filInfoId);
 
@@ -179,18 +162,14 @@ public class AdministrerForsendelseConsumer {
 		}
 	}
 
-	private Throwable mapError(Throwable error) {
-		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
-			return new DokdistsentralprintFunctionalException(
-					format("Kall mot rdist001 feilet funksjonelt med status=%s, feilmelding=%s",
-							response.getStatusCode(),
-							response.getMessage()),
-					error);
-		} else {
-			return new DokdistsentralprintTechnicalException(
-					format("Kall mot rdist001 feilet teknisk med feilmelding=%s", error.getMessage()),
-					error);
-		}
-	}
+	private void handleError(ClientHttpResponse response) throws IOException {
+		String body = copyToString(response.getBody(), UTF_8);
+		String feilmelding = ("Kall mot dokdistadmin feilet %s med status=%s, feilmelding=%s")
+				.formatted(response.getStatusCode().is4xxClientError() ? "funksjonelt" : "teknisk", response.getStatusCode(), body);
 
+		if (response.getStatusCode().is4xxClientError()) {
+			throw new DokdistsentralprintFunctionalException(feilmelding);
+		}
+		throw new DokdistsentralprintTechnicalException(feilmelding);
+	}
 }

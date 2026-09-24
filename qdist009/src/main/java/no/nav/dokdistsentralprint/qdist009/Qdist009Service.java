@@ -18,7 +18,6 @@ import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static no.nav.dokdistsentralprint.qdist009.PdfA4Validator.loggHvisDetFinnesPagesSomErStoerreEnnA4;
