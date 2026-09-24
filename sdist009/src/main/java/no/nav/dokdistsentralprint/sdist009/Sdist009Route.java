@@ -54,7 +54,7 @@ public class Sdist009Route extends RouteBuilder {
 		from(INBOUND_SFTP_FOLDER)
 				.routeId(SERVICE_ID)
 				.autoStartup(sdist009Properties.isEnabled())
-				.log(INFO, log, "Sdist009 starter prosessering av fil med filnavn=${file:name}")
+				.log(INFO, log, "Sdist009 har hentet fil med filnavn=${file:name} fra sftp-server")
 				.setProperty(MAILPIECE_FILE_NAME, simple("${file:name}"))
 				.to("validator:no/nav/dokdistsentralprint/kvittering/mailpiece.xsd")
 				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(StatusRapport.class)))

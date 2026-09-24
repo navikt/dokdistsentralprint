@@ -55,6 +55,8 @@ public class Sdist009Service {
 		String filnavn = exchange.getProperty(MAILPIECE_FILE_NAME, String.class);
 
 		List<Rapport> kvitteringer = statusRapport.getRapport();
+		log.info("Sdist009 starter behandling av fil={} med antall kvitteringer={}", filnavn, kvitteringer.size());
+
 		if (kvitteringer.isEmpty()) {
 			log.warn("Kvitteringsfilen inneholder ingen kvitteringer. Avslutter behandling av kvitteringsfil og legger fil i feilmappe.");
 			throw new KvitteringsfilInneholderIngenKvitteringer("Kvitteringsfilen har ingen kvitteringer.");
@@ -166,7 +168,7 @@ public class Sdist009Service {
 	}
 
 	private void loggForsendelseHarUventetStatus(HentForsendelseResponse forsendelse, LePuKode lePuKode, EnumSet<ForsendelseStatus> forventetStatus) {
-		log.error("Forsendelse med forsendelseId={} og LePu={} har dokumentstatus={}. Forventet dokumentstatus={}. Avslutter behandling av kvittering og går til neste.",
+		log.warn("Forsendelse med forsendelseId={} og LePu={} har dokumentstatus={}. Forventet dokumentstatus={}. Avslutter behandling av kvittering og går til neste.",
 				forsendelse.getForsendelseId(), lePuKode, forsendelse.getForsendelseStatus(), forventetStatus);
 	}
 
