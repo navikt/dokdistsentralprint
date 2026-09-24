@@ -65,10 +65,10 @@ public class DokmetConsumer {
 	private void handleError(ClientHttpResponse response) throws IOException {
 		String body = StreamUtils.copyToString(response.getBody(), UTF_8);
 		if (response.getStatusCode().is4xxClientError()) {
-			throw new DokmetFunctionalException(format("Dokmet feilet funksjonelt med statuskode=%s. Feilmelding=%s",
+			throw new DokmetFunctionalException(format("Kall mot dokmet feilet funksjonelt med statuskode=%s. Feilmelding=%s",
 					response.getStatusCode(), body));
 		}
-		throw new DokmetTechnicalException(format("Dokmet feilet teknisk med feilmelding=%s", body));
+		throw new DokmetTechnicalException(format("Kall mot dokmet feilet teknisk med feilmelding=%s", body));
 	}
 
 	private boolean manglerDistribusjonsinfo(DokumenttypeInfoTo response) {
