@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <StatusRapport Type="Mailpiece">
 	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890672" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:46:05"/>
+		<Status Status="OK" Id="37890672" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
 	<Rapport Id="MVA-P405-IN200C5-121127-0020">
 		<Status Status="OK" Id="37890663" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
 	<Rapport Id="MVA-P405-IN200C5-121127-0021">
-		<Status Status="OK" Id="37890666" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:06"/>
+		<Status Status="OK" Id="37890666" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
 	<Rapport Id="MVA-P405-IN200C5-121127-0022">
 		<Status Status="OK" Id="37890664" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
 	<Rapport Id="MVA-P405-IN200C5-121127-0023">
-		<Status Status="OK" Id="37890665" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:06"/>
+		<Status Status="OK" Id="37890665" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
 	<Rapport Id="MVA-P405-IN200C5-121127-0024">
-		<Status Status="OK" Id="37890667" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:06"/>
+		<Status Status="OK" Id="37890667" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
 	<Rapport Id="MVA-P405-IN200C5-121127-0025">
-		<Status Status="OK" Id="37890680" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:06"/>
+		<Status Status="OK" Id="37890680" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
 	<Rapport Id="MVA-P405-IN200C5-121127-0026">
-		<Status Status="OK" Id="37890681" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:06"/>
+		<Status Status="OK" Id="37890681" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
 	<Rapport Id="MVA-P405-IN200C5-121127-0027">
-		<Status Status="OK" Id="37890682" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:06"/>
+		<Status Status="OK" Id="37890682" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
 	<Rapport Id="MVA-P405-IN200C5-121127-0028">
-		<Status Status="OK" Id="37890683" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:06"/>
+		<Status Status="OK" Id="37890683" LePu="KONVOLUTTERT" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
 </StatusRapport>

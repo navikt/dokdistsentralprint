@@ -53,7 +53,6 @@ public class AdministrerForsendelseConsumer {
 				.exchange((request, response) -> {
 					if (response.getStatusCode().isError()) {
 						if (NOT_FOUND.isSameCodeAs(response.getStatusCode())) {
-							log.warn("finnForsendelse fant ikke forsendelse med bestillingsId={}", bestillingsId);
 							return null;
 						}
 						handleError(response);
@@ -88,11 +87,16 @@ public class AdministrerForsendelseConsumer {
 
 	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
+		log.info("oppdaterForsendelseStatus oppdaterer forsendelse med forsendelseId={}", oppdaterForsendelseRequest.forsendelseId());
+
 		texasAuthorizedRestClient.put()
 				.uri("/oppdaterforsendelse")
 				.body(oppdaterForsendelseRequest)
 				.retrieve()
 				.toBodilessEntity();
+
+		log.info("oppdaterForsendelseStatus har oppdatert forsendelse med forsendelseId={} til forsendelsestatus={}",
+				oppdaterForsendelseRequest.forsendelseId(), oppdaterForsendelseRequest.forsendelseStatus());
 	}
 
 	@Cacheable(POSTDESTINASJON_CACHE)

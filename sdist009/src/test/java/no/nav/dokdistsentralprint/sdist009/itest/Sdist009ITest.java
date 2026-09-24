@@ -32,6 +32,7 @@ import java.util.logging.LogManager;
 import java.util.stream.Stream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -115,7 +116,8 @@ class Sdist009ITest {
 		kopierFilTilInngaaende(filnavn);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
-			verify(10, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL)));
+			verify(10, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL))
+					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"BEKREFTET\",\"ekspedertDato\":null}")));
 			verify(2, putRequestedFor(urlEqualTo(OPPDATER_FILINFORMASJON_URL)));
 
 			assertThat(ferdig.resolve(filnavn))
@@ -187,7 +189,8 @@ class Sdist009ITest {
 		kopierFilTilInngaaende(filnavn);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
-			verify(10, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL)));
+			verify(10, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL))
+					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"EKSPEDERT\",\"ekspedertDato\":\"2013-05-07T10:43:05\"}")));
 			verify(2, putRequestedFor(urlEqualTo(OPPDATER_FILINFORMASJON_URL)));
 
 			assertThat(ferdig.resolve(filnavn))
@@ -259,7 +262,8 @@ class Sdist009ITest {
 		kopierFilTilInngaaende(filnavn);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
-			verify(10, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL)));
+			verify(10, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL))
+					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"RETURPOSTBEHANDLET\",\"ekspedertDato\":null}")));
 			verify(2, putRequestedFor(urlEqualTo(OPPDATER_FILINFORMASJON_URL)));
 
 			String receive = receive(qopp001);
