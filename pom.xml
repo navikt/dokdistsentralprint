@@ -32,7 +32,7 @@
 		<google-cloud.version>26.87.0</google-cloud.version>
 		<tink.version>1.23.0</tink.version>
 		<tink-gcpkms.version>1.12.0</tink-gcpkms.version>
-		<com.ibm.mq.jakarta.client.version>10.0.0.0</com.ibm.mq.jakarta.client.version>
+		<com.ibm.mq.jakarta.client.version>10.0.0.5</com.ibm.mq.jakarta.client.version>
 		<apache-pdfbox.version>3.0.8</apache-pdfbox.version>
 		<dokmet-api.version>2025.06.30-07.30-22496f8</dokmet-api.version>
 		<dok-legacy-tjenestespesifikasjoner.version>43-5bca208</dok-legacy-tjenestespesifikasjoner.version>
