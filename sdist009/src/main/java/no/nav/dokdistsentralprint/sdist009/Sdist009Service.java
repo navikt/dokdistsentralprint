@@ -148,14 +148,22 @@ public class Sdist009Service {
 
 	private void oppdaterForsendelseStatusOgEkspedertDato(Long forsendelseId, LocalDateTime tidspunkt) {
 		administrerForsendelseConsumer.oppdaterForsendelseStatus(
-				new OppdaterForsendelseRequest(forsendelseId, EKSPEDERT.name(), tidspunkt)
+				OppdaterForsendelseRequest.builder()
+						.forsendelseId(forsendelseId)
+						.forsendelseStatus(EKSPEDERT.name())
+						.ekspedertDato(tidspunkt)
+						.kilde(SDIST009_KILDE)
+						.build()
 		);
 	}
 
 	private void oppdaterForsendelseStatus(Long forsendelseId, ForsendelseStatus forsendelseStatus) {
 		administrerForsendelseConsumer.oppdaterForsendelseStatus(
-				new OppdaterForsendelseRequest(forsendelseId, forsendelseStatus.name()
-				)
+				OppdaterForsendelseRequest.builder()
+						.forsendelseId(forsendelseId)
+						.forsendelseStatus(forsendelseStatus.name())
+						.kilde(SDIST009_KILDE)
+						.build()
 		);
 	}
 

@@ -16,6 +16,7 @@ import java.io.IOException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
+import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_SERVICE_ID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static no.nav.dokdistsentralprint.consumer.naistoken.NaisTexasRequestInterceptor.TARGET_SCOPE;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -91,6 +92,7 @@ public class AdministrerForsendelseConsumer {
 
 		texasAuthorizedRestClient.put()
 				.uri("/oppdaterforsendelse")
+				.header(NAV_SERVICE_ID, oppdaterForsendelseRequest.kilde())
 				.body(oppdaterForsendelseRequest)
 				.retrieve()
 				.toBodilessEntity();
@@ -148,6 +150,7 @@ public class AdministrerForsendelseConsumer {
 
 		Long filInfoId = texasAuthorizedRestClient.put()
 				.uri("/oppdaterfilinformasjon")
+				.header(NAV_SERVICE_ID, oppdaterFilinformasjonRequest.kilde())
 				.body(oppdaterFilinformasjonRequest)
 				.retrieve()
 				.body(OppdaterFilinformasjonResponse.class)

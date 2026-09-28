@@ -1,13 +1,14 @@
 package no.nav.dokdistsentralprint.consumer.rdist001;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 
+@Builder
 public record OppdaterForsendelseRequest(
 		Long forsendelseId,
 		String forsendelseStatus,
-		LocalDateTime ekspedertDato
+		LocalDateTime ekspedertDato,
+		String kilde
 ) {
-	public OppdaterForsendelseRequest(Long forsendelseId, String forsendelseStatus) {
-		this(forsendelseId, forsendelseStatus, null);
-	}
 }

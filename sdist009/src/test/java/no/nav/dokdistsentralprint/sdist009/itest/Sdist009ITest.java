@@ -117,7 +117,7 @@ class Sdist009ITest {
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			verify(10, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL))
-					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"BEKREFTET\",\"ekspedertDato\":null}")));
+					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"BEKREFTET\",\"ekspedertDato\":null,\"kilde\": \"SDIST009\"}")));
 			verify(2, putRequestedFor(urlEqualTo(OPPDATER_FILINFORMASJON_URL)));
 
 			assertThat(ferdig.resolve(filnavn))
@@ -190,7 +190,7 @@ class Sdist009ITest {
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			verify(10, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL))
-					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"EKSPEDERT\",\"ekspedertDato\":\"2013-05-07T10:43:05\"}")));
+					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"EKSPEDERT\",\"ekspedertDato\":\"2013-05-07T10:43:05\",\"kilde\": \"SDIST009\"}")));
 			verify(2, putRequestedFor(urlEqualTo(OPPDATER_FILINFORMASJON_URL)));
 
 			assertThat(ferdig.resolve(filnavn))
@@ -263,7 +263,7 @@ class Sdist009ITest {
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			verify(10, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL))
-					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"RETURPOSTBEHANDLET\",\"ekspedertDato\":null}")));
+					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"RETURPOSTBEHANDLET\",\"ekspedertDato\":null,\"kilde\": \"SDIST009\"}")));
 			verify(2, putRequestedFor(urlEqualTo(OPPDATER_FILINFORMASJON_URL)));
 
 			String receive = receive(qopp001);
