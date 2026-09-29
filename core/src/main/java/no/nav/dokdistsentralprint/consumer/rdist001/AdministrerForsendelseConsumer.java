@@ -16,6 +16,7 @@ import java.io.IOException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistsentralprint.config.cache.LokalCacheConfig.POSTDESTINASJON_CACHE;
+import static no.nav.dokdistsentralprint.constants.NavHeaders.NAV_SERVICE_ID;
 import static no.nav.dokdistsentralprint.constants.RetryConstants.MULTIPLIER_SHORT;
 import static no.nav.dokdistsentralprint.consumer.naistoken.NaisTexasRequestInterceptor.TARGET_SCOPE;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -53,7 +54,6 @@ public class AdministrerForsendelseConsumer {
 				.exchange((request, response) -> {
 					if (response.getStatusCode().isError()) {
 						if (NOT_FOUND.isSameCodeAs(response.getStatusCode())) {
-							log.warn("finnForsendelse fant ikke forsendelse med bestillingsId={}", bestillingsId);
 							return null;
 						}
 						handleError(response);
@@ -88,11 +88,17 @@ public class AdministrerForsendelseConsumer {
 
 	@Retryable(includes = {DokdistsentralprintTechnicalException.class, ResourceAccessException.class}, multiplier = MULTIPLIER_SHORT)
 	public void oppdaterForsendelseStatus(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
+		log.info("oppdaterForsendelseStatus oppdaterer forsendelse med forsendelseId={}", oppdaterForsendelseRequest.forsendelseId());
+
 		texasAuthorizedRestClient.put()
 				.uri("/oppdaterforsendelse")
+				.header(NAV_SERVICE_ID, oppdaterForsendelseRequest.kilde())
 				.body(oppdaterForsendelseRequest)
 				.retrieve()
 				.toBodilessEntity();
+
+		log.info("oppdaterForsendelseStatus har oppdatert forsendelse med forsendelseId={} til forsendelsestatus={}",
+				oppdaterForsendelseRequest.forsendelseId(), oppdaterForsendelseRequest.forsendelseStatus());
 	}
 
 	@Cacheable(POSTDESTINASJON_CACHE)
@@ -144,6 +150,7 @@ public class AdministrerForsendelseConsumer {
 
 		Long filInfoId = texasAuthorizedRestClient.put()
 				.uri("/oppdaterfilinformasjon")
+				.header(NAV_SERVICE_ID, oppdaterFilinformasjonRequest.kilde())
 				.body(oppdaterFilinformasjonRequest)
 				.retrieve()
 				.body(OppdaterFilinformasjonResponse.class)

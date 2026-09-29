@@ -24,7 +24,10 @@ public class DokdistStatusUpdater {
 		final String forsendelseId = exchange.getProperty(PROPERTY_FORSENDELSE_ID, String.class);
 
 		administrerForsendelseConsumer.oppdaterForsendelseStatus(
-				new OppdaterForsendelseRequest(valueOf(forsendelseId), OVERSENDT.name())
+				OppdaterForsendelseRequest.builder()
+						.forsendelseId(valueOf(forsendelseId))
+						.forsendelseStatus(OVERSENDT.name())
+						.build()
 		);
 	}
 
