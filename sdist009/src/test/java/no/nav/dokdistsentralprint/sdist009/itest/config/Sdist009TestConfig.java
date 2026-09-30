@@ -3,6 +3,7 @@ package no.nav.dokdistsentralprint.sdist009.itest.config;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistsentralprint.config.alias.DokdistsentralprintProperties;
 import no.nav.dokdistsentralprint.config.alias.NaisProperties;
+import no.nav.dokdistsentralprint.consumer.leaderelection.LeaderElectionConsumer;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
@@ -28,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.nio.file.Path.of;
 import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @ComponentScan("no.nav.dokdistsentralprint")
@@ -44,6 +47,13 @@ import static java.util.Collections.singletonList;
 @EnableAutoConfiguration
 @Profile("itest")
 public class Sdist009TestConfig {
+
+	@Bean
+	LeaderElectionConsumer leaderElectionConsumer() {
+		LeaderElectionConsumer leaderElectionConsumer = mock(LeaderElectionConsumer.class);
+		when(leaderElectionConsumer.isLeader()).thenReturn(true);
+		return leaderElectionConsumer;
+	}
 
 	@Configuration
 	static class CamelTestStartupConfig {

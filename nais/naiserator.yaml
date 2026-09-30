@@ -94,6 +94,7 @@ spec:
       cpu: 100m
       memory: 1024Mi
   webproxy: true
+  leaderElection: true
   observability:
     autoInstrumentation:
       enabled: true
