@@ -1,7 +1,7 @@
 {
   "APPNAVN": "dokdistsentralprint",
   "ENVIRONMENT": "q2",
-  "MIN_REPLICAS": "1",
+  "MIN_REPLICAS": "2",
   "MAX_REPLICAS": "2",
   "INGRESSES": [
     "https://dokdistsentralprint.intern.dev.nav.no"
