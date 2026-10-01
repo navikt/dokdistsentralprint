@@ -6,7 +6,6 @@ import no.nav.dokdistsentralprint.sdist009.ForsendelseStatus;
 import no.nav.dokdistsentralprint.sdist009.itest.config.Sdist009TestConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -514,7 +513,7 @@ class Sdist009ITest {
 		stubFor(post("/texastoken")
 				.willReturn(aResponse()
 						.withStatus(OK.value())
-						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("nais-texas/texas_response.json")));
 	}
 
