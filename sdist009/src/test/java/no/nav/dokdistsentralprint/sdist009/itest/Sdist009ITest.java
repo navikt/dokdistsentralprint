@@ -39,6 +39,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -190,6 +191,32 @@ class Sdist009ITest {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			verify(10, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL))
 					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"EKSPEDERT\",\"ekspedertDato\":\"2013-05-07T10:43:05\",\"kilde\": \"SDIST009\"}")));
+			verify(2, putRequestedFor(urlEqualTo(OPPDATER_FILINFORMASJON_URL)));
+
+			assertThat(ferdig.resolve(filnavn))
+					.exists().isRegularFile();
+		});
+	}
+
+	// Test der status-id og rapport-id er ulike for bdist001
+	@Test
+	void skalBehandleKvitteringMedLePuKonvoluttertOgStatusBekreftetForBdist001() throws IOException {
+		stubFinnForsendelse(OK);
+		stubHentForsendelse("hentforsendelse_status_bekreftet.json");
+		stubOppdaterFilinformasjon();
+		stubOppdaterForsendelse();
+
+		String filnavn = "MP_RAPPORT_XML-KONVOLUTTERT-BDIST001.xml";
+		kopierFilTilInngaaende(filnavn);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			verify(0, getRequestedFor(urlPathMatching(FINN_FORSENDELSE_URL + "2345-77400830-B-PK-W-D-INNLAND")));
+			verify(1, getRequestedFor(urlPathMatching(FINN_FORSENDELSE_URL + "aaaa60e7-b979-41b5-aa34-6f0b6d0d2e76")));
+			verify(1, getRequestedFor(urlPathMatching(FINN_FORSENDELSE_URL + "bbbb9c0b-bdee-4c2e-8cda-77e6a9cdea89")));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL))
+					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"EKSPEDERT\",\"ekspedertDato\":\"2026-10-19T12:01:42\",\"kilde\": \"SDIST009\"}")));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATER_FORSENDELSE_URL))
+					.withRequestBody(equalToJson("{\"forsendelseId\":33333,\"forsendelseStatus\":\"EKSPEDERT\",\"ekspedertDato\":\"2026-10-19T13:01:42\",\"kilde\": \"SDIST009\"}")));
 			verify(2, putRequestedFor(urlEqualTo(OPPDATER_FILINFORMASJON_URL)));
 
 			assertThat(ferdig.resolve(filnavn))
@@ -441,7 +468,7 @@ class Sdist009ITest {
 		kopierFilTilInngaaende(filnavn);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
-			verify(3, getRequestedFor(urlEqualTo(FINN_FORSENDELSE_URL + BESTILLINGS_ID)));
+			verify(3, getRequestedFor(urlPathMatching(FINN_FORSENDELSE_URL + ".*")));
 			verify(0, getRequestedFor(urlEqualTo(HENT_FORSENDELSE_URL + FORSENDELSE_ID)));
 			verify(2, putRequestedFor(urlEqualTo(OPPDATER_FILINFORMASJON_URL)));
 
