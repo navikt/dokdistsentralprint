@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<StatusRapport Type="Mailpiece">
+	<Rapport Id="2345-77400830-B-PK-W-D-INNLAND">
+		<Status Id="aaaa60e7-b979-41b5-aa34-6f0b6d0d2e76" LePu="KONVOLUTTERT" Status="OK" Tidspunkt="19/10/2026 12:01:42"/>
+	</Rapport>
+	<Rapport Id="2345-77400830-B-PK-W-D-INNLAND">
+		<Status Id="bbbb9c0b-bdee-4c2e-8cda-77e6a9cdea89" LePu="KONVOLUTTERT" Status="OK" Tidspunkt="19/10/2026 13:01:42"/>
+	</Rapport>
+</StatusRapport>

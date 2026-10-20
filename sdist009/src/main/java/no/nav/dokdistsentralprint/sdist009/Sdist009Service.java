@@ -74,11 +74,14 @@ public class Sdist009Service {
 
 	private void behandleKvittering(Rapport rapport) {
 		StatusKode statuskode = rapport.getStatus().getStatus();
+		// Rapporten sin id er distribusjonId, mens statusen sin id er dokumentId (bestillingsId) i dokumentdistribusjon-db.
+		// Disse er like for sendinger gjennom qdist009, men ikke for bdist001.
+		var bestillingsId = rapport.getStatus().getId();
 
 		if (OK.equals(statuskode)) {
-			HentForsendelseResponse forsendelse = hentForsendelse(rapport.getId());
+			HentForsendelseResponse forsendelse = hentForsendelse(bestillingsId);
 			if (forsendelse == null) {
-				log.warn("Fant ikke forsendelse med bestillingsId={}. Avslutter behandling av kvittering og går til neste.", rapport.getId());
+				log.warn("Fant ikke forsendelse med bestillingsId={}. Avslutter behandling av kvittering og går til neste.", bestillingsId);
 				return;
 			}
 
@@ -90,7 +93,7 @@ public class Sdist009Service {
 		} else {
 			// Kvitteringen med FEILET blir forkastet, men sdist002 vil opprette Jira-sak med avviksfil for dem senere
 			log.warn("Kvittering med bestillingsId={} og statuskode={} har feilet. Avslutter behandling av kvittering og går til neste.",
-					rapport.getId(), statuskode);
+					bestillingsId, statuskode);
 		}
 	}
 

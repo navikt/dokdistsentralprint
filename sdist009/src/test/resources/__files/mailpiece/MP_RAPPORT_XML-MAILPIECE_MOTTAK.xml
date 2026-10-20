@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <StatusRapport Type="Mailpiece">
 	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890672" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:05"/>
+		<Status Status="OK" Id="MVA-P405-IN200C5-121127-0019" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:05"/>
 	</Rapport>
-	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890663" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:43:05"/>
+	<Rapport Id="MVA-P405-IN200C5-121127-0020">
+		<Status Status="OK" Id="MVA-P405-IN200C5-121127-0020" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
-	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890666" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:43:06"/>
+	<Rapport Id="MVA-P405-IN200C5-121127-0021">
+		<Status Status="OK" Id="MVA-P405-IN200C5-121127-0021" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:43:06"/>
 	</Rapport>
-	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890664" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:43:05"/>
+	<Rapport Id="MVA-P405-IN200C5-121127-0022">
+		<Status Status="OK" Id="MVA-P405-IN200C5-121127-0022" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:43:05"/>
 	</Rapport>
-	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890665" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:43:06"/>
+	<Rapport Id="MVA-P405-IN200C5-121127-0023">
+		<Status Status="OK" Id="MVA-P405-IN200C5-121127-0023" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:43:06"/>
 	</Rapport>
-	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890667" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:43:06"/>
+	<Rapport Id="MVA-P405-IN200C5-121127-0024">
+		<Status Status="OK" Id="MVA-P405-IN200C5-121127-0024" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:43:06"/>
 	</Rapport>
-	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890673" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:05"/>
+	<Rapport Id="MVA-P405-IN200C5-121127-0025">
+		<Status Status="OK" Id="MVA-P405-IN200C5-121127-0025" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:05"/>
 	</Rapport>
-	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890674" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:05"/>
+	<Rapport Id="MVA-P405-IN200C5-121127-0026">
+		<Status Status="OK" Id="MVA-P405-IN200C5-121127-0026" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:05"/>
 	</Rapport>
-	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890675" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:06"/>
+	<Rapport Id="MVA-P405-IN200C5-121127-0027">
+		<Status Status="OK" Id="MVA-P405-IN200C5-121127-0027" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:06"/>
 	</Rapport>
-	<Rapport Id="MVA-P405-IN200C5-121127-0019">
-		<Status Status="OK" Id="37890676" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:06"/>
+	<Rapport Id="MVA-P405-IN200C5-121127-0028">
+		<Status Status="OK" Id="MVA-P405-IN200C5-121127-0028" LePu="MAILPIECE_MOTTAK" Tidspunkt="07/05/2013 10:46:06"/>
 	</Rapport>
 </StatusRapport>
