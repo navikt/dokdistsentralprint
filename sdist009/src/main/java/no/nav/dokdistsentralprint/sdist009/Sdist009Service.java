@@ -39,7 +39,7 @@ public class Sdist009Service {
 	private static final String FILSTATUS_OK = "OK";
 	private static final String FILTYPE = "DOK_RAPP_PRINT";
 	public static final EnumSet<ForsendelseStatus> FORVENTET_MAILPIECE_MOTTAK_STATUS = EnumSet.of(OVERSENDT, BEKREFTET);
-	public static final EnumSet<ForsendelseStatus> FORVENTET_KONVOLUTTERT_STATUS = EnumSet.of(BEKREFTET, EKSPEDERT);
+	public static final EnumSet<ForsendelseStatus> FORVENTET_KONVOLUTTERT_STATUS = EnumSet.of(OVERSENDT, BEKREFTET, EKSPEDERT);
 	public static final EnumSet<ForsendelseStatus> FORVENTET_RETURPOST_STATUS = EnumSet.of(EKSPEDERT, RETURPOSTBEHANDLET);
 
 
@@ -119,7 +119,7 @@ public class Sdist009Service {
 	private void behandleKonvoluttert(HentForsendelseResponse forsendelse, String tidspunkt) {
 		ForsendelseStatus forsendelseStatus = mapForsendelseStatus(forsendelse.getForsendelseStatus());
 		switch (forsendelseStatus) {
-			case BEKREFTET ->
+			case OVERSENDT, BEKREFTET ->
 					oppdaterForsendelseStatusOgEkspedertDato(forsendelse.getForsendelseId(), mapEkspedertDato(tidspunkt));
 			case EKSPEDERT -> loggKvitteringAlleredeBehandlet(forsendelse, KONVOLUTTERT, forsendelseStatus);
 			default -> loggForsendelseHarUventetStatus(forsendelse, KONVOLUTTERT, FORVENTET_KONVOLUTTERT_STATUS);

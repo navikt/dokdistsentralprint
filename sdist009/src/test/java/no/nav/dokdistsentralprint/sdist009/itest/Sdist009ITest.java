@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
@@ -178,10 +179,11 @@ class Sdist009ITest {
 		);
 	}
 
-	@Test
-	void skalBehandleKvitteringMedLePuKonvoluttertOgStatusBekreftet() throws IOException {
+	@ParameterizedTest
+	@ValueSource(strings = {"hentforsendelse_status_oversendt.json", "hentforsendelse_status_bekreftet.json"})
+	void skalBehandleKvitteringMedLePuKonvoluttertOgStatusOversendtEllerBekreftet(String hentForsendelseRespons) throws IOException {
 		stubFinnForsendelse(OK);
-		stubHentForsendelse("hentforsendelse_status_bekreftet.json");
+		stubHentForsendelse(hentForsendelseRespons);
 		stubOppdaterFilinformasjon();
 		stubOppdaterForsendelse();
 
@@ -199,10 +201,11 @@ class Sdist009ITest {
 	}
 
 	// Test der status-id og rapport-id er ulike for bdist001
-	@Test
-	void skalBehandleKvitteringMedLePuKonvoluttertOgStatusBekreftetForBdist001() throws IOException {
+	@ParameterizedTest
+	@ValueSource(strings = {"hentforsendelse_status_oversendt.json", "hentforsendelse_status_bekreftet.json"})
+	void skalBehandleKvitteringMedLePuKonvoluttertOgStatusOversendtEllerBekreftetForBdist001(String hentForsendelseRespons) throws IOException {
 		stubFinnForsendelse(OK);
-		stubHentForsendelse("hentforsendelse_status_bekreftet.json");
+		stubHentForsendelse(hentForsendelseRespons);
 		stubOppdaterFilinformasjon();
 		stubOppdaterForsendelse();
 
@@ -243,7 +246,7 @@ class Sdist009ITest {
 		});
 	}
 
-	// Kun BEKREFTET og EKSPEDERT er forventede statuser på forsendelse for LePu=Konvoluttert
+	// Kun OVERSENDT, BEKREFTET og EKSPEDERT er forventede statuser på forsendelse for LePu=Konvoluttert
 	@ParameterizedTest
 	@MethodSource
 	void skalBehandleKvitteringMedLePuKonvoluttertOgUforventetStatus(String filnavn, ForsendelseStatus forsendelseStatus, CapturedOutput output) throws IOException {
@@ -271,7 +274,6 @@ class Sdist009ITest {
 		return Stream.of(
 				Arguments.of("hentforsendelse_status_opprettet.json", OPPRETTET),
 				Arguments.of("hentforsendelse_status_klarfordist.json", KLAR_FOR_DIST),
-				Arguments.of("hentforsendelse_status_oversendt.json", OVERSENDT),
 				Arguments.of("hentforsendelse_status_feilet.json", FEILET),
 				Arguments.of("hentforsendelse_status_returpostbehandlet.json", RETURPOSTBEHANDLET)
 		);
